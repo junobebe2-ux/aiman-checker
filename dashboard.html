@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIMAN CHECKER — Dashboard</title>
+  <meta name="description" content="Your AIMAN CHECKER dashboard — usage, plan, and API key.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80' fill='%23D4AF37'>◆</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .dash-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .dash-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-dark), var(--gold), transparent);
+      opacity: 0.3;
+    }
+    .dash-card:hover {
+      border-color: rgba(212, 175, 55, 0.2);
+    }
+    .dash-card-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .dash-card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .dash-card-value {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .dash-card-value.normal {
+      color: var(--text);
+      -webkit-text-fill-color: var(--text);
+      background: none;
+    }
+    .dash-card-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+    .usage-bar-wrap {
+      height: 6px;
+      background: var(--surface);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .usage-bar {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+      transition: width 0.4s ease;
+    }
+    .usage-bar.warning {
+      background: linear-gradient(90deg, var(--amber), var(--red));
+    }
+    .plan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .plan-badge.guest { background: rgba(212, 175, 55, 0.06); border: 1px solid rgba(212, 175, 55, 0.12); color: var(--gold-dark); }
+    .plan-badge.free { background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.2); color: var(--gold-light); }
+    .plan-badge.pro { background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.08)); border: 1px solid var(--gold); color: var(--gold); }
+    .plan-badge.business { background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(212, 175, 55, 0.1)); border: 1px solid var(--gold-light); color: var(--gold-light); }
+    .plan-badge.admin { background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(231, 76, 60, 0.08)); border: 1px solid var(--red); color: var(--red); }
+    .api-key-display {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .api-key-display .key-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+    .api-key-display .copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .api-key-display .copy-btn:hover {
+      color: var(--gold-light);
+      background: rgba(212, 175, 55, 0.06);
+    }
+    .txn-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .txn-table th {
+      padding: 10px 8px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-dim);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+    .txn-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .status-confirmed { color: var(--green); font-weight: 600; }
+    .status-pending { color: var(--amber); font-weight: 600; }
+    .btn-upgrade {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold-mid), var(--gold));
+      color: #1a1508;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-upgrade:hover {
+      box-shadow: 0 0 24px rgba(212, 175, 55, 0.25);
+      transform: translateY(-1px);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .logout-btn:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+    @media (max-width: 640px) {
+      .dash-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <div class="logo" onclick="location.href='index.html'" style="cursor:pointer">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">
+          <h1>AIMAN CHECKER</h1>
+          <span class="logo-sub">Domain Authority Tool</span>
+        </div>
+      </div>
+      <nav style="display:flex;align-items:center;gap:12px">
+        <a href="index.html" style="color:var(--text-dim);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">Home</a>
+        <a href="pricing.html" style="color:var(--gold-light);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid rgba(212,175,55,0.2);border-radius:var(--radius-sm)">Pricing</a>
+        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:800;color:var(--text-warm)">Dashboard</h2>
+        <p style="color:var(--text-dim);font-size:13px">Your usage and account overview</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="plan-badge" id="planBadge">Loading...</span>
+        <a href="pricing.html" class="btn-upgrade" id="upgradeBtn" style="display:none">✦ Upgrade Plan</a>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="dash-card-icon">📊</div>
+        <div class="dash-card-label">URLs Checked Today</div>
+        <div class="dash-card-value" id="todayUsage">0</div>
+        <div class="dash-card-sub" id="todayLimit">of 0 allowed</div>
+        <div class="usage-bar-wrap">
+          <div class="usage-bar" id="usageBar" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-icon">📈</div>
+        <div class="dash-card-label">Total URLs All Time</div>
+        <div class="dash-card-value" id="totalUsage">0</div>
+        <div class="dash-card-sub">lifetime</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-icon">🎯</div>
+        <div class="dash-card-label">Plan Limit</div>
+        <div class="dash-card-value" id="planLimit">0</div>
+        <div class="dash-card-sub">URLs per session</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-icon">🗓️</div>
+        <div class="dash-card-label">History</div>
+        <div class="dash-card-value" id="historyDays">0</div>
+        <div class="dash-card-sub">days retained</div>
+      </div>
+    </div>
+
+    <!-- API Key -->
+    <section class="card">
+      <h3 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold-light);margin-bottom:12px">API Key</h3>
+      <p style="color:var(--text-dim);font-size:12px;margin-bottom:8px">Use this key to authenticate API requests programmatically.</p>
+      <div class="api-key-display">
+        <span class="key-text" id="apiKeyText">••••••••••••••••</span>
+        <button class="copy-btn" onclick="copyApiKey()">Copy</button>
+      </div>
+    </section>
+
+    <!-- Transaction History -->
+    <section class="card">
+      <h3 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold-light);margin-bottom:12px">Transaction History</h3>
+      <div id="txnContainer">
+        <div class="empty-state">No transactions yet</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-border"></div>
+    <div class="container footer-inner">
+      <p><span class="brand">AIMAN CHECKER</span> &mdash; Professional DA PA tool</p>
+      <p class="footer-note">Powered by Moz &amp; Ahrefs data</p>
+    </div>
+  </footer>
+
+  <script>
+    async function loadDashboard() {
+      const token = localStorage.getItem('aiman_token');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth?me=true', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (!res.ok) {
+          localStorage.removeItem('aiman_token');
+          localStorage.removeItem('aiman_user');
+          localStorage.removeItem('aiman_role');
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const data = await res.json();
+        const user = data.user;
+        const role = data.role;
+        const limits = data.limits;
+
+        // Store
+        localStorage.setItem('aiman_user', JSON.stringify(user));
+        localStorage.setItem('aiman_role', role);
+
+        // Update UI
+        const today = user.usage.today || 0;
+        const maxUrls = limits.maxUrls === Infinity ? '∞' : limits.maxUrls;
+        const maxNum = limits.maxUrls === Infinity ? 99999 : limits.maxUrls;
+
+        document.getElementById('todayUsage').textContent = today;
+        document.getElementById('todayLimit').textContent = 'of ' + maxUrls + ' allowed';
+        document.getElementById('totalUsage').textContent = (user.usage.total || 0).toLocaleString();
+        document.getElementById('planLimit').textContent = maxUrls;
+        document.getElementById('historyDays').textContent = limits.historyDays === Infinity ? '∞' : limits.historyDays;
+        document.getElementById('apiKeyText').textContent = user.apiKey || 'N/A';
+
+        // Plan badge
+        const badge = document.getElementById('planBadge');
+        badge.textContent = limits.label;
+        badge.className = 'plan-badge ' + role;
+
+        // Usage bar
+        const pct = maxNum === 0 ? 0 : Math.min(100, (today / maxNum) * 100);
+        document.getElementById('usageBar').style.width = pct + '%';
+        if (pct >= 85) {
+          document.getElementById('usageBar').classList.add('warning');
+        }
+
+        // Show upgrade button for non-premium
+        const upgradeBtn = document.getElementById('upgradeBtn');
+        if (role === 'guest' || role === 'free') {
+          upgradeBtn.style.display = 'inline-flex';
+        } else {
+          upgradeBtn.style.display = 'none';
+        }
+
+        // Transactions
+        const txns = user.transactions || [];
+        const txnContainer = document.getElementById('txnContainer');
+        if (txns.length === 0) {
+          txnContainer.innerHTML = '<div class="empty-state">No transactions yet. Upgrade your plan to see payment history.</div>';
+        } else {
+          let html = '<table class="txn-table"><thead><tr><th>Type</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+          txns.slice().reverse().forEach(t => {
+            const statusClass = t.status === 'confirmed' || t.type === 'payment' ? 'status-confirmed' : 'status-pending';
+            const statusText = t.status === 'confirmed' ? 'Confirmed' : (t.type === 'payment' ? 'Completed' : 'Pending');
+            html += '<tr><td>' + (t.type || 'payment') + '</td><td>' + (t.plan || '-') + '</td><td>' + (t.amount ? '$' + t.amount : '-') + '</td><td>' + (t.date ? new Date(t.date).toLocaleDateString() : '-') + '</td><td class="' + statusClass + '">' + statusText + '</td></tr>';
+          });
+          html += '</tbody></table>';
+          txnContainer.innerHTML = html;
+        }
+      } catch (err) {
+        document.getElementById('todayUsage').textContent = 'Error';
+        document.getElementById('apiKeyText').textContent = 'Failed to load';
+      }
+    }
+
+    function copyApiKey() {
+      const key = document.getElementById('apiKeyText').textContent;
+      if (key && key !== '••••••••••••••••' && key !== 'N/A') {
+        navigator.clipboard.writeText(key).then(() => {
+          const btn = document.querySelector('.copy-btn');
+          btn.textContent = 'Copied!';
+          setTimeout(() => btn.textContent = 'Copy', 2000);
+        });
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('aiman_token');
+      localStorage.removeItem('aiman_user');
+      localStorage.removeItem('aiman_role');
+      window.location.href = 'index.html';
+    }
+
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
+</body>
+</html>

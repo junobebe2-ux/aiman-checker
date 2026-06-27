@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIMAN CHECKER — Sign In</title>
+  <meta name="description" content="Sign in or create your AIMAN CHECKER account.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80' fill='%23D4AF37'>◆</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .auth-wrap {
+      max-width: 440px;
+      margin: 40px auto;
+    }
+    .auth-tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 24px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      border: 1px solid var(--border);
+    }
+    .auth-tab {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.2s;
+    }
+    .auth-tab.active {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.06));
+      color: var(--gold-light);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+    }
+    .auth-form {
+      display: none;
+    }
+    .auth-form.active {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--gold-dark);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.06);
+    }
+    .form-group input::placeholder {
+      color: #4a3f32;
+    }
+    .auth-error {
+      background: rgba(231, 76, 60, 0.08);
+      border: 1px solid rgba(231, 76, 60, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: #e8786a;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .auth-error.visible { display: block; }
+    .auth-success {
+      background: rgba(46, 204, 113, 0.08);
+      border: 1px solid rgba(46, 204, 113, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--green);
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .auth-success.visible { display: block; }
+    .btn-auth {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold-mid), var(--gold));
+      color: #1a1508;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-auth:hover {
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+      transform: translateY(-1px);
+    }
+    .btn-auth:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .auth-footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .auth-footer a {
+      color: var(--gold-light);
+      text-decoration: none;
+    }
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+    .separator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .separator-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .separator-text {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .guest-btn {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .guest-btn:hover {
+      border-color: var(--gold-dark);
+      color: var(--gold-light);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <div class="logo" onclick="location.href='index.html'" style="cursor:pointer">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">
+          <h1>AIMAN CHECKER</h1>
+          <span class="logo-sub">Domain Authority Tool</span>
+        </div>
+      </div>
+      <nav style="display:flex;align-items:center;gap:12px">
+        <a href="index.html" style="color:var(--text-dim);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">Home</a>
+        <a href="pricing.html" style="color:var(--gold-light);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid rgba(212,175,55,0.2);border-radius:var(--radius-sm)">Pricing</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="auth-wrap card" style="padding:36px">
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="logo-mark" style="margin:0 auto 12px;width:52px;height:52px;font-size:24px">A</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:var(--text-warm)">Welcome to AIMAN CHECKER</h2>
+        <p style="color:var(--text-dim);font-size:13px;margin-top:4px">Sign in to access your dashboard and plan</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Sign In</button>
+        <button class="auth-tab" data-tab="register">Create Account</button>
+      </div>
+
+      <!-- Login Form -->
+      <div class="auth-form active" id="form-login">
+        <div class="auth-error" id="loginError"></div>
+        <div class="auth-success" id="loginSuccess"></div>
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-auth" id="loginBtn" onclick="handleLogin()">Sign In</button>
+        <div class="separator">
+          <div class="separator-line"></div>
+          <span class="separator-text">or</span>
+          <div class="separator-line"></div>
+        </div>
+        <button class="guest-btn" onclick="continueAsGuest()">Continue as Guest</button>
+      </div>
+
+      <!-- Register Form -->
+      <div class="auth-form" id="form-register">
+        <div class="auth-error" id="registerError"></div>
+        <div class="auth-success" id="registerSuccess"></div>
+        <div class="form-group">
+          <label for="regEmail">Email</label>
+          <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Password</label>
+          <input type="password" id="regPassword" placeholder="At least 6 characters" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="regConfirm">Confirm Password</label>
+          <input type="password" id="regConfirm" placeholder="••••••••">
+        </div>
+        <button class="btn-auth" id="registerBtn" onclick="handleRegister()">Create Account</button>
+        <div class="auth-footer">
+          Already have an account? <a href="#" onclick="switchTab('login');return false">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-border"></div>
+    <div class="container footer-inner">
+      <p><span class="brand">AIMAN CHECKER</span> &mdash; Professional DA PA tool</p>
+      <p class="footer-note">Powered by Moz &amp; Ahrefs data</p>
+    </div>
+  </footer>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('form-' + tab.dataset.tab).classList.add('active');
+        // Clear errors
+        document.querySelectorAll('.auth-error').forEach(e => e.classList.remove('visible'));
+        document.querySelectorAll('.auth-success').forEach(e => e.classList.remove('visible'));
+      });
+    });
+
+    function switchTab(name) {
+      document.querySelectorAll('.auth-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === name);
+      });
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      document.getElementById('form-' + name).classList.add('active');
+    }
+
+    function showError(el, msg) {
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function showSuccess(el, msg) {
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+      const btn = document.getElementById('loginBtn');
+
+      errorEl.classList.remove('visible');
+
+      if (!email || !password) {
+        showError(errorEl, 'Please enter email and password');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'login', email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(errorEl, data.error || 'Login failed');
+          btn.disabled = false;
+          btn.textContent = 'Sign In';
+          return;
+        }
+
+        // Store JWT
+        localStorage.setItem('aiman_token', data.token);
+        localStorage.setItem('aiman_user', JSON.stringify(data.user));
+        localStorage.setItem('aiman_role', data.role);
+
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showError(errorEl, 'Network error: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    }
+
+    async function handleRegister() {
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const confirm = document.getElementById('regConfirm').value;
+      const errorEl = document.getElementById('registerError');
+      const btn = document.getElementById('registerBtn');
+
+      errorEl.classList.remove('visible');
+
+      if (!email || !password || !confirm) {
+        showError(errorEl, 'All fields are required');
+        return;
+      }
+      if (password.length < 6) {
+        showError(errorEl, 'Password must be at least 6 characters');
+        return;
+      }
+      if (password !== confirm) {
+        showError(errorEl, 'Passwords do not match');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'register', email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(errorEl, data.error || 'Registration failed');
+          btn.disabled = false;
+          btn.textContent = 'Create Account';
+          return;
+        }
+
+        // Store JWT
+        localStorage.setItem('aiman_token', data.token);
+        localStorage.setItem('aiman_user', JSON.stringify(data.user));
+        localStorage.setItem('aiman_role', data.role);
+
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showError(errorEl, 'Network error: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    }
+
+    function continueAsGuest() {
+      localStorage.removeItem('aiman_token');
+      localStorage.removeItem('aiman_user');
+      localStorage.setItem('aiman_role', 'guest');
+      window.location.href = 'index.html';
+    }
+
+    // Enter key support
+    document.getElementById('loginPassword').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleLogin();
+    });
+    document.getElementById('regConfirm').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleRegister();
+    });
+
+    // If already logged in, go to dashboard
+    if (localStorage.getItem('aiman_token')) {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

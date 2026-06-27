@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIMAN CHECKER — Admin Panel</title>
+  <meta name="description" content="Admin panel for AIMAN CHECKER.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80' fill='%23D4AF37'>◆</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-nav {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 28px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      border: 1px solid var(--border);
+    }
+    .admin-nav-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.2s;
+    }
+    .admin-nav-btn.active {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.06));
+      color: var(--gold-light);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+    }
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .data-table th {
+      padding: 10px 8px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-dim);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.06), rgba(212, 175, 55, 0.02));
+      position: sticky;
+      top: 0;
+    }
+    .data-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .data-table tr:hover td {
+      background: rgba(212, 175, 55, 0.02);
+    }
+    .role-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .role-select:focus {
+      border-color: var(--gold-dark);
+      outline: none;
+    }
+    .save-role-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .save-role-btn:hover {
+      border-color: var(--gold-dark);
+      color: var(--gold-light);
+    }
+    .set-display {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .set-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .set-item label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+    .set-item input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    .set-item input:focus {
+      border-color: var(--gold-dark);
+    }
+    .btn-save-settings {
+      margin-top: 16px;
+      padding: 10px 28px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold-mid), var(--gold));
+      color: #1a1508;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-save-settings:hover {
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+    }
+    .admin-error {
+      background: rgba(231, 76, 60, 0.08);
+      border: 1px solid rgba(231, 76, 60, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: #e8786a;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .admin-error.visible { display: block; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-box .num {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-box .label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+    @media (max-width: 640px) {
+      .set-display { grid-template-columns: 1fr; }
+      .admin-nav { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <div class="logo" onclick="location.href='index.html'" style="cursor:pointer">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">
+          <h1>AIMAN CHECKER</h1>
+          <span class="logo-sub">Admin Panel</span>
+        </div>
+      </div>
+      <nav style="display:flex;align-items:center;gap:12px">
+        <a href="index.html" style="color:var(--text-dim);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">Home</a>
+        <a href="dashboard.html" style="color:var(--text-dim);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">Dashboard</a>
+        <button class="logout-btn" onclick="handleLogout()" style="background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:6px 14px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;cursor:pointer">Sign Out</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="margin-bottom:24px">
+      <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:800;color:var(--text-warm)">Admin Panel</h2>
+      <p style="color:var(--text-dim);font-size:13px">Manage users, transactions, and system settings</p>
+    </div>
+
+    <div class="admin-error" id="adminError"></div>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-box"><div class="num" id="statUsers">0</div><div class="label">Users</div></div>
+      <div class="stat-box"><div class="num" id="statTxns">0</div><div class="label">Transactions</div></div>
+      <div class="stat-box"><div class="num" id="statRevenue">$0</div><div class="label">Revenue</div></div>
+    </div>
+
+    <div class="admin-nav">
+      <button class="admin-nav-btn active" data-section="users">Users</button>
+      <button class="admin-nav-btn" data-section="transactions">Transactions</button>
+      <button class="admin-nav-btn" data-section="settings">Settings</button>
+    </div>
+
+    <!-- Users Section -->
+    <div class="admin-section active" id="section-users">
+      <section class="card" style="padding:20px;overflow-x:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <h3 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold-light)">All Users</h3>
+          <input type="text" id="userSearch" placeholder="Search by email..." style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;outline:none;max-width:240px">
+        </div>
+        <div id="usersContainer">
+          <div class="empty-state">Loading users...</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Transactions Section -->
+    <div class="admin-section" id="section-transactions">
+      <section class="card" style="padding:20px;overflow-x:auto">
+        <h3 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold-light);margin-bottom:16px">All Transactions</h3>
+        <div id="txnsContainer">
+          <div class="empty-state">Loading transactions...</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Settings Section -->
+    <div class="admin-section" id="section-settings">
+      <section class="card">
+        <h3 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold-light);margin-bottom:16px">System Settings</h3>
+        <div class="set-display">
+          <div class="set-item">
+            <label>TRON Payment Wallet</label>
+            <input type="text" id="setWallet" value="Loading...">
+          </div>
+          <div class="set-item">
+            <label>Guest Limit (URLs)</label>
+            <input type="number" id="setGuestLimit" value="50">
+          </div>
+          <div class="set-item">
+            <label>Free Limit (URLs)</label>
+            <input type="number" id="setFreeLimit" value="100">
+          </div>
+          <div class="set-item">
+            <label>Pro Limit (URLs)</label>
+            <input type="number" id="setProLimit" value="1000">
+          </div>
+          <div class="set-item">
+            <label>Business Limit (URLs)</label>
+            <input type="number" id="setBusinessLimit" value="5000">
+          </div>
+          <div class="set-item">
+            <label>JWT Secret</label>
+            <input type="password" id="setJWT" value="********" disabled>
+          </div>
+        </div>
+        <button class="btn-save-settings" onclick="saveSettings()">Save Settings</button>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-border"></div>
+    <div class="container footer-inner">
+      <p><span class="brand">AIMAN CHECKER</span> &mdash; Admin Panel</p>
+    </div>
+  </footer>
+
+  <script>
+    let allUsers = [];
+    let allTransactions = [];
+
+    function showError(msg) {
+      const el = document.getElementById('adminError');
+      el.textContent = msg;
+      el.classList.add('visible');
+      setTimeout(() => el.classList.remove('visible'), 4000);
+    }
+
+    async function loadAdmin() {
+      const token = localStorage.getItem('aiman_token');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Verify admin
+      try {
+        const meRes = await fetch('/api/auth?me=true', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const meData = await meRes.json();
+        if (!meRes.ok || meData.role !== 'admin') {
+          showError('Admin access required');
+          setTimeout(() => window.location.href = 'dashboard.html', 2000);
+          return;
+        }
+      } catch (e) {
+        showError('Auth error: ' + e.message);
+        return;
+      }
+
+      // Load users — via direct API (admin can read users from the file via a special endpoint)
+      // We'll try the auth me endpoint first, then use admin-specific logic
+      try {
+        // For admin, we load from a special endpoint
+        const usersRes = await fetch('/api/auth?me=true', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        // We can only get our own user. For full admin list, we'd need a dedicated endpoint.
+        // Since the auth system uses a JSON file, let's treat the "me" as admin verification.
+        // For demo: show placeholder admin panel with info that full user management
+        // would require an additional endpoint.
+        // We'll simulate admin user listing by showing the current user info.
+        const userData = await usersRes.json();
+        
+        // For demonstration, show admin user
+        document.getElementById('statUsers').textContent = 'Admin';
+        
+        // Try to get transactions from payment API
+        try {
+          const txnRes = await fetch('/api/payment', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (txnRes.ok) {
+            const txnData = await txnRes.json();
+            allTransactions = txnData.transactions || [];
+            renderTransactions();
+            document.getElementById('statTxns').textContent = allTransactions.length;
+            const revenue = allTransactions.filter(t => t.status === 'confirmed').reduce((s, t) => s + (t.amount || 0), 0);
+            document.getElementById('statRevenue').textContent = '$' + revenue.toFixed(2);
+          }
+        } catch (e) {}
+
+      } catch (e) {
+        showError('Failed to load data: ' + e.message);
+      }
+
+      // Load wallet address from env hint
+      document.getElementById('setWallet').value = 'Set via ENV: TRON_WALLET';
+    }
+
+    function renderTransactions() {
+      const container = document.getElementById('txnsContainer');
+      if (allTransactions.length === 0) {
+        container.innerHTML = '<div class="empty-state">No transactions yet</div>';
+        return;
+      }
+      let html = '<table class="data-table"><thead><tr><th>Ref</th><th>User</th><th>Plan</th><th>Amount</th><th>Status</th><th>Created</th><th>TxID</th></tr></thead><tbody>';
+      allTransactions.slice().reverse().forEach(t => {
+        const statusClass = t.status === 'confirmed' ? 'status-confirmed' : 'status-pending';
+        html += '<tr><td style="font-family:monospace;font-size:10px">' + (t.refId || '-') + '</td><td>' + (t.userId || '-') + '</td><td>' + (t.plan || '-') + '</td><td>$' + (t.amount || 0).toFixed(2) + '</td><td class="' + statusClass + '">' + t.status + '</td><td>' + (t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '-') + '</td><td style="font-family:monospace;font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (t.txId || '-') + '</td></tr>';
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function saveSettings() {
+      showError('Settings are managed via environment variables on Vercel. Deploy to update.');
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('aiman_token');
+      localStorage.removeItem('aiman_user');
+      localStorage.removeItem('aiman_role');
+      window.location.href = 'index.html';
+    }
+
+    // Tab switching
+    document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('section-' + btn.dataset.section).classList.add('active');
+      });
+    });
+
+    // User search
+    document.getElementById('userSearch')?.addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      // Re-render users filtered
+      const container = document.getElementById('usersContainer');
+      const filtered = allUsers.filter(u => u.email.toLowerCase().includes(q));
+      renderUsers(filtered);
+    });
+
+    function renderUsers(users) {
+      const container = document.getElementById('usersContainer');
+      // Since we don't have a full user list API, show admin instructions
+      container.innerHTML = `
+        <div class="empty-state" style="text-align:left">
+          <p style="margin-bottom:12px;font-weight:600;color:var(--text-warm)">User management requires a dedicated admin API endpoint.</p>
+          <p style="font-size:12px;color:var(--text-dim);line-height:1.7">To add full user management:</p>
+          <ol style="font-size:12px;color:var(--text-dim);line-height:1.8;padding-left:20px;margin-top:8px">
+            <li>Create <code style="color:var(--gold)">/api/admin/users.js</code> to list/update users from the JSON store</li>
+            <li>Add role management (promote/demote users)</li>
+            <li>Add user deletion capability</li>
+          </ol>
+          <p style="margin-top:16px;font-size:12px;color:var(--text-dim)">The current auth system reads from <code style="color:var(--gold)">/tmp/users.json</code> (Vercel-compatible).</p>
+        </div>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadAdmin);
+  </script>
+</body>
+</html>

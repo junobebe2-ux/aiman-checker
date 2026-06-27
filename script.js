@@ -1,4 +1,4 @@
-/* AIMAN CHECKER — Frontend */
+/* AIMAN CHECKER — Frontend with Auth */
 
 (() => {
   'use strict';
@@ -30,6 +30,44 @@
   let results = [];
   let sortAsc = {};
   let lastSortKey = null;
+  let planBadge = document.getElementById('planBadge');
+  let loginLink = document.getElementById('loginLink');
+  let dashLink = document.getElementById('dashLink');
+
+  // ---- AUTH UI ----
+  function updateAuthUI() {
+    const token = localStorage.getItem('aiman_token');
+    const role = localStorage.getItem('aiman_role') || 'guest';
+    const userStr = localStorage.getItem('aiman_user');
+
+    if (planBadge) {
+      if (token || role !== 'guest') {
+        planBadge.style.display = 'inline-block';
+        const roleClass = role === 'pro' ? 'pro' : role === 'business' ? 'business' : role === 'admin' ? 'admin' : 'free';
+        planBadge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+        planBadge.style.background = roleClass === 'pro' ? 'linear-gradient(135deg,rgba(212,175,55,0.15),rgba(212,175,55,0.08))' :
+          roleClass === 'business' ? 'linear-gradient(135deg,rgba(255,215,0,0.2),rgba(212,175,55,0.1))' :
+          roleClass === 'admin' ? 'linear-gradient(135deg,rgba(231,76,60,0.15),rgba(231,76,60,0.08))' :
+          'linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.05))';
+        planBadge.style.color = roleClass === 'admin' ? '#e74c3c' : roleClass === 'business' ? '#FFD700' : roleClass === 'pro' ? '#D4AF37' : '#D4AF37';
+        planBadge.style.border = roleClass === 'admin' ? '1px solid rgba(231,76,60,0.3)' :
+          roleClass === 'business' ? '1px solid rgba(255,215,0,0.3)' :
+          '1px solid rgba(212,175,55,0.2)';
+      } else {
+        planBadge.style.display = 'none';
+      }
+    }
+
+    if (loginLink) {
+      loginLink.style.display = token ? 'none' : 'inline-flex';
+    }
+    if (dashLink) {
+      dashLink.style.display = token ? 'inline-flex' : 'none';
+    }
+  }
+
+  // Run on page load
+  updateAuthUI();
 
   // Tabs
   document.querySelectorAll('.tab').forEach(tab => {
@@ -112,6 +150,40 @@
     if (urls.length === 0) { showError('Enter at least one domain'); return; }
     if (urls.length > 500) { showError('Maximum 500 domains per session'); return; }
 
+    // ---- CHECK PLAN LIMITS BEFORE SENDING ----
+    const token = localStorage.getItem('aiman_token');
+    const role = localStorage.getItem('aiman_role') || 'guest';
+    const limits = {
+      guest: 50,
+      free: 100,
+      pro: 1000,
+      business: 5000,
+      admin: Infinity
+    };
+    const maxForRole = limits[role] || 50;
+
+    if (urls.length > maxForRole) {
+      if (role === 'guest' || role === 'free') {
+        showError('Your ' + role + ' plan allows max ' + maxForRole + ' URLs. You entered ' + urls.length + '. <a href="pricing.html" style="color:var(--gold-light)">Upgrade now</a> to check more.');
+        // Also show upgrade modal suggestion
+        const upgradeNotice = document.createElement('div');
+        upgradeNotice.style.cssText = 'margin-top:12px;padding:12px 16px;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.15);border-radius:var(--radius-sm);text-align:center';
+        upgradeNotice.innerHTML = '✦ Need to check more? <a href="pricing.html" style="color:var(--gold-light);font-weight:700">Upgrade to Pro</a> for 1,000 URLs or Business for 5,000 URLs.';
+        errorMsg.parentNode.insertBefore(upgradeNotice, errorMsg.nextSibling);
+        return;
+      } else {
+        showError('Your plan allows max ' + maxForRole + ' URLs. You entered ' + urls.length + '.');
+        return;
+      }
+    }
+
+    // ---- Prompt guest/free users about plan limits ----
+    if ((role === 'guest' || role === 'free') && urls.length > 100) {
+      if (!confirm('Your ' + role + ' plan allows up to ' + maxForRole + ' URLs. Upgrade to Pro for 1,000 URLs. Continue anyway?')) {
+        return;
+      }
+    }
+
     checkBtn.disabled = true;
     checkBtn.querySelector('.btn-text').textContent = 'Checking';
     checkBtn.querySelector('.btn-icon').innerHTML = '<span class="spinner"></span>';
@@ -127,22 +199,53 @@
 
     try {
       progressDetail.textContent = 'Requesting server...';
+      
+      // Build headers — include auth token if available
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+      }
+
       const res = await fetch('/api/check', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ urls })
       });
+      
       if (!res.ok) {
         const text = await res.text();
-        throw new Error('Server ' + res.status + ': ' + text);
+        let errorData;
+        try { errorData = JSON.parse(text); } catch(e) { errorData = { error: text }; }
+        
+        // Handle plan limit exceeded
+        if (errorData.error === 'plan_limit_exceeded') {
+          throw new Error(errorData.message + ' <a href="' + (errorData.upgrade_url || '/pricing.html') + '" style="color:var(--gold-light)">Upgrade your plan</a>');
+        }
+        throw new Error('Server ' + res.status + ': ' + (errorData.error || text));
       }
+      
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Unknown error');
+
+      // Update stored plan/role from response
+      if (data.plan) {
+        localStorage.setItem('aiman_role', data.plan);
+        updateAuthUI();
+      }
 
       results = data.results || [];
       progressBar.style.width = '100%';
       progressStatus.textContent = (data.checked || 0) + ' / ' + total;
       progressDetail.textContent = 'Done';
+
+      // Show plan info
+      if (data.plan_label) {
+        const planInfo = document.createElement('div');
+        planInfo.style.cssText = 'margin-top:12px;padding:8px 14px;background:rgba(212,175,55,0.04);border:1px solid rgba(212,175,55,0.1);border-radius:var(--radius-sm);font-size:11px;color:var(--text-dim);display:flex;justify-content:space-between;align-items:center';
+        const remaining = data.remaining !== undefined ? data.remaining : '∞';
+        planInfo.innerHTML = '<span>Plan: <strong style="color:var(--gold)">' + data.plan_label + '</strong></span><span>Remaining today: <strong style="color:var(--text-warm)">' + (remaining === Infinity ? '∞' : remaining) + '</strong></span>';
+        progressCard.appendChild(planInfo);
+      }
 
       if (data.errors && data.errors.length > 0) {
         errorsCard.hidden = false;

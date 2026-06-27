@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIMAN CHECKER — Pricing</title>
+  <meta name="description" content="Choose your plan — Free, Pro, or Business. Bulk DA PA checking with crypto payments.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80' fill='%23D4AF37'>◆</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .pricing-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .pricing-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold-dark), var(--gold), transparent);
+      opacity: 0.3;
+    }
+    .pricing-card:hover {
+      border-color: rgba(212, 175, 55, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(212, 175, 55, 0.08);
+    }
+    .pricing-card.featured {
+      border-color: rgba(212, 175, 55, 0.3);
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.05), rgba(212, 175, 55, 0.02));
+    }
+    .pricing-card.featured::before {
+      opacity: 0.8;
+      background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), transparent);
+    }
+    .pricing-card.featured::after {
+      content: 'BEST VALUE';
+      position: absolute;
+      top: 16px;
+      right: -28px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #1a1508;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 4px 36px;
+      transform: rotate(45deg);
+    }
+    .plan-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-warm);
+      margin-bottom: 4px;
+    }
+    .plan-price {
+      margin: 16px 0;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .plan-price .amount {
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .plan-price .period {
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+    .plan-description {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .plan-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 24px;
+    }
+    .plan-features li {
+      padding: 8px 0;
+      font-size: 13px;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .plan-features li:last-child { border-bottom: none; }
+    .plan-features .check { color: var(--gold); font-weight: 700; }
+    .plan-features .cross { color: var(--text-dim); opacity: 0.4; }
+    .btn-buy {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold-mid), var(--gold));
+      color: #1a1508;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-buy:hover {
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+      transform: translateY(-1px);
+    }
+    .btn-buy:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-buy .crypto-icon {
+      font-size: 16px;
+    }
+    .payment-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .payment-modal.active { display: flex; }
+    .payment-modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+    }
+    .payment-modal-content h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--gold-light);
+      margin-bottom: 16px;
+    }
+    .payment-modal-content .amount-big {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--gold-light);
+      margin: 8px 0;
+    }
+    .payment-modal-content .wallet-addr {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--gold);
+      word-break: break-all;
+      margin: 12px 0;
+      cursor: pointer;
+    }
+    .payment-modal-content .wallet-addr:hover {
+      border-color: var(--gold-dark);
+    }
+    .payment-modal-content .qr-wrap {
+      margin: 16px auto;
+      width: 200px;
+      height: 200px;
+      background: white;
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .payment-modal-content .qr-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .payment-modal-content .status-text {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-top: 12px;
+    }
+    .payment-modal-content .close-btn {
+      margin-top: 20px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 10px 24px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .payment-modal-content .close-btn:hover {
+      border-color: var(--gold-dark);
+      color: var(--gold-light);
+    }
+    .payment-modal-content .copied-msg {
+      color: var(--green);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .payment-modal-content .steps {
+      text-align: left;
+      margin: 16px 0;
+      padding: 0;
+      list-style: none;
+    }
+    .payment-modal-content .steps li {
+      padding: 6px 0;
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .payment-modal-content .steps .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.08));
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    @media (max-width: 640px) {
+      .pricing-grid { grid-template-columns: 1fr; }
+      .pricing-card { padding: 24px 20px; }
+      .plan-price .amount { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <div class="logo" onclick="location.href='index.html'" style="cursor:pointer">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">
+          <h1>AIMAN CHECKER</h1>
+          <span class="logo-sub">Domain Authority Tool</span>
+        </div>
+      </div>
+      <nav style="display:flex;align-items:center;gap:12px">
+        <a href="index.html" style="color:var(--text-dim);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">Home</a>
+        <a href="login.html" style="color:var(--gold-light);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid rgba(212,175,55,0.2);border-radius:var(--radius-sm);background:rgba(212,175,55,0.06)">Sign In</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card" style="text-align:center;padding:48px 32px;margin-bottom:32px">
+      <h2 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">Choose Your Plan</h2>
+      <p style="color:var(--text-dim);font-size:14px;max-width:500px;margin:0 auto">Pay once with USDT TRC20 — no KYC, no recurring subscriptions. Your plan is active forever.</p>
+    </section>
+
+    <div class="pricing-grid">
+      <!-- Free Tier -->
+      <div class="pricing-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">
+          <span class="amount" style="font-size:32px">$0</span>
+          <span class="period">forever</span>
+        </div>
+        <p class="plan-description">Perfect for getting started with bulk DA PA checking.</p>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> <strong>100 URLs</strong> per session</li>
+          <li><span class="check">✓</span> DA, PA, Spam, DR, TF, CF</li>
+          <li><span class="check">✓</span> CSV / JSON export</li>
+          <li><span class="cross">✗</span> 7-day history</li>
+          <li><span class="cross">✗</span> Priority support</li>
+        </ul>
+        <button class="btn-buy" onclick="location.href='login.html'" style="background:var(--surface);border:1px solid var(--border);color:var(--text);font-weight:600">
+          Get Started Free
+        </button>
+      </div>
+
+      <!-- Pro Tier -->
+      <div class="pricing-card featured" id="pro-card">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">
+          <span class="amount">$9.99</span>
+          <span class="period">one-time</span>
+        </div>
+        <p class="plan-description">Serious checking with higher limits and history retention.</p>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> <strong>1,000 URLs</strong> per session</li>
+          <li><span class="check">✓</span> Full metrics suite</li>
+          <li><span class="check">✓</span> <strong>30-day history</strong></li>
+          <li><span class="check">✓</span> API access</li>
+          <li><span class="check">✓</span> Email support</li>
+          <li><span class="check">✓</span> All exports + batch processing</li>
+        </ul>
+        <button class="btn-buy" onclick="openPayment('pro')">
+          <span class="crypto-icon">₿</span> Buy with Crypto
+        </button>
+      </div>
+
+      <!-- Business Tier -->
+      <div class="pricing-card">
+        <div class="plan-name">Business</div>
+        <div class="plan-price">
+          <span class="amount">$29.99</span>
+          <span class="period">one-time</span>
+        </div>
+        <p class="plan-description">Heavy-volume SEO agencies and power users.</p>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> <strong>5,000 URLs</strong> per session</li>
+          <li><span class="check">✓</span> Full metrics suite</li>
+          <li><span class="check">✓</span> <strong>90-day history</strong></li>
+          <li><span class="check">✓</span> Priority API access</li>
+          <li><span class="check">✓</span> Priority support</li>
+          <li><span class="check">✓</span> Proxy rotation included</li>
+        </ul>
+        <button class="btn-buy" onclick="openPayment('business')">
+          <span class="crypto-icon">₿</span> Buy with Crypto
+        </button>
+      </div>
+    </div>
+
+    <section class="card" style="text-align:center;padding:32px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:16px;color:var(--gold-light);margin-bottom:8px">All Plans Include</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px;color:var(--text-dim);font-size:13px">
+        <div>✦ Unlimited use of your plan's limit</div>
+        <div>✦ No recurring subscription</div>
+        <div>✦ USDT TRC20 payment only</div>
+        <div>✦ No KYC required</div>
+        <div>✦ Export to CSV / JSON</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Payment Modal -->
+  <div class="payment-modal" id="paymentModal">
+    <div class="payment-modal-content">
+      <h3>Complete Payment</h3>
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:8px">Send exactly</p>
+      <div class="amount-big" id="payAmount">0 USDT</div>
+      <p style="color:var(--text-dim);font-size:12px;margin-bottom:8px">to the TRC20 address below</p>
+      <div class="wallet-addr" id="payAddress" onclick="copyAddress(this)">Loading...</div>
+      <div class="copied-msg" id="copiedMsg" hidden>✓ Address copied!</div>
+      <div class="qr-wrap" id="qrWrap">
+        <img id="qrImage" src="" alt="QR Code">
+      </div>
+      <ul class="steps">
+        <li><span class="step-num">1</span> Open your crypto wallet (Trust Wallet, MetaMask, etc.)</li>
+        <li><span class="step-num">2</span> Send <strong id="stepAmount">0 USDT</strong> on <strong>TRC20</strong> network</li>
+        <li><span class="step-num">3</span> Copy the address above as the recipient</li>
+        <li><span class="step-num">4</span> Wait for confirmation (usually under 5 minutes)</li>
+      </ul>
+      <div class="status-text" id="payStatus">Waiting for payment...</div>
+      <button class="close-btn" onclick="closePayment()">Close</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-border"></div>
+    <div class="container footer-inner">
+      <p><span class="brand">AIMAN CHECKER</span> &mdash; Professional DA PA tool</p>
+      <p class="footer-note">Powered by Moz &amp; Ahrefs data</p>
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE = '';
+
+    function getToken() {
+      return localStorage.getItem('aiman_token');
+    }
+
+    let paymentInterval = null;
+
+    async function openPayment(plan) {
+      const modal = document.getElementById('paymentModal');
+      modal.classList.add('active');
+      document.getElementById('payStatus').textContent = 'Creating payment...';
+
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = getToken();
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+
+        const res = await fetch(API_BASE + '/api/payment', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ plan })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Payment creation failed');
+        }
+
+        const data = await res.json();
+
+        document.getElementById('payAmount').textContent = data.amount + ' USDT';
+        document.getElementById('payAddress').textContent = data.address;
+        document.getElementById('stepAmount').textContent = data.amount + ' USDT';
+        document.getElementById('qrImage').src = data.qr || ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(data.address));
+
+        document.getElementById('payStatus').textContent = 'Waiting for payment...';
+        document.getElementById('payStatus').style.color = 'var(--text-dim)';
+
+        // Poll for status
+        const refId = data.refId;
+        if (paymentInterval) clearInterval(paymentInterval);
+        paymentInterval = setInterval(async () => {
+          try {
+            const sr = await fetch(API_BASE + '/api/payment/status/' + refId);
+            const sd = await sr.json();
+            if (sd.status === 'confirmed') {
+              document.getElementById('payStatus').textContent = '✓ Payment confirmed! Your plan has been upgraded.';
+              document.getElementById('payStatus').style.color = 'var(--green)';
+              clearInterval(paymentInterval);
+              paymentInterval = null;
+              setTimeout(() => {
+                closePayment();
+                if (getToken()) location.href = 'dashboard.html';
+              }, 2000);
+            } else {
+              document.getElementById('payStatus').textContent = 'Checking for payment... ' + (sd.confirmations || 0) + ' confirmations';
+            }
+          } catch(e) {
+            document.getElementById('payStatus').textContent = 'Checking...';
+          }
+        }, 5000);
+      } catch (err) {
+        document.getElementById('payStatus').textContent = 'Error: ' + err.message;
+        document.getElementById('payStatus').style.color = 'var(--red)';
+      }
+    }
+
+    function closePayment() {
+      document.getElementById('paymentModal').classList.remove('active');
+      if (paymentInterval) {
+        clearInterval(paymentInterval);
+        paymentInterval = null;
+      }
+    }
+
+    function copyAddress(el) {
+      const text = el.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const msg = document.getElementById('copiedMsg');
+        msg.hidden = false;
+        setTimeout(() => msg.hidden = true, 2000);
+      });
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('paymentModal').addEventListener('click', function(e) {
+      if (e.target === this) closePayment();
+    });
+  </script>
+</body>
+</html>
