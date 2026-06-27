@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIMAN CHECKER — Bulk DA PA Checker</title>
+  <meta name="description" content="Check Domain Authority, Page Authority, Spam Score, and Domain Rating in bulk — free & unlimited.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="stars"></div>
+
+  <header>
+    <div class="container header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <h1>AIMAN <span>CHECKER</span></h1>
+      </div>
+      <div class="badge">⚡ Free Bulk DA PA Tool</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Input Section -->
+    <section class="card input-card">
+      <div class="card-header">
+        <h2>📊 Check Domain Authority</h2>
+        <p>Paste up to <strong>500 URLs</strong> — get DA, PA, Spam Score, DR, TF & more</p>
+      </div>
+
+      <div class="input-methods">
+        <div class="method-tabs">
+          <button class="tab active" data-tab="paste">⌨️ Paste URLs</button>
+          <button class="tab" data-tab="upload">📁 Upload File</button>
+        </div>
+
+        <div class="tab-content active" id="tab-paste">
+          <textarea id="urlInput" placeholder="Enter URLs, one per line&#10;e.g.&#10;https://github.com&#10;https://google.com&#10;example.com" rows="8"></textarea>
+        </div>
+
+        <div class="tab-content" id="tab-upload">
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📄</div>
+            <p>Drop a <strong>.txt</strong> file here or click to browse</p>
+            <p class="upload-hint">One URL per line, plain text file</p>
+            <input type="file" id="fileInput" accept=".txt" hidden>
+            <button class="btn btn-outline" id="browseBtn">Browse Files</button>
+          </div>
+          <div id="fileName" class="file-name" hidden></div>
+        </div>
+
+        <div class="input-footer">
+          <div class="url-count">
+            <span id="urlCount">0</span> URLs
+          </div>
+          <div class="input-actions">
+            <button class="btn btn-outline btn-sm" id="sampleBtn">📋 Sample</button>
+            <button class="btn btn-outline btn-sm" id="clearBtn">🗑️ Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-lg" id="checkBtn">
+        <span class="btn-icon">🔍</span>
+        <span class="btn-text">Check Authority</span>
+      </button>
+
+      <div id="errorMsg" class="error-msg" hidden></div>
+    </section>
+
+    <!-- Progress Section -->
+    <section class="card progress-card" id="progressCard" hidden>
+      <div class="progress-header">
+        <h3>⏳ Checking...</h3>
+        <span class="progress-status" id="progressStatus">0 / 0 URLs</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-detail" id="progressDetail">Preparing...</div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="card results-card" id="resultsCard" hidden>
+      <div class="results-header">
+        <div>
+          <h2>✅ Results</h2>
+          <p class="results-summary" id="resultsSummary">0 domains checked</p>
+        </div>
+        <div class="results-actions">
+          <button class="btn btn-outline btn-sm" id="copyBtn">📋 Copy</button>
+          <button class="btn btn-outline btn-sm" id="csvBtn">📥 CSV</button>
+          <button class="btn btn-outline btn-sm" id="jsonBtn">📄 JSON</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="resultsTable">
+          <thead>
+            <tr>
+              <th data-sort="domain">Domain ↕</th>
+              <th data-sort="DA">DA ↕</th>
+              <th data-sort="PA">PA ↕</th>
+              <th data-sort="Spam">Spam ↕</th>
+              <th data-sort="DR">DR ↕</th>
+              <th data-sort="TF">TF ↕</th>
+              <th data-sort="CF">CF ↕</th>
+              <th data-sort="Backlinks">Backlinks ↕</th>
+              <th data-sort="Traffic">Traffic ↕</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Stats Summary -->
+      <div class="stats-row" id="statsRow" hidden>
+        <div class="stat">
+          <span class="stat-value" id="statHighDA">0</span>
+          <span class="stat-label">DA ≥ 50</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="statAvgDA">0</span>
+          <span class="stat-label">Avg DA</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="statAvgPA">0</span>
+          <span class="stat-label">Avg PA</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="statAvgSpam">0</span>
+          <span class="stat-label">Avg Spam</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Errors Section -->
+    <section class="card errors-card" id="errorsCard" hidden>
+      <h3>⚠️ Partial Results</h3>
+      <div id="errorsList"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <p>AIMAN CHECKER &copy; 2026 — Free Bulk DA PA Tool</p>
+      <p class="footer-note">Powered by Moz &amp; Ahrefs APIs via dapachecker.tools</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
