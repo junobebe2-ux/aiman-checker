@@ -200,6 +200,52 @@
   </style>
 </head>
 <body>
+  <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-mark" style="width:36px;height:36px;font-size:16px">A</div>
+        <div class="sidebar-brand">AIMAN CHECKER</div>
+      </div>
+      <button class="sidebar-close" id="sidebarClose">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-title">Navigation</div>
+      <a href="/" class="sidebar-item">🏠 Home</a>
+      <a href="/pricing.html" class="sidebar-item">💰 Pricing</a>
+      <a href="/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+      <a href="/admin.html" class="sidebar-item">⚙️ Admin</a>
+      <a href="/login.html" class="sidebar-item">🔑 Login</a>
+
+      <div class="sidebar-section-title" style="margin-top:16px">📋 Project Status</div>
+      
+      <div class="sidebar-section-title" style="margin-top:20px;color:var(--green);">✅ Completed</div>
+      <div class="sidebar-item"><span class="status-dot completed"></span>AIMAN CHECKER Web</div>
+      <div class="sidebar-item" style="padding-left:40px;font-size:12px;opacity:0.7">DA/PA/DR/TF Checker</div>
+      <div class="sidebar-item"><span class="status-dot completed"></span>Auth System</div>
+      <div class="sidebar-item"><span class="status-dot completed"></span>Crypto Payment</div>
+      <div class="sidebar-item"><span class="status-dot completed"></span>QR + Dark/Light Toggle</div>
+      
+      <div class="sidebar-section-title" style="margin-top:16px;color:var(--gold);">🟡 In Progress</div>
+      <div class="sidebar-item"><span class="status-dot in-progress"></span>Sidebar Navigation</div>
+      <div class="sidebar-item"><span class="status-dot in-progress"></span>Proxy Rotation</div>
+      
+      <div class="sidebar-section-title" style="margin-top:16px;color:var(--text-dim);">⚪ Planned</div>
+      <div class="sidebar-item"><span class="status-dot planned"></span>Blog SEO</div>
+      <div class="sidebar-item"><span class="status-dot planned"></span>Share Card Feature</div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <p>AIMAN CHECKER v1.0</p>
+    </div>
+  </aside>
+
   <header>
     <div class="container header-inner">
       <div class="logo" onclick="location.href='index.html'" style="cursor:pointer">
@@ -406,6 +452,31 @@
 
     // Load on page load
     document.addEventListener('DOMContentLoaded', loadDashboard);
+
+    // Sidebar toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebarClose = document.getElementById('sidebarClose');
+
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('show');
+      });
+    }
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+      });
+    }
+    if (sidebarClose) {
+      sidebarClose.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+      });
+    }
   </script>
 </body>
 </html>
