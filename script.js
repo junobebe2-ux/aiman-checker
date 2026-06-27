@@ -1,9 +1,8 @@
-/* AIMAN CHECKER — Frontend Logic */
+/* AIMAN CHECKER — Frontend */
 
 (() => {
   'use strict';
 
-  // DOM refs
   const urlInput = document.getElementById('urlInput');
   const urlCount = document.getElementById('urlCount');
   const checkBtn = document.getElementById('checkBtn');
@@ -42,7 +41,7 @@
     });
   });
 
-  // Sample URLs
+  // Sample
   sampleBtn.addEventListener('click', () => {
     urlInput.value = [
       'https://github.com',
@@ -56,11 +55,7 @@
     updateCount();
   });
 
-  // Clear
-  clearBtn.addEventListener('click', () => {
-    urlInput.value = '';
-    updateCount();
-  });
+  clearBtn.addEventListener('click', () => { urlInput.value = ''; updateCount(); });
 
   // File upload
   browseBtn.addEventListener('click', () => fileInput.click());
@@ -81,13 +76,12 @@
       showError('Only .txt files supported');
       return;
     }
-    fileName.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    fileName.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
     fileName.hidden = false;
     const reader = new FileReader();
     reader.onload = e => {
       urlInput.value = e.target.result;
       updateCount();
-      // Switch to paste tab
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelector('[data-tab="paste"]').classList.add('active');
@@ -96,51 +90,30 @@
     reader.readAsText(file);
   }
 
-  // Count URLs
   urlInput.addEventListener('input', updateCount);
   function updateCount() {
     const urls = getURLs();
     urlCount.textContent = urls.length;
-    if (urls.length > 500) {
-      urlCount.style.color = 'var(--red)';
-    } else {
-      urlCount.style.color = 'var(--text-dim)';
-    }
+    urlCount.style.color = urls.length > 500 ? '#e74c3c' : 'inherit';
   }
 
   function getURLs() {
-    return urlInput.value.split('\n')
-      .map(l => l.trim())
-      .filter(l => l.length > 0);
+    return urlInput.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   }
 
-  // Main check
   checkBtn.addEventListener('click', checkDomains);
 
-  function showError(msg) {
-    errorMsg.textContent = msg;
-    errorMsg.hidden = false;
-  }
-
-  function hideError() {
-    errorMsg.hidden = true;
-  }
+  function showError(msg) { errorMsg.textContent = msg; errorMsg.hidden = false; }
+  function hideError() { errorMsg.hidden = true; }
 
   async function checkDomains() {
     hideError();
     let urls = getURLs();
-    if (urls.length === 0) {
-      showError('Please enter at least one URL');
-      return;
-    }
-    if (urls.length > 500) {
-      showError('Maximum 500 URLs per session (API limit). You have ' + urls.length);
-      return;
-    }
+    if (urls.length === 0) { showError('Enter at least one domain'); return; }
+    if (urls.length > 500) { showError('Maximum 500 domains per session'); return; }
 
-    // UI state
     checkBtn.disabled = true;
-    checkBtn.querySelector('.btn-text').textContent = 'Checking...';
+    checkBtn.querySelector('.btn-text').textContent = 'Checking';
     checkBtn.querySelector('.btn-icon').innerHTML = '<span class="spinner"></span>';
     progressCard.hidden = false;
     resultsCard.hidden = true;
@@ -149,91 +122,73 @@
 
     const total = urls.length;
     progressBar.style.width = '0%';
-    progressStatus.textContent = `0 / ${total} URLs`;
+    progressStatus.textContent = '0 / ' + total;
     progressDetail.textContent = 'Sending request...';
 
-    let step = 1;
-
     try {
-      // The API is called via our proxy
-      progressDetail.textContent = `Requesting server (batch ${step})...`;
-
+      progressDetail.textContent = 'Requesting server...';
       const res = await fetch('/api/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ urls })
       });
-
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(`Server error ${res.status}: ${text}`);
+        throw new Error('Server ' + res.status + ': ' + text);
       }
-
       const data = await res.json();
-
-      if (!data.success) {
-        throw new Error(data.error || 'Unknown error');
-      }
+      if (!data.success) throw new Error(data.error || 'Unknown error');
 
       results = data.results || [];
-      const checked = data.checked || 0;
-
-      // Progress animation
       progressBar.style.width = '100%';
-      progressStatus.textContent = `${checked} / ${total} URLs`;
-      progressDetail.textContent = 'Done!';
+      progressStatus.textContent = (data.checked || 0) + ' / ' + total;
+      progressDetail.textContent = 'Done';
 
-      // Show errors
       if (data.errors && data.errors.length > 0) {
         errorsCard.hidden = false;
-        errorsList.innerHTML = data.errors.map(e => `<li>${escapeHTML(e)}</li>`).join('');
+        errorsList.innerHTML = data.errors.map(e => '<li>' + esc(e) + '</li>').join('');
       }
 
-      // Delay to show completion
-      await sleep(400);
-
-      // Render results
+      await sleep(300);
       renderResults(results);
-
     } catch (err) {
       showError(err.message);
       progressCard.hidden = true;
     } finally {
       checkBtn.disabled = false;
       checkBtn.querySelector('.btn-text').textContent = 'Check Authority';
-      checkBtn.querySelector('.btn-icon').innerHTML = '🔍';
+      checkBtn.querySelector('.btn-icon').innerHTML = '◆';
     }
   }
 
   function renderResults(data) {
     results = data;
     resultsCard.hidden = false;
-
-    resultsSummary.textContent = `${data.length} domain${data.length !== 1 ? 's' : ''} checked`;
+    resultsSummary.textContent = data.length + ' domain' + (data.length !== 1 ? 's' : '');
     resultsBody.innerHTML = '';
 
     if (data.length === 0) {
-      resultsBody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-dim)">No results returned</td></tr>';
+      resultsBody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#4a3f32">No results</td></tr>';
       return;
     }
 
-    // Build rows
     data.forEach(r => {
       const da = parseFloat(r.DA) || 0;
       const daClass = da >= 50 ? 'da-high' : da >= 30 ? 'da-mid' : 'da-low';
+      const spam = parseFloat(r.Spam) || 0;
+      const spamClass = spam > 10 ? 'ss-high' : 'ss-low';
 
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="domain-cell">${escapeHTML(r.domain)}</td>
-        <td class="da-cell ${daClass}">${da}</td>
-        <td>${parseFloat(r.PA) || 0}</td>
-        <td><span class="${(parseFloat(r.Spam) || 0) > 10 ? 'da-low' : 'da-high'}">${parseFloat(r.Spam) || 0}%</span></td>
-        <td>${parseFloat(r.DR) || 0}</td>
-        <td>${parseFloat(r.TF) || 0}</td>
-        <td>${parseFloat(r.CF) || 0}</td>
-        <td>${formatNum(r.Backlinks)}</td>
-        <td>${formatNum(r.Traffic)}</td>
-      `;
+      tr.innerHTML =
+        '<td class="domain-cell">' + esc(r.domain) + '</td>' +
+        '<td class="da-cell ' + daClass + '">' + da + '</td>' +
+        '<td>' + (parseFloat(r.PA) || 0) + '</td>' +
+        '<td><span class="ss-badge ' + spamClass + '">' + spam + '</span></td>' +
+        '<td>' + (parseFloat(r.DR) || 0) + '</td>' +
+        '<td>' + (parseFloat(r.TF) || 0) + '</td>' +
+        '<td>' + (parseFloat(r.CF) || 0) + '</td>' +
+        '<td>' + fmt(r.Backlinks) + '</td>' +
+        '<td>' + fmt(r.Traffic) + '</td>';
       resultsBody.appendChild(tr);
     });
 
@@ -245,25 +200,24 @@
     if (das.length > 0) {
       statsRow.hidden = false;
       document.getElementById('statHighDA').textContent = das.filter(d => d >= 50).length;
-      document.getElementById('statAvgDA').textContent = (das.reduce((a, b) => a + b, 0) / das.length).toFixed(1);
-      document.getElementById('statAvgPA').textContent = pas.length > 0 ? (pas.reduce((a, b) => a + b, 0) / pas.length).toFixed(1) : '0';
-      document.getElementById('statAvgSpam').textContent = (spams.reduce((a, b) => a + b, 0) / spams.length).toFixed(1) + '%';
+      document.getElementById('statAvgDA').textContent = (das.reduce((a,b) => a+b, 0) / das.length).toFixed(1);
+      document.getElementById('statAvgPA').textContent = pas.length > 0 ? (pas.reduce((a,b) => a+b, 0) / pas.length).toFixed(1) : '0';
+      document.getElementById('statAvgSpam').textContent = (spams.reduce((a,b) => a+b, 0) / spams.length).toFixed(1);
     }
 
-    // Re-sort if previously sorted
     if (lastSortKey) sortTable(lastSortKey, sortAsc[lastSortKey]);
   }
 
-  // Table sorting
+  // Sorting
   document.querySelectorAll('th[data-sort]').forEach(th => {
     th.addEventListener('click', () => {
       const key = th.dataset.sort;
       const asc = sortAsc[key] !== undefined ? !sortAsc[key] : true;
       sortAsc[key] = asc;
       lastSortKey = key;
-      // Reset others
-      document.querySelectorAll('th[data-sort]').forEach(t => t.style.color = '');
-      th.style.color = 'var(--accent)';
+      document.querySelectorAll('th[data-sort]').forEach(t => { t.classList.remove('sort-asc', 'sort-desc'); t.style.color = ''; });
+      th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+      th.style.color = '#D4AF37';
       sortTable(key, asc);
     });
   });
@@ -272,76 +226,69 @@
     const tbody = resultsBody;
     const rows = Array.from(tbody.querySelectorAll('tr'));
     if (rows.length === 0) return;
-
     rows.sort((a, b) => {
-      const va = getCellValue(a, key);
-      const vb = getCellValue(b, key);
+      const va = cellVal(a, key);
+      const vb = cellVal(b, key);
       const cmp = typeof va === 'string' ? va.localeCompare(vb) : va - vb;
       return asc ? cmp : -cmp;
     });
-
     rows.forEach(r => tbody.appendChild(r));
   }
 
-  function getCellValue(tr, key) {
+  function cellVal(tr, key) {
     const cells = tr.querySelectorAll('td');
     const idx = ['domain','DA','PA','Spam','DR','TF','CF','Backlinks','Traffic'].indexOf(key);
     if (idx === -1 || !cells[idx]) return '';
-    const val = cells[idx].textContent.trim().replace(/[%,]/g, '');
+    const val = cells[idx].textContent.trim().replace(/,/g, '');
     return key === 'domain' ? val.toLowerCase() : parseFloat(val) || 0;
   }
 
-  // Copy button
+  // Export
   copyBtn.addEventListener('click', () => {
-    const text = results.map(r =>
-      `${r.domain}\t${r.DA}\t${r.PA}\t${r.Spam}%\t${r.DR}\t${r.TF}\t${r.CF}\t${formatNum(r.Backlinks)}\t${formatNum(r.Traffic)}`
-    ).join('\n');
     const header = 'Domain\tDA\tPA\tSpam\tDR\tTF\tCF\tBacklinks\tTraffic';
+    const text = results.map(r =>
+      r.domain + '\t' + r.DA + '\t' + r.PA + '\t' + r.Spam + '\t' + r.DR + '\t' + r.TF + '\t' + r.CF + '\t' + fmtNum(r.Backlinks) + '\t' + fmtNum(r.Traffic)
+    ).join('\n');
     navigator.clipboard.writeText(header + '\n' + text).then(() => {
-      copyBtn.textContent = '✅ Copied';
-      setTimeout(() => copyBtn.textContent = '📋 Copy', 2000);
+      copyBtn.textContent = 'Done';
+      setTimeout(() => copyBtn.textContent = 'Copy', 2000);
     });
   });
 
-  // CSV
   csvBtn.addEventListener('click', () => {
     const header = 'Domain,DA,PA,Spam,DR,TF,CF,Backlinks,Traffic,Keywords';
-    const rows = results.map(r =>
-      `"${r.domain}",${r.DA},${r.PA},${r.Spam},${r.DR},${r.TF},${r.CF},${r.Backlinks},${r.Traffic},${r.Keywords}`
-    );
-    download(header + '\n' + rows.join('\n'), 'aiman-checker-results.csv', 'text/csv');
+    const rows = results.map(r => '"' + r.domain + '",' + r.DA + ',' + r.PA + ',' + r.Spam + ',' + r.DR + ',' + r.TF + ',' + r.CF + ',' + r.Backlinks + ',' + r.Traffic + ',' + (r.Keywords || 0));
+    download(header + '\n' + rows.join('\n'), 'aiman-checker.csv', 'text/csv');
   });
 
-  // JSON
   jsonBtn.addEventListener('click', () => {
-    download(JSON.stringify(results, null, 2), 'aiman-checker-results.json', 'application/json');
+    download(JSON.stringify(results, null, 2), 'aiman-checker.json', 'application/json');
   });
 
   // Helpers
-  function formatNum(n) {
+  function fmt(n) {
     const v = parseInt(n) || 0;
     if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M';
     if (v >= 1000) return (v / 1000).toFixed(1) + 'K';
     return v.toLocaleString();
   }
-
-  function escapeHTML(s) {
+  function fmtNum(n) {
+    return (parseInt(n) || 0).toLocaleString();
+  }
+  function esc(s) {
     const d = document.createElement('div');
     d.textContent = s;
     return d.innerHTML;
   }
-
-  function download(content, filename, type) {
+  function download(content, name, type) {
     const blob = new Blob([content], { type });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = filename;
+    a.download = name;
     a.click();
     URL.revokeObjectURL(a.href);
   }
-
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  // Init
   updateCount();
 })();
