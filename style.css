@@ -2,6 +2,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
 
+/* ===== DARK THEME (default) ===== */
 :root {
   --gold: #D4AF37;
   --gold-light: #FFD700;
@@ -23,8 +24,123 @@
   --amber: #f39c12;
   --radius: 10px;
   --radius-sm: 6px;
+  --transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* ===== LIGHT THEME ===== */
+[data-theme="light"] {
+  --bg: #f5f0e8;
+  --bg-card: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: #faf5ed;
+  --border: #e0d5c5;
+  --border-gold: rgba(212, 175, 55, 0.3);
+  --text: #2c2416;
+  --text-dim: #8a7e6b;
+  --text-warm: #3d3220;
+  --cream: #f5f0e8;
+  --gold-glow: rgba(212, 175, 55, 0.15);
+}
+
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(212, 175, 55, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(212, 175, 55, 0.04) 0%, transparent 50%);
+}
+
+[data-theme="light"] .card {
+  border-color: var(--border-gold);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .dash-card,
+[data-theme="light"] .pricing-card {
+  border-color: var(--border-gold);
+}
+
+[data-theme="light"] .btn-outline {
+  border-color: var(--border-gold);
+}
+
+[data-theme="light"] textarea,
+[data-theme="light"] input {
+  background: #faf5ed;
+  border-color: #e0d5c5;
+  color: var(--text);
+}
+
+[data-theme="light"] textarea:focus,
+[data-theme="light"] input:focus {
+  border-color: var(--gold-dark);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+[data-theme="light"] .method-tabs,
+[data-theme="light"] .auth-tabs,
+[data-theme="light"] .admin-nav {
+  background: #faf5ed;
+  border-color: #e0d5c5;
+}
+
+[data-theme="light"] .api-key-display {
+  background: #faf5ed;
+}
+
+[data-theme="light"] .stat,
+[data-theme="light"] .set-item {
+  background: #faf5ed;
+}
+
+[data-theme="light"] .payment-modal-content {
+  background: #ffffff;
+}
+
+[data-theme="light"] .wallet-addr {
+  background: #faf5ed !important;
+}
+
+[data-theme="light"] .table-wrap {
+  background: #faf5ed;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f0e8db;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px 10px;
+  transition: all 0.2s ease;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.theme-toggle:hover {
+  border-color: var(--gold-dark);
+  color: var(--gold-light);
+  background: rgba(212, 175, 55, 0.06);
+}
+
+/* Smooth transitions on theme change */
+body, .card, .dash-card, .pricing-card, .payment-modal-content,
+.btn, .btn-outline, .tab, .auth-tab, .admin-nav-btn, .user-link,
+.wallet-addr, .api-key-display, .stat, .set-item, textarea, input,
+.method-tabs, .auth-tabs, .admin-nav, .table-wrap, .logo-mark,
+.badge, .plan-badge, .theme-toggle {
+  transition: var(--transition);
+}
+
+/* ===== BASE STYLES ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -36,6 +152,7 @@ body {
   background-image:
     radial-gradient(ellipse at 20% 50%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 20%, rgba(212, 175, 55, 0.02) 0%, transparent 50%);
+  transition: var(--transition);
 }
 
 /* Custom scrollbar */
@@ -588,3 +705,47 @@ footer {
 /* Sorting indicator */
 th.sort-asc::after { content: ' ▲'; font-size: 9px; }
 th.sort-desc::after { content: ' ▼'; font-size: 9px; }
+
+/* Confirmation animation */
+@keyframes confirmPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes checkmark {
+  0% { stroke-dashoffset: 50; }
+  100% { stroke-dashoffset: 0; }
+}
+.confirm-animation {
+  text-align: center;
+  padding: 24px 0;
+  animation: confirmPop 0.5s ease;
+}
+.confirm-animation .check-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
+  display: block;
+}
+.confirm-animation .check-icon circle {
+  fill: var(--green);
+  opacity: 0.15;
+}
+.confirm-animation .check-icon path {
+  stroke: var(--green);
+  stroke-width: 3;
+  fill: transparent;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: checkmark 0.6s ease 0.3s forwards;
+}
+.confirm-animation h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+.confirm-animation p {
+  color: var(--text-dim);
+  font-size: 13px;
+}

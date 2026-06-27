@@ -176,6 +176,8 @@
       letter-spacing: 0.5px;
       margin-top: 4px;
     }
+    .status-confirmed { color: var(--green); font-weight: 600; }
+    .status-pending { color: var(--amber); font-weight: 600; }
     @media (max-width: 640px) {
       .set-display { grid-template-columns: 1fr; }
       .admin-nav { flex-direction: column; }
@@ -193,6 +195,7 @@
         </div>
       </div>
       <nav style="display:flex;align-items:center;gap:12px">
+        <button id="themeToggle" class="theme-toggle" title="Toggle theme">☀️</button>
         <a href="index.html" style="color:var(--text-dim);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">Home</a>
         <a href="dashboard.html" style="color:var(--text-dim);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">Dashboard</a>
         <button class="logout-btn" onclick="handleLogout()" style="background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:6px 14px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;cursor:pointer">Sign Out</button>
@@ -249,8 +252,12 @@
         <h3 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold-light);margin-bottom:16px">System Settings</h3>
         <div class="set-display">
           <div class="set-item">
-            <label>TRON Payment Wallet</label>
-            <input type="text" id="setWallet" value="Loading...">
+            <label>Base Wallet (USDT)</label>
+            <input type="text" id="setBaseWallet" value="0xSET_BY_ADMIN_LATER">
+          </div>
+          <div class="set-item">
+            <label>Solana Wallet (USDC)</label>
+            <input type="text" id="setSolanaWallet" value="SOLANA_WALLET_NOT_SET">
           </div>
           <div class="set-item">
             <label>Guest Limit (URLs)</label>
@@ -286,6 +293,22 @@
   </footer>
 
   <script>
+    // ---- THEME TOGGLE ----
+    (function() {
+      const saved = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      const btn = document.getElementById('themeToggle');
+      if (btn) {
+        btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+        btn.addEventListener('click', function() {
+          const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('theme', next);
+          btn.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+      }
+    })();
+
     let allUsers = [];
     let allTransactions = [];
 
@@ -355,8 +378,9 @@
         showError('Failed to load data: ' + e.message);
       }
 
-      // Load wallet address from env hint
-      document.getElementById('setWallet').value = 'Set via ENV: TRON_WALLET';
+      // Load wallet addresses from env hint
+      document.getElementById('setBaseWallet').value = 'Set via ENV: BASE_WALLET';
+      document.getElementById('setSolanaWallet').value = 'Set via ENV: SOLANA_WALLET';
     }
 
     function renderTransactions() {
@@ -365,13 +389,53 @@
         container.innerHTML = '<div class="empty-state">No transactions yet</div>';
         return;
       }
-      let html = '<table class="data-table"><thead><tr><th>Ref</th><th>User</th><th>Plan</th><th>Amount</th><th>Status</th><th>Created</th><th>TxID</th></tr></thead><tbody>';
+      let html = '<table class="data-table"><thead><tr><th>Ref</th><th>User</th><th>Plan</th><th>Amount</th><th>Network</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>';
       allTransactions.slice().reverse().forEach(t => {
-        const statusClass = t.status === 'confirmed' ? 'status-confirmed' : 'status-pending';
-        html += '<tr><td style="font-family:monospace;font-size:10px">' + (t.refId || '-') + '</td><td>' + (t.userId || '-') + '</td><td>' + (t.plan || '-') + '</td><td>$' + (t.amount || 0).toFixed(2) + '</td><td class="' + statusClass + '">' + t.status + '</td><td>' + (t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '-') + '</td><td style="font-family:monospace;font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (t.txId || '-') + '</td></tr>';
+        const statusClass = t.status === 'confirmed' ? 'status-confirmed' : t.status === 'pending' ? 'status-pending' : '';
+        const actionBtn = t.status === 'pending'
+          ? '<button class="save-role-btn" onclick="manualConfirm(\'' + t.refId + '\')" style="color:var(--gold-light)">✓ Confirm</button>'
+          : '-';
+        html += '<tr>' +
+          '<td style="font-family:monospace;font-size:10px">' + (t.refId || '-') + '</td>' +
+          '<td>' + (t.userId || '-') + '</td>' +
+          '<td>' + (t.plan || '-') + '</td>' +
+          '<td>$' + (t.amount || 0).toFixed(2) + ' ' + (t.currency || 'USDT') + '</td>' +
+          '<td>' + (t.network || '-') + '</td>' +
+          '<td class="' + statusClass + '">' + t.status + '</td>' +
+          '<td>' + (t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '-') + '</td>' +
+          '<td>' + actionBtn + '</td>' +
+          '</tr>';
       });
       html += '</tbody></table>';
       container.innerHTML = html;
+    }
+
+    async function manualConfirm(refId) {
+      const token = localStorage.getItem('aiman_token');
+      if (!token) return;
+      try {
+        const res = await fetch('/api/payment/confirm/' + refId, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showError('✅ Transaction confirmed: ' + refId);
+          // Reload transactions
+          const txnRes = await fetch('/api/payment', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (txnRes.ok) {
+            const txnData = await txnRes.json();
+            allTransactions = txnData.transactions || [];
+            renderTransactions();
+          }
+        } else {
+          showError('Error: ' + (data.error || 'Failed to confirm'));
+        }
+      } catch (e) {
+        showError('Error: ' + e.message);
+      }
     }
 
     function saveSettings() {
