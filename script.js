@@ -158,8 +158,48 @@
   function showError(msg) { errorMsg.textContent = msg; errorMsg.hidden = false; }
   function hideError() { errorMsg.hidden = true; }
 
+  // ---- Cloudflare Turnstile helper ----
+  function showTurnstile() {
+    return new Promise((resolve, reject) => {
+      const modal = document.getElementById('cfModal');
+      const cancelBtn = document.getElementById('cfCancel');
+      // Clean previous widget if any
+      const container = document.getElementById('turnstileContainer');
+      container.innerHTML = '';
+
+      // Render Turnstile
+      const widgetId = turnstile.render('#turnstileContainer', {
+        sitekey: '1x00000000000000000000AA', // demo key – replace with real key
+        callback: token => {
+          modal.style.display = 'none';
+          resolve(token);
+        },
+        'error-callback': err => {
+          modal.style.display = 'none';
+          reject(new Error('Turnstile verification failed'));
+        }
+      });
+
+      cancelBtn.onclick = () => {
+        turnstile.reset(widgetId);
+        modal.style.display = 'none';
+        reject(new Error('User cancelled Turnstile'));
+      };
+
+      modal.style.display = 'flex';
+    });
+  }
+
   async function checkDomains() {
     hideError();
+    // Show Cloudflare Turnstile before proceeding
+    try {
+      await showTurnstile();
+    } catch (e) {
+      showError(e.message);
+      return;
+    }
+
     let urls = getURLs();
     if (urls.length === 0) { showError('Enter at least one domain'); return; }
     if (urls.length > 500) { showError('Maximum 500 domains per session'); return; }
