@@ -7,6 +7,7 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "https-proxy-agent": "^7.0.0",
     "jsonwebtoken": "^9.0.2"
   }
