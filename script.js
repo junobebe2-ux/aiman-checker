@@ -260,7 +260,7 @@
         headers['Authorization'] = 'Bearer ' + token;
       }
 
-      const res = await fetch('/api/check', {
+      const res = await fetch('/api/guestpost', {
         method: 'POST',
         headers,
         body: JSON.stringify({ urls })
@@ -278,35 +278,31 @@
         throw new Error('Server ' + res.status + ': ' + (errorData.error || text));
       }
       
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'Unknown error');
+      const response = await res.json();
+      if (!response.success) throw new Error(response.error || 'Unknown error');
 
-      // Update stored plan/role from response
-      if (data.plan) {
-        localStorage.setItem('aiman_role', data.plan);
-        updateAuthUI();
-      }
+      // Guestpostlinks returns a map {url: {da, pa, ss}}
+      const map = response.data || {};
+      const transformed = Object.entries(map).map(([url, vals]) => ({
+        domain: url,
+        DA: vals.da || 0,
+        PA: vals.pa || 0,
+        Spam: vals.ss || 0,
+        DR: 0,
+        TF: 0,
+        CF: 0,
+        Backlinks: 0,
+        Traffic: 0
+      }));
 
-      results = data.results || [];
+      results = transformed;
       progressBar.style.width = '100%';
-      progressStatus.textContent = (data.checked || 0) + ' / ' + total;
+      progressStatus.textContent = transformed.length + ' / ' + total;
       progressDetail.textContent = 'Done';
 
-      // Show plan info
-      if (data.plan_label) {
-        const planInfo = document.createElement('div');
-        planInfo.style.cssText = 'margin-top:12px;padding:8px 14px;background:rgba(212,175,55,0.04);border:1px solid rgba(212,175,55,0.1);border-radius:var(--radius-sm);font-size:11px;color:var(--text-dim);display:flex;justify-content:space-between;align-items:center';
-        const remaining = data.remaining !== undefined ? data.remaining : '∞';
-        planInfo.innerHTML = '<span>Plan: <strong style="color:var(--gold)">' + data.plan_label + '</strong></span><span>Remaining today: <strong style="color:var(--text-warm)">' + (remaining === Infinity ? '∞' : remaining) + '</strong></span>';
-        progressCard.appendChild(planInfo);
-      }
-
-      if (data.errors && data.errors.length > 0) {
-        errorsCard.hidden = false;
-        errorsList.innerHTML = data.errors.map(e => '<li>' + esc(e) + '</li>').join('');
-      }
 
       await sleep(300);
+
       renderResults(results);
     } catch (err) {
       showError(err.message);
