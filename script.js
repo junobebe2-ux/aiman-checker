@@ -168,8 +168,8 @@
     const token = localStorage.getItem('aiman_token');
     const role = localStorage.getItem('aiman_role') || 'guest';
     const limits = {
-      guest: 50,
-      free: 100,
+      guest: 100,
+      free: 200,
       pro: 1000,
       business: 5000,
       admin: Infinity

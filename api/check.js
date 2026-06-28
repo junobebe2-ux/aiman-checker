@@ -203,7 +203,7 @@ export default async function handler(req, res) {
     domain: r.domain || "",
     DA: r.mozDA || "0",
     PA: r.mozPA || "0",
-    Spam: r.mozSpam || "0",
+    Spam: String(r.mozSpam || "0").replace('%', '').trim() || "0",
     DR: r.ahrefsDR || "0",
     TF: r.majesticTF || "0",
     CF: r.majesticCF || "0",

@@ -6,17 +6,17 @@
 const LIMITS = {
   guest: {
     label: 'Guest',
-    maxUrls: 50,
+    maxUrls: 100,
     historyDays: 0,
-    batchLimit: 1,       // max batches of 50
-    description: 'Free trial — 50 URLs'
+    batchLimit: 2,       // max batches of 50
+    description: 'Free trial — 100 URLs'
   },
   free: {
     label: 'Free',
-    maxUrls: 100,
+    maxUrls: 200,
     historyDays: 7,
-    batchLimit: 2,
-    description: '100 URLs, 7-day history'
+    batchLimit: 4,
+    description: '200 URLs, 7-day history'
   },
   pro: {
     label: 'Pro',
