@@ -1,14 +1,12 @@
 /**
- * AIMAN CHECKER — Shared Limits Configuration
- * Centralized role-based limits for all endpoints.
+ * AIMAN CHECKER — Rate limits per role
  */
-
-const LIMITS = {
+const RATE_LIMITS = {
   guest: {
     label: 'Guest',
     maxUrls: 100,
     historyDays: 0,
-    batchLimit: 2,       // max batches of 50
+    batchLimit: 2,
     description: 'Free trial — 100 URLs'
   },
   free: {
@@ -16,63 +14,41 @@ const LIMITS = {
     maxUrls: 200,
     historyDays: 7,
     batchLimit: 4,
-    description: '200 URLs, 7-day history'
+    description: 'Free plan — 200 URLs per session'
   },
   pro: {
     label: 'Pro',
     maxUrls: 1000,
     historyDays: 30,
-    batchLimit: Infinity,
-    description: '1000 URLs, 30-day history'
+    batchLimit: 20,
+    description: 'Pro plan — 1000 URLs per session'
   },
   business: {
     label: 'Business',
     maxUrls: 5000,
     historyDays: 90,
-    batchLimit: Infinity,
-    description: '5000 URLs, 90-day history'
+    batchLimit: 100,
+    description: 'Business plan — 5000 URLs per session'
   },
   admin: {
     label: 'Admin',
-    maxUrls: Infinity,
-    historyDays: Infinity,
-    batchLimit: Infinity,
+    maxUrls: 100000,
+    historyDays: 365,
+    batchLimit: 2000,
     description: 'Unlimited'
   }
 };
 
-const PLAN_PRICES = {
-  free: 0,
-  pro: 9.99,
-  business: 29.99
-};
-
-const PLAN_DAYS = {
-  pro: 30,
-  business: 90
-};
-
-function getLimits(role = 'guest') {
-  return LIMITS[role] || LIMITS.guest;
+function getLimits(role) {
+  return RATE_LIMITS[role] || RATE_LIMITS.guest;
 }
 
-function getMaxUrls(role = 'guest') {
-  const l = getLimits(role);
-  return l.maxUrls;
-}
-
-function checkLimit(role, urlCount) {
-  const max = getMaxUrls(role);
-  if (urlCount > max) {
-    return {
-      allowed: false,
-      limit: max,
-      yourCount: urlCount,
-      role,
-      message: `Your plan (${getLimits(role).label}) allows max ${max} URLs. You submitted ${urlCount}.`
-    };
+function checkLimit(role, requested) {
+  const limits = getLimits(role);
+  if (requested > limits.maxUrls) {
+    return { allowed: false, limit: limits.maxUrls, yourCount: requested, message: "Plan " + limits.label + " allows max " + limits.maxUrls + " URLs (you requested " + requested + ")" };
   }
-  return { allowed: true, limit: max, yourCount: urlCount };
+  return { allowed: true, limit: limits.maxUrls };
 }
 
-module.exports = { LIMITS, getLimits, getMaxUrls, checkLimit, PLAN_PRICES, PLAN_DAYS };
+module.exports = { RATE_LIMITS, getLimits, checkLimit };
