@@ -198,12 +198,16 @@ export default async function handler(req, res) {
     }
   }
 
-  // Extract key metrics
-  const metrics = allResults.map(r => ({
+  // Extract key metrics - convert mozSpam (Moz v1: 0-17) to percentage (0-100)
+  const metrics = allResults.map(r => {
+    const raw = parseFloat(String(r.mozSpam || "0").replace('%', '').trim()) || 0;
+    // Moz Spam Score v1 uses 17 flags → convert to 0-100 percentage
+    const spamPct = Math.round((raw / 17) * 100);
+    return {
     domain: r.domain || "",
     DA: r.mozDA || "0",
     PA: r.mozPA || "0",
-    Spam: String(r.mozSpam || "0").replace('%', '').trim() || "0",
+    Spam: String(spamPct),
     DR: r.ahrefsDR || "0",
     TF: r.majesticTF || "0",
     CF: r.majesticCF || "0",
@@ -212,7 +216,7 @@ export default async function handler(req, res) {
     RefDomains: r.ahrefsRefDomains || 0,
     Traffic: r.ahrefsTraffic || 0,
     Keywords: r.ahrefsOrganicKeywords || 0
-  }));
+  }); // end metrics.map
 
   res.json({
     success: true,
