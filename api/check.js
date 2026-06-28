@@ -329,6 +329,10 @@ export default async function handler(req, res) {
     return await fallbackHandler(req, res);
   }
 
+  // SKIP DAPA - use fallback Moz API for now
+  console.log('⚠️  Skipping DAPA (blocked by login), using Moz API fallback');
+  return await fallbackHandler(req, res);
+
   // Batch process (DAPA free: 5/req)
   for (let i = 0; i < total; i += BATCH_SIZE) {
     const batchNum = Math.floor(i / BATCH_SIZE) + 1;
