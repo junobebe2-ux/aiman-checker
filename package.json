@@ -1,6 +1,7 @@
 {
   "name": "aiman-checker",
   "version": "1.0.0",
+  "type": "module",
   "description": "AIMAN CHECKER — Free Bulk DA PA Checker",
   "scripts": {
     "dev": "vercel dev",
