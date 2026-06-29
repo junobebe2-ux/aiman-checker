@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIMAN CHECKER — Bulk DA PA Spam Score Checker</title>
+  <meta name="description" content="Free bulk domain authority checker. Check DA, PA, spam score for up to 500 URLs.">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#050505;color:#fff;min-height:100vh}
+    .container{max-width:900px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 0}
+    .logo{font-size:48px;color:#D4AF37;margin-bottom:10px}
+    h1{font-size:28px;margin-bottom:10px}
+    .subtitle{color:#888;font-size:14px}
+    .card{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;padding:24px;margin:20px 0}
+    textarea{width:100%;min-height:150px;background:#050505;border:1px solid #333;border-radius:8px;padding:12px;color:#fff;font-family:monospace;font-size:14px;resize:vertical}
+    textarea:focus{outline:none;border-color:#D4AF37}
+    .btn{background:linear-gradient(135deg,#D4AF37,#B8860B);color:#000;border:none;padding:12px 32px;border-radius:8px;font-weight:600;cursor:pointer;font-size:16px;margin-top:16px}
+    .btn:hover{opacity:0.9}
+    .btn:disabled{opacity:0.5;cursor:not-allowed}
+    .results{margin-top:24px}
+    .result-item{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:16px;margin:12px 0;display:flex;justify-content:space-between;align-items:center}
+    .domain{font-weight:600;color:#D4AF37}
+    .metrics{display:flex;gap:24px}
+    .metric{text-align:center}
+    .metric-value{font-size:24px;font-weight:700}
+    .metric-label{font-size:12px;color:#666;margin-top:4px}
+    .status{padding:8px 16px;border-radius:6px;font-size:13px}
+    .status-success{background:#1b4332;color:#95d5b2}
+    .status-error{background:#5c1a1a;color:#f5a5a5}
+    .loading{text-align:center;padding:40px;color:#888}
+    .error{background:#5c1a1a;border:1px solid #f5a5a5;border-radius:8px;padding:16px;margin:20px 0;color:#f5a5a5}
+    footer{text-align:center;padding:40px 0;color:#444;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">◆</div>
+      <h1>AIMAN CHECKER</h1>
+      <p class="subtitle">Free Bulk DA PA Spam Score Checker</p>
+    </header>
+
+    <div class="card">
+      <label style="display:block;margin-bottom:12px;font-weight:500">Enter domains (one per line, max 500):</label>
+      <textarea id="domains" placeholder="malcomschein.my.id&#10;example.com&#10;google.com"></textarea>
+      <button class="btn" id="checkBtn" onclick="checkDomains()">Check Now</button>
+    </div>
+
+    <div id="error" class="error" style="display:none"></div>
+    <div id="results" class="results"></div>
+
+    <footer>
+      <p>Powered by AIMAN CHECKER • Data from dachecker.io</p>
+    </footer>
+  </div>
+
+  <script>
+    const SCRAPER_URL = 'https://concentrations-contain-rays-hans.trycloudflare.com';
+
+    async function checkDomains() {
+      const btn = document.getElementById('checkBtn');
+      const textarea = document.getElementById('domains');
+      const resultsDiv = document.getElementById('results');
+      const errorDiv = document.getElementById('error');
+
+      const urls = textarea.value.split('\n').map(u => u.trim()).filter(u => u);
+      if (!urls.length) {
+        showError('Please enter at least one domain');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Checking...';
+      errorDiv.style.display = 'none';
+      resultsDiv.innerHTML = '<div class="loading">Analyzing domains...</div>';
+
+      try {
+        const response = await fetch(`${SCRAPER_URL}/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls })
+        });
+
+        if (!response.ok) throw new Error('Scraper unavailable');
+
+        const data = await response.json();
+        
+        if (!data.success || !data.results) throw new Error('Invalid response');
+
+        renderResults(data.results);
+      } catch (err) {
+        showError('Failed to check domains: ' + err.message);
+        resultsDiv.innerHTML = '';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Check Now';
+      }
+    }
+
+    function renderResults(results) {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = results.map(r => `
+        <div class="result-item">
+          <div class="domain">${r.url}</div>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-value" style="color:#D4AF37">${r.domain_authority}</div>
+              <div class="metric-label">DA</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" style="color:#95d5b2">${r.page_authority}</div>
+              <div class="metric-label">PA</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" style="color:#f5a5a5">${r.spam_score}</div>
+              <div class="metric-label">SS</div>
+            </div>
+          </div>
+          <div class="status status-success">✓</div>
+        </div>
+      `).join('');
+    }
+
+    function showError(msg) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = msg;
+      errorDiv.style.display = 'block';
+    }
+
+    // Auto-check from URL param
+    const urlParams = new URLSearchParams(window.location.search);
+    const url = urlParams.get('url');
+    if (url) {
+      document.getElementById('domains').value = url;
+      checkDomains();
+    }
+  </script>
+</body>
+</html>
