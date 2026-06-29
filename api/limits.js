@@ -1,7 +1,7 @@
 /**
  * AIMAN CHECKER — Rate limits per role
  */
-const RATE_LIMITS = {
+export const RATE_LIMITS = {
   guest: {
     label: 'Guest',
     maxUrls: 100,
@@ -39,16 +39,14 @@ const RATE_LIMITS = {
   }
 };
 
-function getLimits(role) {
+export function getLimits(role) {
   return RATE_LIMITS[role] || RATE_LIMITS.guest;
 }
 
-function checkLimit(role, requested) {
+export function checkLimit(role, requested) {
   const limits = getLimits(role);
   if (requested > limits.maxUrls) {
     return { allowed: false, limit: limits.maxUrls, yourCount: requested, message: "Plan " + limits.label + " allows max " + limits.maxUrls + " URLs (you requested " + requested + ")" };
   }
   return { allowed: true, limit: limits.maxUrls };
 }
-
-module.exports = { RATE_LIMITS, getLimits, checkLimit };
