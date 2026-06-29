@@ -8,7 +8,7 @@ import { checkLimit, getLimits } from './limits.js';
 
 const JWT_SECRET = '"aiman-checker-secret-key-2024"';
 const USERS_PATH = '/tmp/users.json';
-const DACHECKER_API = 'https://supplement-jam-aruba-head.trycloudflare.com/api/da-pa-check';
+const DACHECKER_API = 'https://concentrations-contain-rays-hans.trycloudflare.com/api/da-pa-check';
 
 function calculateSpamScore(da) {
   const estimatedMozSpam = Math.max(1, Math.round(15 - da * 0.15));
