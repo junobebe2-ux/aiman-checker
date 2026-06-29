@@ -1,16 +1,14 @@
 /**
  * AIMAN CHECKER — API Proxy with auth & role-based limits
- * Backend: EC2 scraper (dachecker.io API)
- * DA/PA from Moz, SS calculated from DA metrics
+ * Backend: dachecker.io API (real Moz DA/PA/SS data)
  */
-const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const { checkLimit, getLimits } = require('./limits');
+import jwt from 'jsonwebtoken';
+import fs from 'fs';
+import { checkLimit, getLimits } from './limits.js';
 
 const JWT_SECRET = '"aiman-checker-secret-key-2024"';
 const USERS_PATH = '/tmp/users.json';
-const EC2_SCRAPER = 'https://concentrations-contain-rays-hans.trycloudflare.com'; // Hardcoded tunnel - BACKUP ONLY
-const DACHECKER_API = 'https://dachecker.io/api/da-pa-check'; // Primary: real Moz data with SS
+const DACHECKER_API = 'https://dachecker.io/api/da-pa-check';
 
 function calculateSpamScore(da) {
   const estimatedMozSpam = Math.max(1, Math.round(15 - da * 0.15));
@@ -59,17 +57,16 @@ function saveUserUsage(user) {
 }
 
 async function callScraper(urls) {
-  // Try dachecker.io first (real Moz data with SS)
+  const ctrl = new AbortController();
+  const timeout = setTimeout(() => ctrl.abort(), 25000);
   try {
-    const ctrl1 = new AbortController();
-    const timeout1 = setTimeout(() => ctrl1.abort(), 25000);
     const response = await fetch(`${DACHECKER_API}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ domains: urls }),
-      signal: ctrl1.signal
+      signal: ctrl.signal
     });
-    clearTimeout(timeout1);
+    clearTimeout(timeout);
     if (response.ok) {
       const data = await response.json();
       if (data && data.results) {
@@ -88,27 +85,11 @@ async function callScraper(urls) {
   } catch (e) {
     console.error('dachecker.io failed:', e.message);
   }
-  
-  // Fallback to old tunnel
-  const ctrl2 = new AbortController();
-  const timeout2 = setTimeout(() => ctrl2.abort(), 30000);
-  try {
-    const response = await fetch(`${EC2_SCRAPER}/check`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ urls }),
-      signal: ctrl2.signal
-    });
-    clearTimeout(timeout2);
-    return await response.json();
-  } catch (e) {
-    clearTimeout(timeout2);
-    console.error('Scraper error:', e.message);
-    return null;
-  }
+  clearTimeout(timeout);
+  return null;
 }
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   try {
     const authHeader = event.headers?.authorization || event.headers?.Authorization || '';
     const { role, user } = verifyAuth(authHeader);
@@ -130,7 +111,7 @@ exports.handler = async (event, context) => {
       domain_authority: r.domain_authority,
       page_authority: r.page_authority,
       spam_score: r.spam_score !== undefined ? r.spam_score : calculateSpamScore(r.domain_authority),
-      source: r.source || 'dapachecker.org',
+      source: r.source || 'dachecker.io',
       status: r.status
     }));
     if (user) {

@@ -1,1 +1,1 @@
-{"functions":{"api/check.js":{"maxDuration":30},"api/auth.js":{"maxDuration":10},"api/payment.js":{"maxDuration":15}},"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}
+{"functions":{"api/check.js":{"maxDuration":120},"api/auth.js":{"maxDuration":10},"api/payment.js":{"maxDuration":15}},"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}
