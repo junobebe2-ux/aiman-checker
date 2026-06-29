@@ -117,8 +117,8 @@
         <div class="stat-label">Avg DA</div>
       </div>
       <div class="stat">
-        <div class="stat-value" id="stat-avg-dr" style="color:#4fc3f7">0</div>
-        <div class="stat-label">Avg DR</div>
+        <div class="stat-value" id="stat-avg-pa" style="color:#95d5b2">0</div>
+        <div class="stat-label">Avg PA</div>
       </div>
       <div class="stat">
         <div class="stat-value" id="stat-avg-ss" style="color:#f5a5a5">0</div>
@@ -200,12 +200,12 @@
       if (!valid.length) return;
 
       const avgDA = Math.round(valid.reduce((a,b) => a + (b.domain_authority||0), 0) / valid.length);
-      const avgDR = Math.round(valid.reduce((a,b) => a + (b.domain_rating||0), 0) / valid.length);
+      const avgPA = Math.round(valid.reduce((a,b) => a + (b.page_authority||0), 0) / valid.length);
       const avgSS = Math.round(valid.reduce((a,b) => a + (b.spam_score||0), 0) / valid.length);
 
       document.getElementById('stat-total').textContent = results.length;
       document.getElementById('stat-avg-da').textContent = avgDA;
-      document.getElementById('stat-avg-dr').textContent = avgDR;
+      document.getElementById('stat-avg-pa').textContent = avgPA;
       document.getElementById('stat-avg-ss').textContent = avgSS;
       document.getElementById('stats').style.display = 'grid';
     }
@@ -219,31 +219,31 @@
         </div>
         <table>
           <thead>
-            <tr>
-              <th style="width:40%">Domain</th>
-              <th style="width:10%">DA</th>
-              <th style="width:10%">DR</th>
-              <th style="width:10%">PA</th>
-              <th style="width:10%">SS</th>
-              <th style="width:20%">Status</th>
-            </tr>
-          </thead>
+                    <tr>
+                      <th>Domain</th>
+                      <th>DA</th>
+                      <th>PA</th>
+                      <th>SS</th>
+                      <th>DR</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
           <tbody>
             ${results.map(r => {
-              const status = r.status === 'success' || r.domain_authority > 0 ? '✓ Success' : '✗ Failed';
-              const statusClass = r.status === 'success' || r.domain_authority > 0 ? 'status-success' : 'status-error';
-              const dr = r.domain_rating || Math.round(r.domain_authority * 0.9);
-              return `
-              <tr>
-                <td class="domain" title="${r.url}">${r.url}</td>
-                <td class="metric da">${r.domain_authority > 0 ? r.domain_authority : '-'}</td>
-                <td class="metric dr">${dr > 0 ? dr : '-'}</td>
-                <td class="metric pa">${r.page_authority > 0 ? r.page_authority : '-'}</td>
-                <td class="metric ss">${r.spam_score !== undefined ? r.spam_score : '-'}</td>
-                <td><span class="status ${statusClass}">${status}</span></td>
-              </tr>
-              `;
-            }).join('')}
+                          const status = r.status === 'success' || r.domain_authority > 0 ? '✓ Success' : '✗ Failed';
+                          const statusColor = status.includes('Success') ? '#95d5b2' : '#f5a5a5';
+                          const dr = r.domain_rating !== undefined && r.domain_rating !== null && r.domain_rating !== '' ? r.domain_rating : 0;
+                          return `
+                            <tr>
+                              <td class="domain">${r.domain}</td>
+                              <td class="metric da">${r.domain_authority}</td>
+                              <td class="metric pa">${r.page_authority}</td>
+                              <td class="metric ss">${r.spam_score}</td>
+                              <td class="metric dr">${dr}</td>
+                              <td style="color:${statusColor}">${status}</td>
+                            </tr>
+                          `;
+                        }).join('')}
           </tbody>
         </table>
       `;
@@ -254,16 +254,16 @@
     function exportToExcel() {
       if (!lastResults.length) return;
 
-      const headers = ['Domain', 'DA', 'DR', 'PA', 'SS', 'Status'];
+      const headers = ['Domain', 'DA', 'PA', 'SS', 'DR', 'Status'];
       const rows = lastResults.map(r => {
-        const dr = r.domain_rating || Math.round(r.domain_authority * 0.9);
+        const dr = r.domain_rating !== undefined && r.domain_rating !== null && r.domain_rating !== '' ? r.domain_rating : 0;
         const status = r.status === 'success' || r.domain_authority > 0 ? 'Success' : 'Failed';
         return [
-          r.url,
-          r.domain_authority > 0 ? r.domain_authority : '',
-          dr > 0 ? dr : '',
-          r.page_authority > 0 ? r.page_authority : '',
-          r.spam_score !== undefined ? r.spam_score : '',
+          r.domain,
+          r.domain_authority,
+          r.page_authority,
+          r.spam_score !== undefined ? r.spam_score : 0,
+          dr,
           status
         ];
       });
