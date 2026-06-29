@@ -61,15 +61,15 @@ function saveUserUsage(user) {
 async function callScraper(urls) {
   // Try dachecker.io first (real Moz data with SS)
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 25000);
+    const ctrl1 = new AbortController();
+    const timeout1 = setTimeout(() => ctrl1.abort(), 25000);
     const response = await fetch(`${DACHECKER_API}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ domains: urls }),
-      signal: controller.signal
+      signal: ctrl1.signal
     });
-    clearTimeout(timeout);
+    clearTimeout(timeout1);
     if (response.ok) {
       const data = await response.json();
       if (data && data.results) {
@@ -90,19 +90,19 @@ async function callScraper(urls) {
   }
   
   // Fallback to old tunnel
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
+  const ctrl2 = new AbortController();
+  const timeout2 = setTimeout(() => ctrl2.abort(), 30000);
   try {
     const response = await fetch(`${EC2_SCRAPER}/check`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ urls }),
-      signal: controller.signal
+      signal: ctrl2.signal
     });
-    clearTimeout(timeout);
+    clearTimeout(timeout2);
     return await response.json();
   } catch (e) {
-    clearTimeout(timeout);
+    clearTimeout(timeout2);
     console.error('Scraper error:', e.message);
     return null;
   }
