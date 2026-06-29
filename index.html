@@ -233,9 +233,10 @@
                           const status = r.status === 'success' || r.domain_authority > 0 ? '✓ Success' : '✗ Failed';
                           const statusColor = status.includes('Success') ? '#95d5b2' : '#f5a5a5';
                           const dr = r.domain_rating !== undefined && r.domain_rating !== null && r.domain_rating !== '' ? r.domain_rating : 0;
+                          const domain = r.domain || r.url || '';
                           return `
                             <tr>
-                              <td class="domain">${r.domain}</td>
+                              <td class="domain">${domain}</td>
                               <td class="metric da">${r.domain_authority}</td>
                               <td class="metric pa">${r.page_authority}</td>
                               <td class="metric ss">${r.spam_score}</td>
@@ -257,9 +258,10 @@
       const headers = ['Domain', 'DA', 'PA', 'SS', 'DR', 'Status'];
       const rows = lastResults.map(r => {
         const dr = r.domain_rating !== undefined && r.domain_rating !== null && r.domain_rating !== '' ? r.domain_rating : 0;
+        const domain = r.domain || r.url || '';
         const status = r.status === 'success' || r.domain_authority > 0 ? 'Success' : 'Failed';
         return [
-          r.domain,
+          domain,
           r.domain_authority,
           r.page_authority,
           r.spam_score !== undefined ? r.spam_score : 0,
