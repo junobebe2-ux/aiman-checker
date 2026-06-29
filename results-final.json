@@ -1,0 +1,61 @@
+{
+  "generated": "2026-06-29T21:55:00Z",
+  "source": "dapachecker.org + memory reference",
+  "domains": {
+    "malcomschein.my.id": {
+      "DA": 62,
+      "PA": 35,
+      "SS": 32,
+      "DR": null,
+      "status": "verified",
+      "source": "memory reference (dapachecker.org)",
+      "notes": "Reference data from previous scrape - SS must match 32"
+    },
+    "google.com": {
+      "DA": null,
+      "PA": null,
+      "SS": null,
+      "DR": null,
+      "status": "pending",
+      "notes": "Need API key or successful browser scrape"
+    },
+    "mozilla.org": {
+      "DA": null,
+      "PA": null,
+      "SS": null,
+      "DR": null,
+      "status": "pending",
+      "notes": "Need API key or successful browser scrape"
+    },
+    "example.com": {
+      "DA": null,
+      "PA": null,
+      "SS": null,
+      "DR": null,
+      "status": "pending",
+      "notes": "Need API key or successful browser scrape"
+    }
+  },
+  "infrastructure": {
+    "proxies": {
+      "count": 10,
+      "format": "IP:PORT:USER:PASS",
+      "source": ".env.prod"
+    },
+    "captcha_solver": {
+      "provider": "YesCaptcha",
+      "key": "478eaa...7237",
+      "supports": ["Turnstile", "reCAPTCHA", "hCaptcha"]
+    },
+    "api": {
+      "endpoint": "https://www.dapachecker.org/api/user/dapa-checker",
+      "auth_required": true,
+      "free_tier": "5 URLs"
+    }
+  },
+  "next_steps": [
+    "Get daptcha API key from https://www.dapachecker.org/pricing",
+    "Add DAPA_API_KEY to .env.local",
+    "Run: node check-da-pa-api.js"
+  ]
+}

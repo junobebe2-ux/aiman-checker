@@ -9,7 +9,8 @@ const { checkLimit, getLimits } = require('./limits');
 
 const JWT_SECRET = '"aiman-checker-secret-key-2024"';
 const USERS_PATH = '/tmp/users.json';
-const EC2_SCRAPER = 'https://concentrations-contain-rays-hans.trycloudflare.com'; // Hardcoded tunnel
+const EC2_SCRAPER = 'https://concentrations-contain-rays-hans.trycloudflare.com'; // Hardcoded tunnel - BACKUP ONLY
+const DACHECKER_API = 'https://dachecker.io/api/da-pa-check'; // Primary: real Moz data with SS
 
 function calculateSpamScore(da) {
   const estimatedMozSpam = Math.max(1, Math.round(15 - da * 0.15));
@@ -58,6 +59,37 @@ function saveUserUsage(user) {
 }
 
 async function callScraper(urls) {
+  // Try dachecker.io first (real Moz data with SS)
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+    const response = await fetch(`${DACHECKER_API}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domains: urls }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.results) {
+        return {
+          results: data.results.map(r => ({
+            url: r.domain || r.url,
+            domain_authority: r.da || r.domain_authority,
+            page_authority: r.pa || r.page_authority,
+            spam_score: r.ss !== undefined ? r.ss : r.spam_score,
+            source: 'dachecker.io',
+            status: 'success'
+          }))
+        };
+      }
+    }
+  } catch (e) {
+    console.error('dachecker.io failed:', e.message);
+  }
+  
+  // Fallback to old tunnel
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
   try {

@@ -1,0 +1,5 @@
+{
+  "domain": "malcomschein.my.id",
+  "type": "invalid_request",
+  "message": "API key is required"
+}

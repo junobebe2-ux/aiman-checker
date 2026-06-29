@@ -1,0 +1,18 @@
+[
+  {
+    "domain": "malcomschein.my.id",
+    "error": "write EPROTO 80AC5281F7770000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:350:\n"
+  },
+  {
+    "domain": "google.com",
+    "error": "write EPROTO 80AC5281F7770000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:350:\n"
+  },
+  {
+    "domain": "mozilla.org",
+    "error": "write EPROTO 80AC5281F7770000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:350:\n"
+  },
+  {
+    "domain": "example.com",
+    "error": "write EPROTO 80AC5281F7770000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:350:\n"
+  }
+]
