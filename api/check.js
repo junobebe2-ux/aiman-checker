@@ -3,9 +3,9 @@
  * Backend: EC2 scraper (dachecker.io API)
  * DA/PA from Moz, SS calculated from DA metrics
  */
-import jwt from 'jsonwebtoken';
-import fs from 'fs';
-import { checkLimit, getLimits } from './limits.js';
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const { checkLimit, getLimits } = require('./limits');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aiman-checker-jwt-secret-change-in-production-2024';
 const USERS_PATH = '/tmp/users.json';
@@ -76,7 +76,7 @@ async function callScraper(urls) {
   }
 }
 
-export const handler = async (event, context) => {
+exports.handler = async (event, context) => {
   try {
     const authHeader = event.headers?.authorization || event.headers?.Authorization || '';
     const { role, user } = verifyAuth(authHeader);
