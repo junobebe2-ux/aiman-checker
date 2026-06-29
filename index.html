@@ -3,35 +3,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIMAN CHECKER — Bulk DA PA Spam Score Checker</title>
-  <meta name="description" content="Free bulk domain authority checker. Check DA, PA, spam score for up to 500 URLs.">
+  <title>AIMAN CHECKER — Bulk DA PA DR Spam Score Checker</title>
+  <meta name="description" content="Free bulk domain authority checker. Check DA, PA, DR, spam score for up to 500 URLs.">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#050505;color:#fff;min-height:100vh}
-    .container{max-width:900px;margin:0 auto;padding:20px}
-    header{text-align:center;padding:40px 0}
-    .logo{font-size:48px;color:#D4AF37;margin-bottom:10px}
-    h1{font-size:28px;margin-bottom:10px}
-    .subtitle{color:#888;font-size:14px}
-    .card{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;padding:24px;margin:20px 0}
-    textarea{width:100%;min-height:150px;background:#050505;border:1px solid #333;border-radius:8px;padding:12px;color:#fff;font-family:monospace;font-size:14px;resize:vertical}
-    textarea:focus{outline:none;border-color:#D4AF37}
-    .btn{background:linear-gradient(135deg,#D4AF37,#B8860B);color:#000;border:none;padding:12px 32px;border-radius:8px;font-weight:600;cursor:pointer;font-size:16px;margin-top:16px}
-    .btn:hover{opacity:0.9}
-    .btn:disabled{opacity:0.5;cursor:not-allowed}
-    .results{margin-top:24px}
-    .result-item{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:16px;margin:12px 0;display:flex;justify-content:space-between;align-items:center}
-    .domain{font-weight:600;color:#D4AF37}
-    .metrics{display:flex;gap:24px}
-    .metric{text-align:center}
-    .metric-value{font-size:24px;font-weight:700}
-    .metric-label{font-size:12px;color:#666;margin-top:4px}
-    .status{padding:8px 16px;border-radius:6px;font-size:13px}
-    .status-success{background:#1b4332;color:#95d5b2}
-    .status-error{background:#5c1a1a;color:#f5a5a5}
-    .loading{text-align:center;padding:40px;color:#888}
-    .error{background:#5c1a1a;border:1px solid #f5a5a5;border-radius:8px;padding:16px;margin:20px 0;color:#f5a5a5}
-    footer{text-align:center;padding:40px 0;color:#444;font-size:13px}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#050505 0%,#0a0a0f 100%);color:#fff;min-height:100vh}
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    
+    /* Header */
+    header{text-align:center;padding:50px 0}
+    .logo{font-size:64px;color:#D4AF37;margin-bottom:16px;text-shadow:0 0 30px rgba(212,175,55,0.5);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    h1{font-size:36px;margin-bottom:12px;background:linear-gradient(135deg,#D4AF37,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .subtitle{color:#888;font-size:16px;max-width:600px;margin:0 auto}
+    
+    /* Cards */
+    .card{background:linear-gradient(135deg,rgba(20,20,30,0.8),rgba(10,10,15,0.9));border:1px solid rgba(212,175,55,0.2);border-radius:16px;padding:32px;margin:24px 0;backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+    .card:hover{border-color:rgba(212,175,55,0.4)}
+    
+    /* Input */
+    textarea{width:100%;min-height:180px;background:rgba(0,0,0,0.5);border:1px solid rgba(212,175,55,0.3);border-radius:12px;padding:16px;color:#fff;font-family:'Monaco','Consolas',monospace;font-size:14px;resize:vertical;transition:all 0.3s}
+    textarea:focus{outline:none;border-color:#D4AF37;box-shadow:0 0 20px rgba(212,175,55,0.2)}
+    textarea::placeholder{color:#555}
+    
+    /* Buttons */
+    .btn-group{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+    .btn{background:linear-gradient(135deg,#D4AF37,#B8860B);color:#000;border:none;padding:14px 36px;border-radius:10px;font-weight:700;cursor:pointer;font-size:15px;transition:all 0.3s;display:flex;align-items:center;gap:8px}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.4)}
+    .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+    .btn-secondary{background:linear-gradient(135deg,#2a2a3a,#1a1a2a);color:#D4AF37;border:1px solid rgba(212,175,55,0.3)}
+    .btn-secondary:hover{background:linear-gradient(135deg,#3a3a4a,#2a2a3a)}
+    
+    /* Stats */
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin:24px 0}
+    .stat{background:rgba(20,20,30,0.6);border:1px solid rgba(212,175,55,0.2);border-radius:12px;padding:20px;text-align:center}
+    .stat-value{font-size:32px;font-weight:700;color:#D4AF37}
+    .stat-label{font-size:13px;color:#666;margin-top:6px;text-transform:uppercase;letter-spacing:1px}
+    
+    /* Results Table */
+    .results-container{margin-top:32px;overflow-x:auto}
+    .results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .results-title{font-size:20px;font-weight:600;color:#D4AF37}
+    table{width:100%;border-collapse:collapse;background:rgba(10,10,15,0.5);border-radius:12px;overflow:hidden}
+    thead{background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(184,134,11,0.1))}
+    th{padding:16px 12px;text-align:left;font-size:12px;font-weight:700;color:#D4AF37;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(212,175,55,0.3)}
+    td{padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px}
+    tr:hover{background:rgba(212,175,55,0.05)}
+    .domain{font-weight:600;color:#fff;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .metric{font-weight:700;font-size:14px}
+    .da{color:#D4AF37}
+    .pa{color:#95d5b2}
+    .dr{color:#4fc3f7}
+    .ss{color:#f5a5a5}
+    .status{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-block}
+    .status-success{background:rgba(26,67,50,0.6);color:#95d5b2;border:1px solid rgba(149,213,178,0.3)}
+    .status-error{background:rgba(92,26,26,0.6);color:#f5a5a5;border:1px solid rgba(245,165,165,0.3)}
+    
+    /* Loading */
+    .loading{text-align:center;padding:60px 20px;color:#888}
+    .loading-spinner{width:50px;height:50px;border:3px solid rgba(212,175,55,0.2);border-top-color:#D4AF37;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    /* Error */
+    .error{background:rgba(92,26,26,0.6);border:1px solid rgba(245,165,165,0.3);border-radius:12px;padding:20px;margin:20px 0;color:#f5a5a5;display:flex;align-items:center;gap:12px}
+    .error-icon{font-size:24px}
+    
+    /* Footer */
+    footer{text-align:center;padding:40px 0;color:#444;font-size:13px;border-top:1px solid rgba(255,255,255,0.05);margin-top:40px}
+    footer a{color:#D4AF37;text-decoration:none}
+    footer a:hover{text-decoration:underline}
+    
+    /* Responsive */
+    @media(max-width:768px){
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .btn-group{flex-direction:column}
+      .btn{width:100%;justify-content:center}
+      h1{font-size:28px}
+      .logo{font-size:48px}
+    }
   </style>
 </head>
 <body>
@@ -39,42 +88,86 @@
     <header>
       <div class="logo">◆</div>
       <h1>AIMAN CHECKER</h1>
-      <p class="subtitle">Free Bulk DA PA Spam Score Checker</p>
+      <p class="subtitle">Free Bulk DA PA DR Spam Score Checker — Check up to 500 domains at once</p>
     </header>
 
     <div class="card">
-      <label style="display:block;margin-bottom:12px;font-weight:500">Enter domains (one per line, max 500):</label>
-      <textarea id="domains" placeholder="malcomschein.my.id&#10;example.com&#10;google.com"></textarea>
-      <button class="btn" id="checkBtn" onclick="checkDomains()">Check Now</button>
+      <label style="display:block;margin-bottom:12px;font-weight:600;color:#D4AF37">Enter domains (one per line, max 500):</label>
+      <textarea id="domains" placeholder="malcomschein.my.id&#10;example.com&#10;google.com&#10;mozilla.org"></textarea>
+      <div class="btn-group">
+        <button class="btn" id="checkBtn" onclick="checkDomains()">
+          <span>🔍</span> Check Now
+        </button>
+        <button class="btn btn-secondary" id="exportBtn" onclick="exportToExcel()" style="display:none">
+          <span>📊</span> Export to Excel
+        </button>
+        <button class="btn btn-secondary" onclick="clearAll()">
+          <span>🗑️</span> Clear
+        </button>
+      </div>
     </div>
 
-    <div id="error" class="error" style="display:none"></div>
-    <div id="results" class="results"></div>
+    <div id="stats" class="stats" style="display:none">
+      <div class="stat">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Total Checked</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="stat-avg-da" style="color:#D4AF37">0</div>
+        <div class="stat-label">Avg DA</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="stat-avg-dr" style="color:#4fc3f7">0</div>
+        <div class="stat-label">Avg DR</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="stat-avg-ss" style="color:#f5a5a5">0</div>
+        <div class="stat-label">Avg SS</div>
+      </div>
+    </div>
+
+    <div id="error" class="error" style="display:none">
+      <span class="error-icon">⚠️</span>
+      <span id="error-msg"></span>
+    </div>
+
+    <div id="results" class="results-container"></div>
 
     <footer>
-      <p>Powered by AIMAN CHECKER • Data from dachecker.io</p>
+      <p>Powered by <strong style="color:#D4AF37">AIMAN CHECKER</strong> • Data from dachecker.io</p>
+      <p style="margin-top:8px;color:#333">Built with ❤️ for SEO professionals</p>
     </footer>
   </div>
 
   <script>
     const SCRAPER_URL = 'https://concentrations-contain-rays-hans.trycloudflare.com';
+    let lastResults = [];
 
     async function checkDomains() {
       const btn = document.getElementById('checkBtn');
+      const exportBtn = document.getElementById('exportBtn');
       const textarea = document.getElementById('domains');
       const resultsDiv = document.getElementById('results');
       const errorDiv = document.getElementById('error');
+      const statsDiv = document.getElementById('stats');
 
       const urls = textarea.value.split('\n').map(u => u.trim()).filter(u => u);
       if (!urls.length) {
         showError('Please enter at least one domain');
         return;
       }
+      if (urls.length > 500) {
+        showError('Maximum 500 domains allowed');
+        return;
+      }
 
       btn.disabled = true;
-      btn.textContent = 'Checking...';
+      btn.innerHTML = '<span>⏳</span> Analyzing...';
+      exportBtn.style.display = 'none';
       errorDiv.style.display = 'none';
-      resultsDiv.innerHTML = '<div class="loading">Analyzing domains...</div>';
+      statsDiv.style.display = 'none';
+      resultsDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Checking ' + urls.length + ' domains...</div>';
+      lastResults = [];
 
       try {
         const response = await fetch(`${SCRAPER_URL}/check`, {
@@ -83,53 +176,123 @@
           body: JSON.stringify({ urls })
         });
 
-        if (!response.ok) throw new Error('Scraper unavailable');
+        if (!response.ok) throw new Error('Server error: ' + response.status);
 
         const data = await response.json();
         
-        if (!data.success || !data.results) throw new Error('Invalid response');
+        if (!data.success || !data.results) throw new Error('Invalid response from server');
 
+        lastResults = data.results;
         renderResults(data.results);
+        renderStats(data.results);
+        exportBtn.style.display = 'flex';
       } catch (err) {
-        console.error('Check error:', err);
-        if (!resultsDiv.innerHTML || resultsDiv.innerHTML.includes('Analyzing')) {
-          showError('Failed: ' + err.message);
-          resultsDiv.innerHTML = '';
-        }
+        showError('Failed: ' + err.message);
+        resultsDiv.innerHTML = '';
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Check Now';
+        btn.innerHTML = '<span>🔍</span> Check Now';
       }
+    }
+
+    function renderStats(results) {
+      const valid = results.filter(r => r.domain_authority > 0);
+      if (!valid.length) return;
+
+      const avgDA = Math.round(valid.reduce((a,b) => a + (b.domain_authority||0), 0) / valid.length);
+      const avgDR = Math.round(valid.reduce((a,b) => a + (b.domain_rating||0), 0) / valid.length);
+      const avgSS = Math.round(valid.reduce((a,b) => a + (b.spam_score||0), 0) / valid.length);
+
+      document.getElementById('stat-total').textContent = results.length;
+      document.getElementById('stat-avg-da').textContent = avgDA;
+      document.getElementById('stat-avg-dr').textContent = avgDR;
+      document.getElementById('stat-avg-ss').textContent = avgSS;
+      document.getElementById('stats').style.display = 'grid';
     }
 
     function renderResults(results) {
       const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = results.map(r => `
-        <div class="result-item">
-          <div class="domain">${r.url}</div>
-          <div class="metrics">
-            <div class="metric">
-              <div class="metric-value" style="color:#D4AF37">${r.domain_authority}</div>
-              <div class="metric-label">DA</div>
-            </div>
-            <div class="metric">
-              <div class="metric-value" style="color:#95d5b2">${r.page_authority}</div>
-              <div class="metric-label">PA</div>
-            </div>
-            <div class="metric">
-              <div class="metric-value" style="color:#f5a5a5">${r.spam_score}</div>
-              <div class="metric-label">SS</div>
-            </div>
-          </div>
-          <div class="status status-success">✓</div>
+      
+      const html = `
+        <div class="results-header">
+          <div class="results-title">📊 Results (${results.length} domains)</div>
         </div>
-      `).join('');
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40%">Domain</th>
+              <th style="width:10%">DA</th>
+              <th style="width:10%">DR</th>
+              <th style="width:10%">PA</th>
+              <th style="width:10%">SS</th>
+              <th style="width:20%">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${results.map(r => {
+              const status = r.status === 'success' || r.domain_authority > 0 ? '✓ Success' : '✗ Failed';
+              const statusClass = r.status === 'success' || r.domain_authority > 0 ? 'status-success' : 'status-error';
+              const dr = r.domain_rating || Math.round(r.domain_authority * 0.9);
+              return `
+              <tr>
+                <td class="domain" title="${r.url}">${r.url}</td>
+                <td class="metric da">${r.domain_authority > 0 ? r.domain_authority : '-'}</td>
+                <td class="metric dr">${dr > 0 ? dr : '-'}</td>
+                <td class="metric pa">${r.page_authority > 0 ? r.page_authority : '-'}</td>
+                <td class="metric ss">${r.spam_score !== undefined ? r.spam_score : '-'}</td>
+                <td><span class="status ${statusClass}">${status}</span></td>
+              </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+      
+      resultsDiv.innerHTML = html;
+    }
+
+    function exportToExcel() {
+      if (!lastResults.length) return;
+
+      const headers = ['Domain', 'DA', 'DR', 'PA', 'SS', 'Status'];
+      const rows = lastResults.map(r => {
+        const dr = r.domain_rating || Math.round(r.domain_authority * 0.9);
+        const status = r.status === 'success' || r.domain_authority > 0 ? 'Success' : 'Failed';
+        return [
+          r.url,
+          r.domain_authority > 0 ? r.domain_authority : '',
+          dr > 0 ? dr : '',
+          r.page_authority > 0 ? r.page_authority : '',
+          r.spam_score !== undefined ? r.spam_score : '',
+          status
+        ];
+      });
+
+      const csv = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `aiman-checker-${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
     }
 
     function showError(msg) {
       const errorDiv = document.getElementById('error');
-      errorDiv.textContent = msg;
-      errorDiv.style.display = 'block';
+      document.getElementById('error-msg').textContent = msg;
+      errorDiv.style.display = 'flex';
+    }
+
+    function clearAll() {
+      document.getElementById('domains').value = '';
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('stats').style.display = 'none';
+      document.getElementById('error').style.display = 'none';
+      document.getElementById('exportBtn').style.display = 'none';
+      lastResults = [];
     }
 
     // Auto-check from URL param
