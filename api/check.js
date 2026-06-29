@@ -9,7 +9,7 @@ const { checkLimit, getLimits } = require('./limits');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aiman-checker-jwt-secret-change-in-production-2024';
 const USERS_PATH = '/tmp/users.json';
-const EC2_SCRAPER = process.env.EC2_SCRAPER || 'https://camera-tires-movie-six.trycloudflare.com'; // v2-tunnel
+const EC2_SCRAPER = 'https://camera-tires-movie-six.trycloudflare.com'; // Hardcoded tunnel - auto-update via cron
 
 function calculateSpamScore(da) {
   const estimatedMozSpam = Math.max(1, Math.round(15 - da * 0.15));
