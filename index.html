@@ -91,8 +91,11 @@
 
         renderResults(data.results);
       } catch (err) {
-        showError('Failed to check domains: ' + err.message);
-        resultsDiv.innerHTML = '';
+        console.error('Check error:', err);
+        if (!resultsDiv.innerHTML || resultsDiv.innerHTML.includes('Analyzing')) {
+          showError('Failed: ' + err.message);
+          resultsDiv.innerHTML = '';
+        }
       } finally {
         btn.disabled = false;
         btn.textContent = 'Check Now';
