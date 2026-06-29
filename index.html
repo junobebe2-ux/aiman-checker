@@ -3,179 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIMAN CHECKER — Bulk DA PA Checker</title>
-  <meta name="description" content="Free bulk domain authority checker. Check DA, PA, spam score, DR, TF, CF for up to 500 URLs.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80' fill='%23D4AF37'>◆</text></svg>">
-  <link rel="stylesheet" href="style.css">
+  <title>AIMAN CHECKER — Bulk DA PA Spam Score Checker</title>
+  <meta name="description" content="Free bulk domain authority checker. Check DA, PA, spam score for up to 500 URLs.">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#050505;color:#fff;min-height:100vh}
+    .container{max-width:900px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 0}
+    .logo{font-size:48px;color:#D4AF37;margin-bottom:10px}
+    h1{font-size:28px;margin-bottom:10px}
+    .subtitle{color:#888;font-size:14px}
+    .card{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;padding:24px;margin:20px 0}
+    textarea{width:100%;min-height:150px;background:#050505;border:1px solid #333;border-radius:8px;padding:12px;color:#fff;font-family:monospace;font-size:14px;resize:vertical}
+    textarea:focus{outline:none;border-color:#D4AF37}
+    .btn{background:linear-gradient(135deg,#D4AF37,#B8860B);color:#000;border:none;padding:12px 32px;border-radius:8px;font-weight:600;cursor:pointer;font-size:16px;margin-top:16px}
+    .btn:hover{opacity:0.9}
+    .btn:disabled{opacity:0.5;cursor:not-allowed}
+    .results{margin-top:24px}
+    .result-item{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:16px;margin:12px 0;display:flex;justify-content:space-between;align-items:center}
+    .domain{font-weight:600;color:#D4AF37}
+    .metrics{display:flex;gap:24px}
+    .metric{text-align:center}
+    .metric-value{font-size:24px;font-weight:700}
+    .metric-label{font-size:12px;color:#666;margin-top:4px}
+    .status{padding:8px 16px;border-radius:6px;font-size:13px}
+    .status-success{background:#1b4332;color:#95d5b2}
+    .status-error{background:#5c1a1a;color:#f5a5a5}
+    .loading{text-align:center;padding:40px;color:#888}
+    .error{background:#5c1a1a;border:1px solid #f5a5a5;border-radius:8px;padding:16px;margin:20px 0;color:#f5a5a5}
+    footer{text-align:center;padding:40px 0;color:#444;font-size:13px}
+  </style>
 </head>
 <body>
-  <header>
-    <div class="container header-inner">
-      <div class="logo">
-        <svg class="logo-svg" width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#FFD700"/>
-              <stop offset="50%" stop-color="#D4AF37"/>
-              <stop offset="100%" stop-color="#B8860B"/>
-            </linearGradient>
-          </defs>
-          <!-- Outer diamond -->
-          <path d="M21 2L38 14V28L21 40L4 28V14L21 2Z" fill="url(#goldGrad)" opacity="0.15" stroke="url(#goldGrad)" stroke-width="1.5"/>
-          <!-- Inner diamond -->
-          <path d="M21 8L32 16V26L21 34L10 26V16L21 8Z" fill="url(#goldGrad)" opacity="0.25"/>
-          <!-- Letter A -->
-          <text x="21" y="26" text-anchor="middle" fill="url(#goldGrad)" font-family="'Playfair Display', serif" font-size="18" font-weight="900">A</text>
-        </svg>
-        <div class="logo-text">
-          <h1>AIMAN CHECKER</h1>
-          <span class="logo-sub">Domain Authority Tool</span>
-        </div>
-      </div>
-      <div class="badge">✦ Bulk up to 500</div>
-      <div class="user-menu" id="userMenu" style="display:flex;align-items:center;gap:8px">
-        <button id="themeToggle" class="theme-toggle" title="Toggle theme">☀️</button>
-        <a href="login.html" class="user-link" id="loginLink" style="color:var(--text-dim);text-decoration:none;font-size:11px;font-weight:600;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all 0.2s">Sign In</a>
-        <a href="pricing.html" class="user-link" style="color:var(--gold-light);text-decoration:none;font-size:11px;font-weight:600;padding:6px 12px;border:1px solid rgba(212,175,55,0.2);border-radius:var(--radius-sm);background:rgba(212,175,55,0.06);transition:all 0.2s">Pricing</a>
-        <span class="plan-badge-mini" id="planBadge" style="display:none;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px"></span>
-        <a href="dashboard.html" class="user-link" id="dashLink" style="display:none;color:var(--text-dim);text-decoration:none;font-size:11px;font-weight:600;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">Dashboard</a>
-      </div>
+  <div class="container">
+    <header>
+      <div class="logo">◆</div>
+      <h1>AIMAN CHECKER</h1>
+      <p class="subtitle">Free Bulk DA PA Spam Score Checker</p>
+    </header>
+
+    <div class="card">
+      <label style="display:block;margin-bottom:12px;font-weight:500">Enter domains (one per line, max 500):</label>
+      <textarea id="domains" placeholder="malcomschein.my.id&#10;example.com&#10;google.com"></textarea>
+      <button class="btn" id="checkBtn" onclick="checkDomains()">Check Now</button>
     </div>
-  </header>
 
-  <main class="container">
-    <section class="card">
-      <div class="card-header">
-        <h2>Check Domain Authority</h2>
-        <p>Paste your domains or upload a .txt file — up to 500 at once. Get DA, PA, Spam, DR, TF &amp; CF.</p>
-      </div>
+    <div id="error" class="error" style="display:none"></div>
+    <div id="results" class="results"></div>
 
-      <div class="input-methods">
-        <div class="method-tabs">
-          <button class="tab active" data-tab="paste">Paste URLs</button>
-          <button class="tab" data-tab="upload">Upload File</button>
-        </div>
-
-        <div class="tab-content active" id="tab-paste">
-          <textarea id="urlInput" placeholder="One domain per line, with or without https://&#10;&#10;github.com&#10;google.com&#10;stackoverflow.com&#10;wikipedia.org" rows="8"></textarea>
-        </div>
-
-        <div class="tab-content" id="tab-upload">
-          <div class="upload-zone" id="uploadZone">
-            <div class="upload-icon">📄</div>
-            <p>Drop a <strong>.txt</strong> file here, or click to browse</p>
-            <p class="upload-hint">Plain text, one URL per line</p>
-            <input type="file" id="fileInput" accept=".txt" hidden>
-            <button class="btn btn-outline" id="browseBtn">Browse</button>
-          </div>
-          <div id="fileName" class="file-name" hidden></div>
-        </div>
-
-        <div class="input-footer">
-          <div class="url-count">
-            <span id="urlCount">0</span> domains
-          </div>
-          <div class="input-actions">
-            <button class="btn btn-outline btn-sm" id="sampleBtn">Sample</button>
-            <button class="btn btn-outline btn-sm" id="clearBtn">Clear</button>
-          </div>
-        </div>
-      </div>
-
-      <button class="btn btn-primary btn-lg" id="checkBtn">
-        <span class="btn-icon">◆</span>
-        <span class="btn-text">Check Authority</span>
-      </button>
-
-      <div id="errorMsg" class="error-msg" hidden></div>
-    </section>
-
-    <section class="card progress-card" id="progressCard" hidden>
-      <div class="progress-header">
-        <h3>Checking...</h3>
-        <span class="progress-status" id="progressStatus">0 / 0</span>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar" id="progressBar"></div>
-      </div>
-      <div class="progress-detail" id="progressDetail">Starting...</div>
-    </section>
-
-    <section class="card results-card" id="resultsCard" hidden>
-      <div class="results-header">
-        <div>
-          <h2>Results</h2>
-          <p class="results-summary" id="resultsSummary">0 domains</p>
-        </div>
-        <div class="results-actions">
-          <button class="btn btn-outline btn-sm" id="copyBtn">Copy</button>
-          <button class="btn btn-outline btn-sm" id="csvBtn">CSV</button>
-          <button class="btn btn-outline btn-sm" id="jsonBtn">JSON</button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table id="resultsTable">
-          <thead>
-            <tr>
-              <th data-sort="domain">Domain</th>
-              <th data-sort="DA">DA</th>
-              <th data-sort="PA">PA</th>
-              <th data-sort="Spam">Spam</th>
-              <th data-sort="DR">DR</th>
-              <th data-sort="TF">TF</th>
-              <th data-sort="CF">CF</th>
-              <th data-sort="Backlinks">Backlinks</th>
-              <th data-sort="Traffic">Traffic</th>
-            </tr>
-          </thead>
-          <tbody id="resultsBody"></tbody>
-        </table>
-      </div>
-
-      <div class="stats-row" id="statsRow" hidden>
-        <div class="stat">
-          <span class="stat-value" id="statHighDA">0</span>
-          <span class="stat-label">DA 50+</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value" id="statAvgDA">0</span>
-          <span class="stat-label">Avg DA</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value" id="statAvgPA">0</span>
-          <span class="stat-label">Avg PA</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value" id="statAvgSpam">0</span>
-          <span class="stat-label">Avg Spam</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="card errors-card" id="errorsCard" hidden>
-      <h3>Partial results</h3>
-      <div id="errorsList"></div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="footer-border"></div>
-    <div class="container footer-inner">
-      <p><span class="brand">AIMAN CHECKER</span> &mdash; Free bulk DA PA tool</p>
-      <p class="footer-note">Powered by Moz &amp; Ahrefs data</p>
-    </div>
-  </footer>
-
-  <!-- Cloudflare Turnstile modal -->
-  <div id="cfModal" class="cf-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:1000;">
-    <div style="background:#1a1a1a;padding:20px;border-radius:8px;max-width:400px;width:100%;text-align:center;">
-      <h3 style="color:#fff;margin-bottom:15px;">Please verify you are human</h3>
-      <div id="turnstileContainer"></div>
-      <button id="cfCancel" style="margin-top:15px;padding:8px 16px;background:#444;color:#fff;border:none;border-radius:4px;cursor:pointer;">Cancel</button>
-    </div>
+    <footer>
+      <p>Powered by AIMAN CHECKER • Data from dachecker.io</p>
+    </footer>
   </div>
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  <script src="script.js"></script>
+
+  <script>
+    const SCRAPER_URL = 'https://concentrations-contain-rays-hans.trycloudflare.com';
+
+    async function checkDomains() {
+      const btn = document.getElementById('checkBtn');
+      const textarea = document.getElementById('domains');
+      const resultsDiv = document.getElementById('results');
+      const errorDiv = document.getElementById('error');
+
+      const urls = textarea.value.split('\n').map(u => u.trim()).filter(u => u);
+      if (!urls.length) {
+        showError('Please enter at least one domain');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Checking...';
+      errorDiv.style.display = 'none';
+      resultsDiv.innerHTML = '<div class="loading">Analyzing domains...</div>';
+
+      try {
+        const response = await fetch(`${SCRAPER_URL}/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls })
+        });
+
+        if (!response.ok) throw new Error('Scraper unavailable');
+
+        const data = await response.json();
+        
+        if (!data.success || !data.results) throw new Error('Invalid response');
+
+        renderResults(data.results);
+      } catch (err) {
+        showError('Failed to check domains: ' + err.message);
+        resultsDiv.innerHTML = '';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Check Now';
+      }
+    }
+
+    function renderResults(results) {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = results.map(r => `
+        <div class="result-item">
+          <div class="domain">${r.url}</div>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-value" style="color:#D4AF37">${r.domain_authority}</div>
+              <div class="metric-label">DA</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" style="color:#95d5b2">${r.page_authority}</div>
+              <div class="metric-label">PA</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" style="color:#f5a5a5">${r.spam_score}</div>
+              <div class="metric-label">SS</div>
+            </div>
+          </div>
+          <div class="status status-success">✓</div>
+        </div>
+      `).join('');
+    }
+
+    function showError(msg) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = msg;
+      errorDiv.style.display = 'block';
+    }
+
+    // Auto-check from URL param
+    const urlParams = new URLSearchParams(window.location.search);
+    const url = urlParams.get('url');
+    if (url) {
+      document.getElementById('domains').value = url;
+      checkDomains();
+    }
+  </script>
 </body>
 </html>
