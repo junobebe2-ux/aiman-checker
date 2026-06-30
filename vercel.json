@@ -1,16 +1,15 @@
 {
-  "version": 3,
-  "rewrites": [
-    { "source": "/api/check", "destination": "/api/check.js" },
-    { "source": "/api/guestpost", "destination": "/api/guestpost.js" },
-    { "source": "/api/:path*", "destination": "/api/:path*" }
+  "version": 2,
+  "builds": [
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "**/*.html", "use": "@vercel/static" },
+    { "src": "**/*.css", "use": "@vercel/static" }
   ],
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
-  "env": {
-    "EC2_SCRAPER": "https://exemption-portrait-badge-encounter.trycloudflare.com"
-  }
+  "routes": [
+    { "src": "/api/check", "dest": "/api/check.js" },
+    { "src": "/api/guestpost", "dest": "/api/guestpost.js" },
+    { "src": "/api/test", "dest": "/api/test.js" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
 }
