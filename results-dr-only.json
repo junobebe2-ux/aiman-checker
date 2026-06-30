@@ -1,0 +1,26 @@
+[
+  {
+    "domain": "malcomschein.my.id",
+    "DR": 0.1,
+    "Expected DR": "-",
+    "Match": "✅"
+  },
+  {
+    "domain": "google.com",
+    "DR": 99,
+    "Expected DR": "-",
+    "Match": "-"
+  },
+  {
+    "domain": "mozilla.org",
+    "DR": 96,
+    "Expected DR": "-",
+    "Match": "-"
+  },
+  {
+    "domain": "example.com",
+    "DR": 93,
+    "Expected DR": "-",
+    "Match": "-"
+  }
+]
