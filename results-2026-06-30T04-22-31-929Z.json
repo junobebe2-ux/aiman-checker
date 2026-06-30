@@ -1,0 +1,30 @@
+[
+  {
+    "domain": "malcomschein.my.id",
+    "DA": 62350,
+    "PA": 62350,
+    "SS": 65,
+    "DR": 0.1
+  },
+  {
+    "domain": "google.com",
+    "DA": 94910,
+    "PA": 94910,
+    "SS": 65,
+    "DR": 99
+  },
+  {
+    "domain": "mozilla.org",
+    "DA": 97810,
+    "PA": 97810,
+    "SS": 65,
+    "DR": 96
+  },
+  {
+    "domain": "example.com",
+    "DA": 93850,
+    "PA": 93850,
+    "SS": 65,
+    "DR": 93
+  }
+]

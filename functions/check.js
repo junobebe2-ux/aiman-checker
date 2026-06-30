@@ -1,18 +1,26 @@
-// Cloudflare Pages Function: POST /check
+// Cloudflare Pages Function: POST /check  (NDJSON streaming)
 // Real Moz DA/PA/SS via Guestpostlinks (Turnstile solved by YesCaptcha) + DR via Ahrefs.
-// Same-origin endpoint — no EC2/tunnel needed.
+// Streams progress events line-by-line so the UI can show live progress and never looks stuck.
+// Failed domains are retried in fresh sessions until resolved (capped rounds).
 
 const SITE_KEY = '0x4AAAAAAAin6Bci-iDm5IXu';
 const PAGE_URL = 'https://tools.guestpostlinks.net/bulk-da-pa-checker-tool/';
 const AJAX_URL = 'https://tools.guestpostlinks.net/wp-admin/admin-ajax.php';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+const CHUNK = 20;       // GPL max domains per batch
+const MAX_ROUNDS = 6;   // retry rounds for stubborn domains
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Content-Type': 'application/json'
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
+
+const norm = (s) => String(s).toLowerCase()
+  .replace(/^https?:\/\//, '')
+  .replace(/^www\./, '')
+  .replace(/\/+$/, '')
+  .trim();
 
 async function solveTurnstile(key) {
   if (!key) throw new Error('YESCAPTCHA_KEY env var not set');
@@ -47,7 +55,7 @@ async function getCookies() {
   return sc.split(',').map(c => c.split(';')[0].trim()).filter(Boolean).join('; ');
 }
 
-// Query ONE batch. batchIndex 0 needs turnstile token; later batches reuse refId.
+// One GPL batch. batchIndex 0 needs turnstile token; later batches reuse refId.
 async function queryBatch(urls, allRaw, opts) {
   const { token, cookies, batchIndex, batchTotal, refId } = opts;
   const p = new URLSearchParams();
@@ -84,7 +92,7 @@ async function queryBatch(urls, allRaw, opts) {
       if (!item.api_result) continue;
       for (const [url, info] of Object.entries(item.api_result)) {
         const m = info.metrics || {};
-        out[url] = {
+        out[norm(url)] = {
           da: m.domain_authority ?? null,
           pa: m.page_authority ?? null,
           ss: m.spam_score ?? null
@@ -95,24 +103,6 @@ async function queryBatch(urls, allRaw, opts) {
   return { metrics: out, refId: newRefId };
 }
 
-// Query all URLs in batches of 20. Turnstile solved once (batch 0); rest reuse ref_id.
-async function queryMetrics(urls, token, cookies) {
-  const CHUNK = 20;
-  const batches = [];
-  for (let i = 0; i < urls.length; i += CHUNK) batches.push(urls.slice(i, i + CHUNK));
-
-  const all = {};
-  let refId = '';
-  for (let i = 0; i < batches.length; i++) {
-    const { metrics, refId: rid } = await queryBatch(batches[i], urls, {
-      token, cookies, batchIndex: i, batchTotal: batches.length, refId
-    });
-    Object.assign(all, metrics);
-    if (rid) refId = rid;
-  }
-  return all;
-}
-
 async function getDR(domain) {
   try {
     const res = await fetch(`https://api.ahrefs.com/v3/public/domain-rating-free?target=${encodeURIComponent(domain)}`);
@@ -121,63 +111,116 @@ async function getDR(domain) {
   } catch (e) { return null; }
 }
 
+// Run a full GPL session over `urls` (solve turnstile once, batches reuse ref_id).
+// Returns { [normDomain]: {da,pa,ss} }. Emits batch events via send().
+async function runSession(urls, key, send, baseDone, grandTotal) {
+  const cookies = await getCookies();
+  const token = await solveTurnstile(key);
+  const batches = [];
+  for (let i = 0; i < urls.length; i += CHUNK) batches.push(urls.slice(i, i + CHUNK));
+
+  const all = {};
+  let refId = '';
+  let done = baseDone;
+  for (let i = 0; i < batches.length; i++) {
+    send({ t: 'batch', i: i + 1, total: batches.length, size: batches[i].length });
+    const { metrics, refId: rid } = await queryBatch(batches[i], urls, {
+      token, cookies, batchIndex: i, batchTotal: batches.length, refId
+    });
+    if (rid) refId = rid;
+    Object.assign(all, metrics);
+
+    // Fetch DR in parallel for this batch, then stream each row with a tiny stagger
+    const drs = await Promise.all(batches[i].map(d => getDR(d)));
+    for (let j = 0; j < batches[i].length; j++) {
+      const d = batches[i][j];
+      const m = metrics[d] || all[d] || { da: null, pa: null, ss: null };
+      done++;
+      send({
+        t: 'result',
+        r: {
+          url: d,
+          domain_authority: m.da,
+          page_authority: m.pa,
+          spam_score: m.ss,
+          domain_rating: drs[j],
+          status: m.da !== null ? 'success' : 'pending'
+        }
+      });
+      send({ t: 'progress', done, total: grandTotal });
+      await new Promise(r => setTimeout(r, 25)); // cascade rows in UI
+    }
+  }
+  return all;
+}
+
 export async function onRequestOptions() {
   return new Response(null, { status: 200, headers: CORS });
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-  try {
-    const body = await request.json();
-    const rawUrls = (body.urls || []).map(u => String(u).trim()).filter(Boolean);
-    if (!rawUrls.length) {
-      return new Response(JSON.stringify({ error: 'urls required' }), { status: 400, headers: CORS });
+  const body = await request.json().catch(() => ({}));
+  const rawUrls = (body.urls || []).map(u => String(u).trim()).filter(Boolean);
+
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const enc = new TextEncoder();
+  const send = (obj) => writer.write(enc.encode(JSON.stringify(obj) + '\n'));
+
+  (async () => {
+    try {
+      if (!rawUrls.length) { send({ t: 'error', msg: 'No domains provided' }); return; }
+      if (rawUrls.length > 100) { send({ t: 'error', msg: 'Max 100 domains per request' }); return; }
+
+      const urls = rawUrls.map(norm);
+      const total = urls.length;
+      send({ t: 'phase', phase: 'verify', msg: 'Verifying access \u00b7 solving security check' });
+
+      // First pass
+      let metrics = await runSession(urls, env.YESCAPTCHA_KEY, send, 0, total);
+
+      // Retry rounds for any domain that came back null
+      let failed = urls.filter(d => !metrics[d] || metrics[d].da === null);
+      let round = 0;
+      while (failed.length && round < MAX_ROUNDS) {
+        round++;
+        send({ t: 'retry', round, count: failed.length, domains: failed.slice(0, 50) });
+        await new Promise(r => setTimeout(r, 1500 * round)); // backoff
+        const more = await runSession(failed, env.YESCAPTCHA_KEY, send, 0, total);
+        for (const [k, v] of Object.entries(more)) {
+          if (v && v.da !== null) metrics[k] = v;
+        }
+        failed = urls.filter(d => !metrics[d] || metrics[d].da === null);
+      }
+
+      // Final assembled results (preserve original input order + raw input string)
+      const results = await Promise.all(rawUrls.map(async (u) => {
+        const nu = norm(u);
+        const m = metrics[nu] || { da: null, pa: null, ss: null };
+        const dr = await getDR(nu);
+        return {
+          url: u,
+          domain_authority: m.da,
+          page_authority: m.pa,
+          spam_score: m.ss,
+          domain_rating: dr,
+          source: 'guestpostlinks (Moz) + ahrefs',
+          status: m.da !== null ? 'success' : 'failed'
+        };
+      }));
+
+      const success = results.filter(r => r.status === 'success').length;
+      send({ t: 'done', total, success, failed: total - success, results });
+    } catch (e) {
+      send({ t: 'error', msg: e.message || 'failed' });
+    } finally {
+      await writer.close();
     }
-    if (rawUrls.length > 100) {
-      return new Response(JSON.stringify({ error: 'Max 100 URLs per request' }), { status: 400, headers: CORS });
-    }
+  })();
 
-    // Normalize a domain (strip scheme, www, trailing slash, lowercase)
-    const norm = (s) => String(s).toLowerCase()
-      .replace(/^https?:\/\//, '')
-      .replace(/^www\./, '')
-      .replace(/\/+$/, '')
-      .trim();
-
-    // Send clean domains to Guestpostlinks for reliable matching
-    const urls = rawUrls.map(norm);
-
-    const [cookies, token] = await Promise.all([getCookies(), solveTurnstile(env.YESCAPTCHA_KEY)]);
-    const metrics = await queryMetrics(urls, token, cookies);
-
-    // Build a normalized lookup from whatever keys Guestpostlinks returned
-    const metricsByNorm = {};
-    for (const [k, v] of Object.entries(metrics)) {
-      metricsByNorm[norm(k)] = v;
-    }
-
-    const results = await Promise.all(rawUrls.map(async (u) => {
-      const nu = norm(u);
-      const m = metrics[nu] || metricsByNorm[nu] || { da: null, pa: null, ss: null };
-      const dr = await getDR(nu);
-      return {
-        url: u,
-        domain_authority: m.da,
-        page_authority: m.pa,
-        spam_score: m.ss,
-        domain_rating: dr,
-        source: 'guestpostlinks (Moz) + ahrefs',
-        status: m.da !== null ? 'success' : 'failed'
-      };
-    }));
-
-    return new Response(JSON.stringify({
-      success: true,
-      total: rawUrls.length,
-      checked: results.length,
-      results
-    }), { status: 200, headers: CORS });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message || 'failed' }), { status: 500, headers: CORS });
-  }
+  return new Response(readable, {
+    status: 200,
+    headers: { ...CORS, 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-cache' }
+  });
 }
