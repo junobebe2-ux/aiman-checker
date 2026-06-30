@@ -166,10 +166,27 @@ export async function onRequestOptions() {
   return new Response(null, { status: 200, headers: CORS });
 }
 
+async function verifyTurnstile(token, secret, ip) {
+  if (!secret) throw new Error('TURNSTILE_SECRET not set');
+  if (!token) return { success: false, error: 'missing-token' };
+  const form = new URLSearchParams();
+  form.append('secret', secret);
+  form.append('response', token);
+  if (ip) form.append('remoteip', ip);
+  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString()
+  });
+  return res.json();
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   const body = await request.json().catch(() => ({}));
   const rawUrls = (body.urls || []).map(u => String(u).trim()).filter(Boolean);
+  const cfToken = body.cf_token || '';
+  const clientIp = request.headers.get('CF-Connecting-IP') || '';
 
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
@@ -178,6 +195,13 @@ export async function onRequestPost(context) {
 
   (async () => {
     try {
+      // Bot gate — Turnstile verify FIRST (before any paid 2Captcha call)
+      const tv = await verifyTurnstile(cfToken, env.TURNSTILE_SECRET, clientIp);
+      if (!tv.success) {
+        send({ t: 'error', msg: 'Bot verification failed. Refresh the page and try again.' });
+        return;
+      }
+
       if (!rawUrls.length) { send({ t: 'error', msg: 'No domains provided' }); return; }
       if (rawUrls.length > 100) { send({ t: 'error', msg: 'Max 100 domains per request' }); return; }
 
