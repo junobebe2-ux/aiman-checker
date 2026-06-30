@@ -115,6 +115,49 @@
   footer{border-top:1px solid var(--line);padding:40px 0;color:var(--faint);font-size:13px;text-align:center}
   footer a{color:var(--muted);text-decoration:none}
   footer a:hover{color:var(--gold-2)}
+
+  /* Mobile responsive */
+  @media(max-width:768px){
+    .wrap{padding:0 18px}
+    nav{padding:16px 0}
+    .brand{font-size:16px}
+    .brand .mark{width:26px;height:26px;font-size:14px}
+    .hero{padding:60px 0 40px}
+    .pill{font-size:11px;padding:5px 11px}
+    h1{font-size:36px}
+    .lead{font-size:16px}
+    .cta{gap:10px}
+    .btn{font-size:14px;padding:13px 24px}
+    .tools{grid-template-columns:1fr;gap:16px}
+    .tool-card{padding:26px}
+    .tool-icon{width:48px;height:48px}
+    .tool-icon svg{width:24px;height:24px}
+    .tool-card h3{font-size:17px}
+    .tool-card p{font-size:13.5px}
+    .how{padding:50px 0}
+    .how h2{font-size:26px;margin-bottom:36px}
+    .steps{grid-template-columns:1fr;gap:24px}
+    .step-num{width:44px;height:44px;font-size:18px}
+    .tutorial{padding:50px 0}
+    .tutorial h2{font-size:26px}
+    .tutorial .intro{font-size:15px}
+    .tut-grid{grid-template-columns:1fr;gap:20px}
+    .tut-card{padding:24px}
+    .tut-card h3{font-size:16px}
+    .tut-card ol{font-size:13px}
+    .faq{padding:50px 0}
+    .faq h2{font-size:26px;margin-bottom:36px}
+    .faq-item{padding:20px}
+    .faq-item h4{font-size:15px}
+    .faq-item p{font-size:13px}
+    footer{padding:32px 0;font-size:12px}
+  }
+  @media(max-width:480px){
+    h1{font-size:30px}
+    .lead{font-size:15px}
+    .btn{font-size:13px;padding:12px 20px}
+    .tool-card{padding:20px}
+  }
 </style>
 </head>
 <body>
@@ -125,7 +168,6 @@
       <a href="#tools">Tools</a>
       <a href="#tutorial">Tutorial</a>
       <a href="#faq">FAQ</a>
-      <a href="/pricing.html">Pricing</a>
     </div>
   </nav>
 
