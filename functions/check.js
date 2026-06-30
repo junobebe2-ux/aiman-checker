@@ -217,12 +217,18 @@ export async function onRequestPost(context) {
 
       const metrics = {};
       let done = 0;
+      const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
       for (let i = 0; i < batches.length; i++) {
         send({ t: 'batch', i: i + 1, total: batches.length, size: batches[i].length });
+        send({ t: 'phase', msg: `Pulling Moz data \u00b7 batch ${i + 1}/${batches.length} (${batches[i].length} domains)` });
         const m = await queryBatch(batches[i], cookies, reqKey);
         Object.assign(metrics, m);
 
+        // Stream per-domain reveals with delay so the UI looks like it's working through each one
         for (const d of batches[i]) {
+          send({ t: 'scanning', domain: d });
+          await sleep(40);
           const mm = metrics[d] || { da: null, pa: null, ss: null };
           done++;
           send({
@@ -236,7 +242,38 @@ export async function onRequestPost(context) {
             }
           });
           send({ t: 'progress', done, total });
-          await new Promise(r => setTimeout(r, 10));
+          await sleep(50);
+        }
+      }
+
+      // Internal retry: re-auth + re-query domains that came back null (subrequest budget permitting)
+      const stillPending = urls.filter(d => !metrics[d] || metrics[d].da == null);
+      if (stillPending.length && stillPending.length <= 25) {
+        send({ t: 'phase', msg: `Retrying ${stillPending.length} domain(s) on fresh session\u2026` });
+        try {
+          const c2 = await initSession();
+          const tok2 = await solveTurnstile(env.TWOCAPTCHA_KEY);
+          const rk2 = await verifyCaptcha(c2, tok2);
+          const m2 = await queryBatch(stillPending, c2, rk2);
+          Object.assign(metrics, m2);
+          for (const d of stillPending) {
+            send({ t: 'scanning', domain: d });
+            await sleep(40);
+            const mm = metrics[d] || { da: null, pa: null, ss: null };
+            send({
+              t: 'result',
+              r: {
+                url: d,
+                domain_authority: mm.da,
+                page_authority: mm.pa,
+                spam_score: mm.ss,
+                status: mm.da !== null ? 'success' : 'pending'
+              }
+            });
+            await sleep(50);
+          }
+        } catch (re) {
+          send({ t: 'phase', msg: `Retry skipped: ${re.message}` });
         }
       }
 
