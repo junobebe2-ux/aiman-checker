@@ -1,15 +1,17 @@
 // Cloudflare Pages Function: POST /check  (NDJSON streaming)
-// GPL-only: real Moz DA/PA/SS via Guestpostlinks (Turnstile solved by YesCaptcha).
-// DR is fetched separately by the client via /dr (keeps subrequests per invocation low).
-// No in-worker retry — the client re-invokes /check for failed domains (fresh subrequest budget each call).
-// Subrequest budget (100 domains): cookies(1) + captcha(1 + <=20 polls) + 5 batches = ~27, safely under the 50 free-plan cap.
+// Source: prepostseo.com (Moz-backed DA/PA/SS). No batch cap like GPL.
+// Flow: fetch page -> 2Captcha Turnstile -> emd/captcha-verify -> dapa/check
+// Subrequest budget (100 domains): page(1) + captcha(1 + <=20 polls) + verify(1) + 2 batches(2) = ~25, under 50.
 
-const SITE_KEY = '0x4AAAAAAAin6Bci-iDm5IXu';
-const PAGE_URL = 'https://tools.guestpostlinks.net/bulk-da-pa-checker-tool/';
-const AJAX_URL = 'https://tools.guestpostlinks.net/wp-admin/admin-ajax.php';
+const SITE_KEY = '0x4AAAAAAAX_O8VfAMao1UUl';
+const PAGE_URL = 'https://www.prepostseo.com/domain-authority-checker';
+const BASE_URL = 'https://www.prepostseo.com/';
+const VERIFY_PATH = 'emd/captcha-verify/';
+const CHECK_PATH = 'dapa/check';
+const HASH = '2YCFz6VHAbg3tm4JhNIQCNwg7QDLgHQORRNsi4Gqy';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-const CHUNK = 20;        // GPL max domains per batch
-const MAX_POLLS = 20;    // captcha poll cap (20 * 3s = 60s) -> bounds subrequests
+const CHUNK = 50;        // prepostseo: tested 50/50 ok, 100 fails; 50 is safe
+const MAX_POLLS = 20;    // captcha poll cap (20 * 3s = 60s)
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -24,8 +26,8 @@ const norm = (s) => String(s).toLowerCase()
   .trim();
 
 async function solveTurnstile(key) {
-  if (!key) throw new Error('YESCAPTCHA_KEY env var not set');
-  const cRes = await fetch('https://api.yescaptcha.com/createTask', {
+  if (!key) throw new Error('TWOCAPTCHA_KEY env var not set');
+  const cRes = await fetch('https://api.2captcha.com/createTask', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -34,73 +36,130 @@ async function solveTurnstile(key) {
     })
   });
   const cData = await cRes.json();
-  if (cData.errorId !== 0) throw new Error(`YesCaptcha create: ${cData.errorDescription}`);
+  if (cData.errorId !== 0) throw new Error(`2Captcha create: ${cData.errorDescription}`);
   const taskId = cData.taskId;
   for (let i = 0; i < MAX_POLLS; i++) {
     await new Promise(r => setTimeout(r, 3000));
-    const rRes = await fetch('https://api.yescaptcha.com/getTaskResult', {
+    const rRes = await fetch('https://api.2captcha.com/getTaskResult', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ clientKey: key, taskId })
     });
     const rData = await rRes.json();
     if (rData.status === 'ready') return rData.solution.token || rData.solution.gRecaptchaResponse;
-    if (rData.errorId !== 0) throw new Error(`YesCaptcha result: ${rData.errorDescription}`);
+    if (rData.errorId !== 0) throw new Error(`2Captcha result: ${rData.errorDescription}`);
   }
   throw new Error('Turnstile solve timeout');
 }
 
-async function getCookies() {
-  const res = await fetch(PAGE_URL, { headers: { 'User-Agent': UA } });
-  const sc = res.headers.get('set-cookie') || '';
-  return sc.split(',').map(c => c.split(';')[0].trim()).filter(Boolean).join('; ');
+// Parse Set-Cookie (CF Worker supports getSetCookie() in headers)
+function parseCookies(res) {
+  const out = {};
+  // Cloudflare Workers: headers.getSetCookie() returns array of Set-Cookie values
+  let setCookies = [];
+  if (typeof res.headers.getSetCookie === 'function') {
+    setCookies = res.headers.getSetCookie();
+  } else {
+    const raw = res.headers.get('set-cookie') || '';
+    setCookies = raw.split(/,(?=\s*[A-Za-z0-9_-]+=)/);
+  }
+  for (const c of setCookies) {
+    const m = c.match(/^\s*([^=]+)=([^;]+)/);
+    if (m) out[m[1].trim()] = m[2].trim();
+  }
+  return out;
 }
 
-async function queryBatch(urls, allRaw, opts) {
-  const { token, cookies, batchIndex, batchTotal, refId } = opts;
-  const p = new URLSearchParams();
-  p.append('action', 'dapa_checker_function');
-  p.append('data[urls]', urls.join('\n'));
-  p.append('data[same_url]', '0');
-  p.append('data[same_domain]', '0');
-  p.append('data[batch_mode]', 'batch');
-  p.append('data[batch_index]', String(batchIndex));
-  p.append('data[batch_total]', String(batchTotal));
-  p.append('data[all_urls_raw]', batchIndex === 0 ? allRaw.join('\n') : '');
-  p.append('data[ref_id]', refId || '');
-  p.append('data[batch_session_token]', '');
-  if (batchIndex === 0) p.append('data[cf-turnstile-response]', token);
+function cookieHeader(c) {
+  return Object.entries(c).map(([k, v]) => `${k}=${v}`).join('; ');
+}
 
-  const res = await fetch(AJAX_URL, {
+async function initSession() {
+  // 1. Fetch page to get XSRF-TOKEN + prepostseocom_session
+  const pageRes = await fetch(PAGE_URL, { headers: { 'User-Agent': UA } });
+  const cookies = parseCookies(pageRes);
+  if (!cookies['XSRF-TOKEN'] || !cookies['prepostseocom_session']) {
+    throw new Error(`prepostseo cookies missing: ${Object.keys(cookies).join(',')}`);
+  }
+  return cookies;
+}
+
+async function verifyCaptcha(cookies, token) {
+  const xsrf = decodeURIComponent(cookies['XSRF-TOKEN']);
+  const ts = Date.now();
+  const form = new URLSearchParams();
+  form.append('emd_captcha_1', `2${HASH}`);
+  form.append('emd_captcha_2', token);
+  form.append('emd_captcha_3', String(Math.floor(ts / 1000)));
+
+  const res = await fetch(BASE_URL + VERIFY_PATH + ts, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       'User-Agent': UA,
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       'X-Requested-With': 'XMLHttpRequest',
-      'Origin': 'https://tools.guestpostlinks.net',
+      'X-XSRF-TOKEN': xsrf,
+      'Origin': 'https://www.prepostseo.com',
       'Referer': PAGE_URL,
-      'Cookie': cookies
+      'Cookie': cookieHeader(cookies)
     },
-    body: p.toString()
+    body: form.toString()
   });
-  const json = await res.json();
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch (_) {
+    throw new Error(`verify parse fail: ${text.slice(0, 200)}`);
+  }
+  if (!data.req_key) throw new Error(`no req_key: ${text.slice(0, 200)}`);
+  // session may rotate after verify
+  const newCookies = parseCookies(res);
+  Object.assign(cookies, newCookies);
+  return data.req_key;
+}
+
+async function queryBatch(urls, cookies, reqKey) {
+  const xsrf = decodeURIComponent(cookies['XSRF-TOKEN']);
+  const form = new URLSearchParams();
+  form.append('tool_key', 'domain_authority_checker');
+  form.append('req_key', reqKey);
+  form.append('req_key_2', reqKey);
+  form.append('e_track_key', '');
+  for (const u of urls) form.append('urls[]', u);
+
+  const res = await fetch(BASE_URL + CHECK_PATH, {
+    method: 'POST',
+    headers: {
+      'User-Agent': UA,
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-XSRF-TOKEN': xsrf,
+      'Origin': 'https://www.prepostseo.com',
+      'Referer': PAGE_URL,
+      'Cookie': cookieHeader(cookies)
+    },
+    body: form.toString()
+  });
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch (_) {
+    throw new Error(`check parse fail: ${text.slice(0, 200)}`);
+  }
   const out = {};
-  let newRefId = refId;
-  if (json.success && Array.isArray(json.data)) {
-    for (const item of json.data) {
-      if (item.ref_id) newRefId = item.ref_id;
-      if (!item.api_result) continue;
-      for (const [url, info] of Object.entries(item.api_result)) {
-        const m = info.metrics || {};
-        out[norm(url)] = {
-          da: m.domain_authority ?? null,
-          pa: m.page_authority ?? null,
-          ss: m.spam_score ?? null
-        };
-      }
+  if (Array.isArray(data.data)) {
+    for (const item of data.data) {
+      const k = norm(item.url || item.domain || '');
+      if (!k) continue;
+      out[k] = {
+        da: item.domain_auth ?? null,
+        pa: item.page_auth ?? null,
+        ss: item.spam_score ?? null
+      };
     }
   }
-  return { metrics: out, refId: newRefId };
+  // session may rotate
+  const newCookies = parseCookies(res);
+  Object.assign(cookies, newCookies);
+  return out;
 }
 
 export async function onRequestOptions() {
@@ -128,18 +187,15 @@ export async function onRequestPost(context) {
       for (let i = 0; i < urls.length; i += CHUNK) batches.push(urls.slice(i, i + CHUNK));
 
       send({ t: 'phase', phase: 'verify', msg: 'Verifying access \u00b7 solving security check' });
-      const cookies = await getCookies();
-      const token = await solveTurnstile(env.YESCAPTCHA_KEY);
+      const cookies = await initSession();
+      const token = await solveTurnstile(env.TWOCAPTCHA_KEY);
+      const reqKey = await verifyCaptcha(cookies, token);
 
       const metrics = {};
-      let refId = '';
       let done = 0;
       for (let i = 0; i < batches.length; i++) {
         send({ t: 'batch', i: i + 1, total: batches.length, size: batches[i].length });
-        const { metrics: m, refId: rid } = await queryBatch(batches[i], urls, {
-          token, cookies, batchIndex: i, batchTotal: batches.length, refId
-        });
-        if (rid) refId = rid;
+        const m = await queryBatch(batches[i], cookies, reqKey);
         Object.assign(metrics, m);
 
         for (const d of batches[i]) {
@@ -156,7 +212,7 @@ export async function onRequestPost(context) {
             }
           });
           send({ t: 'progress', done, total });
-          await new Promise(r => setTimeout(r, 20));
+          await new Promise(r => setTimeout(r, 10));
         }
       }
 

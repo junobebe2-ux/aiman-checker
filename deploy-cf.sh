@@ -18,7 +18,7 @@ cp "$SRC"/functions/*.js "$DEPLOY/functions/"
 # Deploy (token from file to avoid inline redaction issues)
 cd "$DEPLOY"
 set -a
-. <(printf 'CLOUDFLARE_API_TOKEN=%s\nCLOUDFLARE_ACCOUNT_ID=a65c45b9816bf5212168bd794c79d008\n' "$(cat /home/ubuntu/.config/cf_token.txt)")
+. <(printf 'CLOUDFLARE_API_TOKEN=%s\nCLOUDFLARE_ACCOUNT_ID=a65c45b9816bf5212168bd794c79d008\nTWOCAPTCHA_KEY=9cd9e80ae13a2e8815ac097a924b82fa\n' "$(cat /home/ubuntu/.config/cf_token.txt)")
 set +a
 
 npx wrangler pages deploy . --project-name aiman-checker --branch main --commit-dirty=true
