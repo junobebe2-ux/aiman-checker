@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aiman Checker — Bulk DA / PA / DR / Spam Score</title>
-<meta name="description" content="Check Domain Authority, Page Authority, Ahrefs DR and Moz Spam Score for up to 100 domains at once. Real metrics, no estimates.">
+<title>Domain Checker — DA PA SS DR | AIMAN Checker</title>
+<meta name="description" content="Check Domain Authority, Page Authority, Spam Score untuk 100 domain sekaligus. Data real Moz, bukan estimasi.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
     --bg:#0b0b0d; --panel:#141417; --panel-2:#1b1b20; --line:#26262d;
     --ink:#ecece8; --muted:#8a8a92; --faint:#5a5a62;
     --gold:#c9a35b; --gold-2:#e6c478; --gold-deep:#9c7b3a;
-    --green:#7fc8a0; --blue:#6fb4e0; --red:#e08a8a;
+    --green:#7fc8a0; --blue:#6fb4e0; --red:#e08a8a; --orange:#e8b563;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -27,24 +27,22 @@
 
   /* nav */
   nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em;font-size:18px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em;font-size:18px;text-decoration:none;color:var(--ink)}
   .brand .mark{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
     background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:16px;
     box-shadow:0 4px 14px rgba(201,163,91,.30)}
   .brand b{color:var(--gold-2)}
-  .nav-links{display:flex;gap:26px;font-size:14px;color:var(--muted)}
+  .nav-links{display:flex;gap:26px;font-size:14px;color:var(--muted);align-items:center}
   .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
   .nav-links a:hover{color:var(--ink)}
-  
-  /* Mobile nav - show menu button */
   .menu-toggle{display:none;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
   .menu-toggle svg{width:24px;height:24px}
   @media(max-width:720px){
-    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;z-index:10;
       background:var(--panel);border:1px solid var(--line);border-top:none;
       flex-direction:column;gap:0;padding:8px 0}
     .nav-links.open{display:flex}
-    .nav-links a{padding:12px 24px;border-bottom:1px solid var(--line)}
+    .nav-links a{padding:12px 24px;border-bottom:1px solid var(--line);width:100%}
     .nav-links a:last-child{border-bottom:none}
     .menu-toggle{display:block}
     nav{position:relative}
@@ -62,7 +60,7 @@
 
   /* panel */
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;margin-top:30px}
-  .panel-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .panel-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:8px}
   .panel-head label{font-weight:600;font-size:14.5px}
   .counter{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--faint)}
   .counter b{color:var(--gold-2)}
@@ -74,493 +72,366 @@
   .row{display:flex;gap:11px;margin-top:16px;flex-wrap:wrap}
   .btn{font-family:inherit;font-weight:700;font-size:14.5px;border:none;border-radius:11px;padding:13px 26px;cursor:pointer;display:inline-flex;align-items:center;gap:9px;transition:transform .15s,box-shadow .2s,background .2s}
   .btn-go{background:linear-gradient(140deg,var(--gold-2),var(--gold-deep));color:#1a1408;box-shadow:0 6px 20px rgba(201,163,91,.25)}
-  .btn-go:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(201,163,91,.35)}
-  .btn-go:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
+  .btn-go:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 26px rgba(201,163,91,.35)}
+  .btn-go:disabled{opacity:.55;cursor:not-allowed}
   .btn-ghost{background:var(--panel-2);color:var(--ink);border:1px solid var(--line)}
   .btn-ghost:hover{border-color:var(--gold-deep);color:var(--gold-2)}
   .btn svg{width:16px;height:16px}
+  
+  .cf-turnstile{margin-top:16px}
 
-  /* progress / live console */
-  .live{margin-top:26px;display:none}
-  .live.on{display:block;animation:fade .3s ease}
-  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  .pbar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13.5px}
-  .pbar-top .ph{display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:600}
-  .spin{width:16px;height:16px;border:2px solid rgba(201,163,91,.25);border-top-color:var(--gold-2);border-radius:50%;animation:spin .8s linear infinite}
+  /* loading state */
+  .loading{margin-top:30px;display:none;text-align:center}
+  .loading.on{display:block;animation:fadeIn .3s}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  
+  .spinner-wrap{display:flex;justify-content:center;align-items:center;gap:20px;margin-bottom:20px}
+  .spinner{width:60px;height:60px;border:3px solid var(--line);border-top-color:var(--gold-2);border-radius:50%;animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .pbar-top .pct{font-family:'JetBrains Mono',monospace;color:var(--gold-2);font-weight:500}
-  .track{height:9px;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
-  .fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--gold-deep),var(--gold-2));
-    background-size:200% 100%;transition:width .35s ease;animation:flow 2s linear infinite}
-  @keyframes flow{to{background-position:200% 0}}
-  .log{margin-top:14px;background:var(--bg);border:1px solid var(--line);border-radius:12px;
-    font-family:'JetBrains Mono',monospace;font-size:12.5px;max-height:168px;overflow-y:auto;padding:6px 0}
-  .log .ln{padding:4px 16px;color:var(--muted);display:flex;gap:10px;align-items:baseline;border-left:2px solid transparent}
-  .log .ln .ts{color:var(--faint);flex-shrink:0}
-  .log .ln.ok{color:var(--green);border-left-color:var(--green)}
-  .log .ln.warn{color:var(--gold-2);border-left-color:var(--gold-2)}
-  .log .ln.info{color:var(--blue)}
-  .log .ln b{color:var(--ink)}
+  
+  .loading-text{font-size:16px;color:var(--ink);font-weight:600;margin-bottom:8px}
+  .loading-sub{font-size:13.5px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+  .loading-dots:after{content:'';animation:dots 1.5s steps(4,end) infinite}
+  @keyframes dots{0%,20%{content:''}40%{content:'.'}60%{content:'..'}80%,100%{content:'...'}}
+  
+  .progress-bar{max-width:400px;margin:20px auto 0;height:8px;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold-deep),var(--gold-2));border-radius:999px;transition:width .4s ease}
 
-  /* stats */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:26px;display:none}
-  .stats.on{display:grid}
-  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 16px}
+  /* results */
+  .results{margin-top:30px;display:none}
+  .results.on{display:block;animation:fadeIn .4s}
+  
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:24px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 16px;text-align:center}
   .stat .v{font-size:27px;font-weight:800;letter-spacing:-.02em}
   .stat .l{font-size:11.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.09em;margin-top:5px}
-  .stat.da .v{color:var(--gold-2)} .stat.pa .v{color:var(--green)} .stat.dr .v{color:var(--blue)} .stat.ss .v{color:var(--red)}
+  .stat.total .v{color:var(--gold-2)} 
+  .stat.success .v{color:var(--green)} 
+  .stat.failed .v{color:var(--red)}
+  .stat.avg .v{color:var(--blue)}
+  
   @media(max-width:620px){.stats{grid-template-columns:repeat(2,1fr)}}
 
   /* table */
-  .tbl-wrap{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:none}
-  .tbl-wrap.on{display:block}
+  .tbl-wrap{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
   .tbl-head{display:flex;justify-content:space-between;align-items:center;padding:17px 20px;border-bottom:1px solid var(--line)}
   .tbl-head h3{font-size:15px;font-weight:700}
-  .tbl-head .sub{font-size:12.5px;color:var(--faint)}
+  .tbl-head .actions{display:flex;gap:8px}
+  .tbl-head .btn-sm{font-size:12px;padding:7px 14px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);cursor:pointer;border-radius:8px;transition:all .2s}
+  .tbl-head .btn-sm:hover{border-color:var(--gold-deep);color:var(--gold-2)}
+  
   .scroll{overflow-x:auto}
-  table{width:100%;border-collapse:collapse}
-  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;padding:12px 16px;border-bottom:1px solid var(--line)}
-  td{padding:13px 16px;border-bottom:1px solid rgba(38,38,45,.6);font-size:13.5px}
-  tbody tr{transition:background .15s}
-  tbody tr:last-child td{border-bottom:none}
-  tbody tr:hover{background:var(--panel-2)}
-  .dom{font-weight:600;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .num{font-weight:700;font-family:'JetBrains Mono',monospace}
-  .num.da{color:var(--gold-2)} .num.pa{color:var(--green)} .num.dr{color:var(--blue)} .num.ss{color:var(--red)}
-  .tag{font-size:11px;font-weight:600;padding:4px 9px;border-radius:6px;display:inline-flex;align-items:center;gap:5px}
-  .tag.ok{background:rgba(127,200,160,.12);color:var(--green)}
-  .tag.pend{background:rgba(201,163,91,.12);color:var(--gold-2)}
-  .tag.fail{background:rgba(224,138,138,.12);color:var(--red)}
-  .tag .d{width:6px;height:6px;border-radius:50%;background:currentColor}
-  tr.appear{animation:rowin .35s ease}
-  @keyframes rowin{from{opacity:0;background:rgba(201,163,91,.10)}to{opacity:1}}
-  .skel{display:inline-block;width:26px;height:11px;border-radius:4px;background:linear-gradient(90deg,var(--panel-2),var(--line),var(--panel-2));background-size:200% 100%;animation:sk 1.1s linear infinite}
-  @keyframes sk{to{background-position:-200% 0}}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead{background:var(--panel-2)}
+  th{text-align:left;padding:12px 16px;font-weight:600;color:var(--faint);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;user-select:none;white-space:nowrap}
+  th:hover{color:var(--gold-2)}
+  th.sortable:after{content:'⇅';margin-left:6px;opacity:.4}
+  th.sort-asc:after{content:'↑';opacity:1}
+  th.sort-desc:after{content:'↓';opacity:1}
+  
+  td{padding:14px 16px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace}
+  tr:hover{background:rgba(201,163,91,.04)}
+  
+  .domain-cell{color:var(--ink);font-weight:500;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  
+  .metric-row{display:flex;gap:8px;align-items:center}
+  .badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:5px 10px;border-radius:8px;font-weight:600;font-size:13px}
+  .badge.da{background:rgba(201,163,91,.15);color:var(--gold-2);border:1px solid rgba(201,163,91,.25)}
+  .badge.pa{background:rgba(127,200,160,.15);color:var(--green);border:1px solid rgba(127,200,160,.25)}
+  .badge.ss{background:rgba(224,138,138,.15);color:var(--red);border:1px solid rgba(224,138,138,.25)}
+  .badge.dr{background:rgba(111,180,224,.15);color:var(--blue);border:1px solid rgba(111,180,224,.25)}
+  .badge.null{background:var(--panel-2);color:var(--faint);border:1px solid var(--line)}
 
-  .note{background:rgba(224,138,138,.08);border:1px solid rgba(224,138,138,.3);color:var(--red);border-radius:12px;padding:14px 16px;margin-top:20px;font-size:13.5px;display:none}
-  .note.on{display:block}
-
-  footer{border-top:1px solid var(--line);margin-top:64px;padding:30px 0;color:var(--faint);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
-  footer a{color:var(--muted);text-decoration:none}
-  footer a:hover{color:var(--gold-2)}
-
-  /* Mobile responsive */
   @media(max-width:768px){
-    .wrap{padding:0 18px}
-    nav{padding:16px 0}
-    .brand{font-size:16px}
-    .brand .mark{width:26px;height:26px;font-size:14px}
-    .hero{padding:40px 0 24px}
-    .pill{font-size:11px;padding:5px 11px}
-    h1{font-size:28px;margin-bottom:14px}
-    .lead{font-size:15px;margin-bottom:20px}
-    .panel{padding:24px 18px}
-    textarea{min-height:140px;font-size:13px}
-    .row{flex-direction:column;gap:10px}
-    .btn{font-size:13.5px;padding:12px 18px}
-    .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-    table{font-size:12px}
-    table th, table td{padding:10px 8px}
-    .log{max-height:220px;font-size:11.5px}
-    .how{padding:50px 0}
-    .how h2{font-size:26px;margin-bottom:36px}
-    .steps{gap:24px}
-    .step-num{width:44px;height:44px;font-size:18px}
-    .step h4{font-size:15px}
-    .step p{font-size:13px}
-    footer{padding:28px 0;font-size:12px}
-  }
-  @media(max-width:480px){
-    h1{font-size:24px}
-    .lead{font-size:14px}
-    .panel{padding:20px 14px}
-    .btn{font-size:13px;padding:11px 16px}
-    table{font-size:11px}
-    table th, table td{padding:8px 6px}
+    .panel{padding:18px}
+    textarea{min-height:140px;font-size:12.5px}
+    .btn{font-size:13.5px;padding:11px 20px}
+    .stats{gap:10px}
+    .stat{padding:14px 12px}
+    .stat .v{font-size:22px}
+    th,td{padding:10px 12px;font-size:12.5px}
+    .domain-cell{max-width:180px}
   }
 </style>
 </head>
 <body>
 <div class="wrap">
   <nav>
-    <div class="brand"><a href="/" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:11px"><span class="mark">A</span>aiman<b>checker</b></a></div>
-    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <a href="/" class="brand">
+      <div class="mark">A</div>
+      <span>AIMAN <b>Checker</b></span>
+    </a>
+    <button class="menu-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
-    <div class="nav-links" id="navLinks">
-      <a href="/">Beranda</a>
-      <a href="#tool">Checker</a>
-      <a href="/dr-booster.html">DR Booster</a>
-      <a href="/analyze.html">Analyzer</a>
-      <a id="auth-link" href="/login.html" style="color:var(--gold-2)">Login</a>
+    <div class="nav-links">
+      <a href="/checker">Domain Checker</a>
+      <a href="/dr-booster">DR Booster</a>
+      <a href="/analyze">Analyzer</a>
+      <a href="/login" id="loginLink">Login</a>
     </div>
   </nav>
 
-  <section class="hero">
-    <span class="pill"><span class="dot"></span> Data live Moz & Ahrefs · bukan estimasi</span>
-    <h1>Cek massal <span class="g">DA, PA, DR</span> &amp; spam score untuk domain Anda.</h1>
-    <p class="lead">Paste domain Anda dan dapatkan Moz Domain Authority, Page Authority, Spam Score dan Ahrefs Domain Rating yang asli — ditarik live, di-retry sampai semua domain resolve. <span style="color:var(--gold-2)">Publik: 10 domain, 3 run/hari. Login: 100 domain, unlimited.</span></p>
-  </section>
+  <div class="hero">
+    <div class="pill"><span class="dot"></span>Real Moz Data — Bukan Estimasi</div>
+    <h1>Check <span class="g">DA · PA · SS · DR</span><br>Sampai 100 Domain</h1>
+    <p class="lead">Cek Domain Authority, Page Authority, Spam Score, dan DR untuk puluhan domain sekaligus. Data langsung dari Moz API.</p>
+  </div>
 
-  <section class="panel" id="tool">
+  <div class="panel">
     <div class="panel-head">
-      <label for="domains">Paste domain Anda (satu per baris)</label>
-      <span class="hint"><span id="cnt">0</span> / 10 baris</span>
+      <label for="domains">Masukkan Domain (satu per baris)</label>
+      <div class="counter"><b id="domainCount">0</b> domain</div>
     </div>
-    <textarea id="domains" placeholder="malcomschein.my.id
-example.com
-ahrefs.com
-moz.com"></textarea>
-    <div id="cf-turnstile" class="cf-turnstile" data-sitekey="0x4AAAAAADtWZV7HUO4N_Fhg" data-theme="dark" data-callback="onTurnstile" style="margin:14px 0 4px"></div>
+    <textarea id="domains" placeholder="example.com&#10;another-site.com&#10;blog.example.org&#10;..."></textarea>
+    
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAADtWZV7HUO4N_Fhg" data-callback="onTurnstileSuccess"></div>
+    
     <div class="row">
-      <button class="btn btn-go" id="go" onclick="run()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        Cek Domain
+      <button class="btn btn-go" id="checkBtn" disabled>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        Cek Sekarang
       </button>
-      <button class="btn btn-ghost" id="exp" onclick="exportCsv()" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-        Export CSV
+      <button class="btn btn-ghost" onclick="document.getElementById('domains').value='';updateCount()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        Clear
       </button>
     </div>
-    <div id="note" class="note"></div>
-  </section>
+  </div>
 
-  <div class="live" id="live">
-    <div class="pbar-top">
-      <div class="ph"><span class="spin"></span><span id="phase">Mempersiapkan...</span></div>
-      <div class="pc"><span id="prog">0</span>/<span id="total">0</span></div>
+  <div class="loading" id="loadingState">
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
     </div>
-        <span class="pct" id="pct">0%</span>
+    <div class="loading-text">Sedang memproses<span class="loading-dots"></span></div>
+    <div class="loading-sub" id="loadingPhase">Verifikasi akses · solving Turnstile</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="results" id="resultsWrap">
+    <div class="stats">
+      <div class="stat total">
+        <div class="v" id="statTotal">0</div>
+        <div class="l">Total</div>
       </div>
-      <div class="track"><div class="fill" id="fill"></div></div>
-      <div class="log" id="log"></div>
+      <div class="stat success">
+        <div class="v" id="statSuccess">0</div>
+        <div class="l">Berhasil</div>
+      </div>
+      <div class="stat failed">
+        <div class="v" id="statFailed">0</div>
+        <div class="l">Gagal</div>
+      </div>
+      <div class="stat avg">
+        <div class="v" id="statAvgDA">—</div>
+        <div class="l">Avg DA</div>
+      </div>
     </div>
-  </section>
 
-  <div class="note" id="note"></div>
-
-  <div class="stats" id="stats">
-    <div class="stat da"><div class="v" id="s-da">—</div><div class="l">Avg DA</div></div>
-    <div class="stat pa"><div class="v" id="s-pa">—</div><div class="l">Avg PA</div></div>
-    <div class="stat dr"><div class="v" id="s-dr">—</div><div class="l">Avg DR</div></div>
-    <div class="stat ss"><div class="v" id="s-ss">—</div><div class="l">Avg Spam</div></div>
+    <div class="tbl-wrap">
+      <div class="tbl-head">
+        <h3>Hasil Checking</h3>
+        <div class="actions">
+          <button class="btn-sm" onclick="exportCSV()">Export CSV</button>
+          <button class="btn-sm" onclick="copyResults()">Copy</button>
+        </div>
+      </div>
+      <div class="scroll">
+        <table id="resultsTable">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTable('domain')">Domain</th>
+              <th class="sortable" onclick="sortTable('da')">DA</th>
+              <th class="sortable" onclick="sortTable('pa')">PA</th>
+              <th class="sortable" onclick="sortTable('ss')">SS</th>
+              <th class="sortable" onclick="sortTable('dr')">DR</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-
-  <div class="tbl-wrap" id="tblw">
-    <div class="tbl-head">
-      <h3>Results</h3>
-      <span class="sub" id="tsub"></span>
-    </div>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>Domain</th><th>DA</th><th>PA</th><th>DR</th><th>Spam</th><th>Status</th></tr></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <footer>
-    <span>© <span id="yr"></span> aimanchecker · real metrics, retried until complete</span>
-    <span>Moz · Ahrefs</span>
-  </footer>
 </div>
 
 <script>
-  const $ = id => document.getElementById(id);
-  document.getElementById('yr').textContent = new Date().getFullYear();
-  let lastResults = [];
-  let userSession = null;
-  let maxDomains = 10; // public default
+let turnstileToken = null;
+let resultsData = [];
+let sortColumn = 'da';
+let sortDir = 'desc';
 
-  // Mobile menu toggle
-  const menuToggle = $('menuToggle');
-  const navLinks = $('navLinks');
-  if (menuToggle) {
-    menuToggle.addEventListener('click', ()=> navLinks.classList.toggle('open'));
-    // Close menu when clicking a link
-    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', ()=> navLinks.classList.remove('open')));
+function onTurnstileSuccess(token) {
+  turnstileToken = token;
+  updateCheckButton();
+}
+
+function updateCount() {
+  const val = document.getElementById('domains').value;
+  const lines = val.split('\n').map(l => l.trim()).filter(Boolean);
+  document.getElementById('domainCount').textContent = lines.length;
+  updateCheckButton();
+}
+
+function updateCheckButton() {
+  const lines = document.getElementById('domains').value.split('\n').map(l => l.trim()).filter(Boolean);
+  document.getElementById('checkBtn').disabled = !turnstileToken || lines.length === 0;
+}
+
+document.getElementById('domains').addEventListener('input', updateCount);
+
+document.getElementById('checkBtn').addEventListener('click', async () => {
+  const val = document.getElementById('domains').value;
+  const domains = val.split('\n').map(l => l.trim()).filter(Boolean);
+  
+  if (!domains.length) {
+    alert('Masukkan minimal 1 domain');
+    return;
+  }
+  
+  if (!turnstileToken) {
+    alert('Tunggu Turnstile selesai load');
+    return;
   }
 
-  // Check session on page load
-  fetch('/api/login', { credentials: 'include' }).then(r=>r.json()).then(d=>{
-    if (d.authed) {
-      userSession = d.user;
-      maxDomains = 100;
-      $('auth-link').textContent = `${d.user} (Keluar)`;
-      $('auth-link').href = '#';
-      $('auth-link').onclick = (e)=>{ e.preventDefault(); logout(); };
-      $('cnt').nextSibling.textContent = ` / ${maxDomains} baris`;
-    } else {
-      $('cnt').nextSibling.textContent = ` / ${maxDomains} baris (10 publik, 100 login)`;
-    }
-  }).catch(()=>{});
+  // Hide results, show loading
+  document.getElementById('resultsWrap').classList.remove('on');
+  document.getElementById('loadingState').classList.add('on');
+  document.getElementById('loadingPhase').textContent = 'Verifikasi bot · solving captcha';
+  
+  // Animate progress
+  let progress = 0;
+  const progressInterval = setInterval(() => {
+    progress += Math.random() * 15;
+    if (progress > 90) progress = 90;
+    document.getElementById('progressFill').style.width = progress + '%';
+  }, 800);
 
-  function logout(){
-    fetch('/api/login', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({logout:true}) }).then(()=>{
-      location.reload();
+  try {
+    const res = await fetch('/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls: domains, cf_token: turnstileToken })
     });
-  }
 
-  const ta = $('domains');
-  ta.addEventListener('input', () => {
-    const n = ta.value.split('\n').filter(x => x.trim()).length;
-    $('cnt').textContent = n;
-  });
+    clearInterval(progressInterval);
+    document.getElementById('progressFill').style.width = '100%';
 
-  function tnow(){ const d=new Date(); return d.toTimeString().slice(0,8); }
-  function logLine(msg, cls=''){
-    const log = $('log');
-    const ln = document.createElement('div');
-    ln.className = 'ln ' + cls;
-    ln.innerHTML = `<span class="ts">${tnow()}</span><span>${msg}</span>`;
-    log.appendChild(ln);
-    log.scrollTop = log.scrollHeight;
-  }
-
-  // live row tracking
-  const rowMap = {};   // domain -> <tr>
-  function ensureRow(domain){
-    if (rowMap[domain]) return rowMap[domain];
-    const tr = document.createElement('tr');
-    tr.className = 'appear';
-    tr.innerHTML = `<td class="dom">${domain}</td>
-      <td class="num da"><span class="skel"></span></td>
-      <td class="num pa"><span class="skel"></span></td>
-      <td class="num dr"><span class="skel"></span></td>
-      <td class="num ss"><span class="skel"></span></td>
-      <td><span class="tag pend"><span class="d"></span>queued</span></td>`;
-    $('tbody').appendChild(tr);
-    rowMap[domain] = tr;
-    return tr;
-  }
-  function fillRow(r){
-    const tr = ensureRow(r.url);
-    const ok = r.status === 'success';
-    const cells = tr.children;
-    cells[1].textContent = r.domain_authority ?? '—';
-    cells[2].textContent = r.page_authority ?? '—';
-    if(r.domain_rating !== undefined) cells[3].textContent = r.domain_rating ?? '—';
-    cells[4].textContent = r.spam_score ?? '—';
-    cells[5].innerHTML = ok
-      ? '<span class="tag ok"><span class="d"></span>done</span>'
-      : '<span class="tag pend"><span class="d"></span>retrying</span>';
-  }
-  function markFail(domain){
-    const tr = rowMap[domain]; if(!tr) return;
-    tr.children[5].innerHTML = '<span class="tag fail"><span class="d"></span>failed</span>';
-  }
-
-  async function run(){
-    const urls = ta.value.split('\n').map(s=>s.trim()).filter(Boolean);
-    if(!urls.length){ showNote('Tambahkan minimal satu domain.'); return; }
-    if(urls.length > maxDomains){
-      showNote(`Maksimal ${maxDomains} domain per run.${maxDomains===10 ? ' Login untuk unlock 100 domain.' : ''}`);
+    const data = await res.json();
+    
+    if (!data.ok) {
+      alert('Error: ' + (data.error || 'Unknown error'));
+      document.getElementById('loadingState').classList.remove('on');
       return;
     }
 
-    // reset
-    $('note').classList.remove('on');
-    $('stats').classList.remove('on');
-    $('tblw').classList.add('on');
-    $('tbody').innerHTML = '';
-    $('log').innerHTML = '';
-    for(const k in rowMap) delete rowMap[k];
-    lastResults = [];
-    $('exp').style.display = 'none';
-    $('live').classList.add('on');
-    $('fill').style.width = '0%';
-    $('pct').textContent = '0%';
-    $('tsub').textContent = `0 / ${urls.length} checked`;
+    // Show results
+    resultsData = data.results || [];
+    renderResults();
+    
+    document.getElementById('loadingState').classList.remove('on');
+    document.getElementById('resultsWrap').classList.add('on');
+    
+    // Reset Turnstile
+    turnstileToken = null;
+    if (window.turnstile) window.turnstile.reset();
+    updateCheckButton();
 
-    const go = $('go');
-    go.disabled = true;
-    go.innerHTML = '<span class="spin" style="border-top-color:#1a1408;border-color:rgba(26,20,8,.3)"></span> Working…';
+  } catch (err) {
+    clearInterval(progressInterval);
+    alert('Network error: ' + err.message);
+    document.getElementById('loadingState').classList.remove('on');
+  }
+});
 
-    // pre-create queued rows so user sees the full list immediately
-    urls.forEach(u => ensureRow(u));
-    setPhase('Verifying access · solving security check');
-    logLine('Run started · <b>'+urls.length+'</b> domains queued','info');
-
-    const TOTAL = urls.length;
-    const MAX_ROUNDS = 6;
-    const metrics = {};   // norm-domain -> {da,pa,ss}
-    const drMap = {};     // norm-domain -> dr
-    let resolvedCount = 0;
-
-    const nrm = (s)=>String(s).toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/+$/,'').trim();
-    const tickProgress = ()=>updateBar(resolvedCount, TOTAL);
-
-    try{
-      // ROUND-BASED: each /check call is a fresh Worker invocation (fresh subrequest budget)
-      let pending = urls.slice();
-      let round = 0;
-      while(pending.length && round < MAX_ROUNDS){
-        round++;
-        if(round>1){
-          setPhase(`Retry round ${round} · re-checking ${pending.length} domain(s)`);
-          logLine(`Round <b>${round}</b> retry on ${pending.length} unresolved domain(s)…`,'warn');
-          pending.forEach(d=>{ const tr=rowMap[d]; if(tr) tr.children[5].innerHTML='<span class="tag pend"><span class="d"></span>retrying</span>'; });
-          await sleep(1200*round);
-        }
-        const got = await streamCheck(pending, metrics, ()=>{ resolvedCount = Object.values(metrics).filter(m=>m.da!=null).length; tickProgress(); });
-        pending = pending.filter(d => !metrics[nrm(d)] || metrics[nrm(d)].da == null);
-        if(!got) break; // hard error already shown
-      }
-
-      // DR pass (separate endpoint, chunked <=40 so each invocation stays under subrequest cap)
-      setPhase('Fetching Ahrefs DR…');
-      logLine('Fetching Domain Rating (Ahrefs)…','info');
-      const all = urls.slice();
-      for(let i=0;i<all.length;i+=40){
-        const chunk = all.slice(i,i+40);
-        try{
-          const dres = await fetch('/dr',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({urls:chunk})});
-          const dj = await dres.json();
-          if(dj.success){ Object.assign(drMap, dj.dr); }
-        }catch(_){}
-        // paint DR into rows as it arrives
-        chunk.forEach(d=>{ const tr=rowMap[d]; if(tr && drMap[nrm(d)]!=null) tr.children[3].textContent = drMap[nrm(d)]; });
-      }
-
-      // assemble final results in input order
-      const results = urls.map(u=>{
-        const k=nrm(u); const m=metrics[k]||{da:null,pa:null,ss:null};
-        return {url:u,domain_authority:m.da,page_authority:m.pa,spam_score:m.ss,domain_rating:drMap[k]??null,status:m.da!=null?'success':'failed'};
-      });
-      finish(results);
-    }catch(err){
-      showNote('Gagal: '+err.message);
-      setPhase('Stopped');
-    }finally{
-      go.disabled = false;
-      go.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Cek Domain';
+function renderResults() {
+  const { results, total, success, failed } = { results: resultsData, total: resultsData.length, success: resultsData.filter(r => r.status === 'success').length, failed: resultsData.filter(r => r.status === 'failed').length };
+  
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statSuccess').textContent = success;
+  document.getElementById('statFailed').textContent = failed;
+  
+  const successResults = results.filter(r => r.da !== null);
+  const avgDA = successResults.length ? Math.round(successResults.reduce((sum, r) => sum + r.da, 0) / successResults.length) : 0;
+  document.getElementById('statAvgDA').textContent = avgDA || '—';
+  
+  // Sort
+  const sorted = [...results].sort((a, b) => {
+    let aVal = a[sortColumn];
+    let bVal = b[sortColumn];
+    if (sortColumn === 'domain') {
+      aVal = String(aVal || '').toLowerCase();
+      bVal = String(bVal || '').toLowerCase();
+      return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     }
+    aVal = aVal ?? -1;
+    bVal = bVal ?? -1;
+    return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+  });
+  
+  const tbody = document.getElementById('resultsBody');
+  tbody.innerHTML = sorted.map(r => `
+    <tr>
+      <td class="domain-cell">${escapeHtml(r.domain)}</td>
+      <td><span class="badge da ${r.da === null ? 'null' : ''}">${r.da ?? '—'}</span></td>
+      <td><span class="badge pa ${r.pa === null ? 'null' : ''}">${r.pa ?? '—'}</span></td>
+      <td><span class="badge ss ${r.ss === null ? 'null' : ''}">${r.ss ?? '—'}</span></td>
+      <td><span class="badge dr ${r.dr === null ? 'null' : ''}">${r.dr ?? '—'}</span></td>
+    </tr>
+  `).join('');
+  
+  // Update sort indicators
+  document.querySelectorAll('th').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+  });
+  const activeCol = Array.from(document.querySelectorAll('th')).find(th => th.textContent.toLowerCase().includes(sortColumn));
+  if (activeCol) activeCol.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+}
+
+function sortTable(col) {
+  if (sortColumn === col) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortColumn = col;
+    sortDir = 'desc';
   }
+  renderResults();
+}
 
-  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+function exportCSV() {
+  const csv = [
+    ['Domain', 'DA', 'PA', 'SS', 'DR'].join(','),
+    ...resultsData.map(r => [r.domain, r.da ?? '', r.pa ?? '', r.ss ?? '', r.dr ?? ''].join(','))
+  ].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'aiman-checker-results.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
-  // --- Cloudflare Turnstile ---
-  let cfToken = '';
-  window.onTurnstile = function(token){ cfToken = token || ''; };
-  function resetTurnstile(){
-    cfToken = '';
-    if (window.turnstile && document.getElementById('cf-turnstile')) {
-      try { window.turnstile.reset('#cf-turnstile'); } catch(_){}
-    }
+function copyResults() {
+  const text = resultsData.map(r => `${r.domain}\tDA:${r.da ?? '—'}\tPA:${r.pa ?? '—'}\tSS:${r.ss ?? '—'}\tDR:${r.dr ?? '—'}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Check auth status
+fetch('/api/login').then(r => r.json()).then(d => {
+  if (d.authed) {
+    document.getElementById('loginLink').textContent = `👤 ${d.user}`;
+    document.getElementById('loginLink').href = '/api/login?logout=1';
   }
-  async function awaitTurnstile(timeoutMs){
-    const t0 = Date.now();
-    while(!cfToken && Date.now()-t0 < timeoutMs){ await sleep(200); }
-    return cfToken;
-  }
-
-  // Stream one /check invocation. Mutates `metrics`. Returns false on hard error.
-  async function streamCheck(domains, metrics, onProgress){
-    const nrm = (s)=>String(s).toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/+$/,'').trim();
-    // Each /check needs a fresh CF Turnstile token (one-time use). First round
-    // usually already has one from on-page render; later rounds wait for reset.
-    if(!cfToken){
-      setPhase('Waiting for bot verification…');
-      await awaitTurnstile(15000);
-    }
-    const tokenForThisRound = cfToken;
-    resetTurnstile(); // invalidate so next round gets a brand new one
-    const res = await fetch('/check',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({urls:domains, cf_token: tokenForThisRound})});
-    if(!res.ok || !res.body) throw new Error('Server error '+res.status);
-    const reader = res.body.getReader();
-    const dec = new TextDecoder();
-    let buf='';
-    while(true){
-      const {value,done} = await reader.read();
-      if(done) break;
-      buf += dec.decode(value,{stream:true});
-      let nl;
-      while((nl=buf.indexOf('\n'))>=0){
-        const line=buf.slice(0,nl).trim(); buf=buf.slice(nl+1);
-        if(!line) continue;
-        const e=JSON.parse(line);
-        if(e.t==='error'){ showNote(e.msg); return false; }
-        if(e.t==='phase'){ setPhase(e.msg); logLine(e.msg,'info'); }
-        else if(e.t==='batch'){ setPhase(`Fetching batch ${e.i} of ${e.total} · ${e.size} domains`); logLine(`Batch <b>${e.i}/${e.total}</b> — pulling ${e.size} domains`,'info'); }
-        else if(e.t==='result'){
-          const r=e.r; const k=nrm(r.url);
-          if(r.domain_authority!=null) metrics[k]={da:r.domain_authority,pa:r.page_authority,ss:r.spam_score};
-          fillRow(r);
-          if(r.status==='success') logLine(`<b>${r.url}</b> → DA ${r.domain_authority} · PA ${r.page_authority} · SS ${r.spam_score}`,'ok');
-        }
-        else if(e.t==='progress'){ if(onProgress) onProgress(); }
-        else if(e.t==='done'){ if(onProgress) onProgress(); }
-      }
-    }
-    return true;
-  }
-
-  function setPhase(t){ $('phase').textContent = t; }
-
-  function updateBar(done,total){
-    const pct = Math.round(done/total*100);
-    $('fill').style.width = pct+'%';
-    $('pct').textContent = pct+'%';
-    $('tsub').textContent = `${done} / ${total} checked`;
-  }
-
-  function finish(results){
-    lastResults = results;
-    const success = results.filter(r=>r.status==='success').length;
-    const failed = results.length - success;
-    results.forEach(r=>{ fillRow(r); if(r.status!=='success') markFail(r.url); });
-    updateBar(success, results.length);
-    setPhase(`Complete · ${success}/${results.length} resolved`);
-    const sp=document.querySelector('.spin'); if(sp) sp.style.display='none';
-    logLine(`Done — <b>${success}</b> resolved, ${failed} failed`, failed? 'warn':'ok');
-    $('tsub').textContent = `${success} / ${results.length} resolved`;
-    renderStats(results);
-    $('exp').style.display = 'inline-flex';
-    if(failed) showNote(`${failed} domain tidak bisa diresolve setelah retry. Mungkin invalid atau tidak ada data Moz.`);
-  }
-
-  function renderStats(rows){
-    const ok = rows.filter(r=>r.status==='success' && r.domain_authority!=null);
-    if(!ok.length) return;
-    const avg = (k)=>Math.round(ok.reduce((a,b)=>a+(b[k]||0),0)/ok.length);
-    $('s-da').textContent = avg('domain_authority');
-    $('s-pa').textContent = avg('page_authority');
-    const drv = ok.filter(r=>r.domain_rating!=null);
-    $('s-dr').textContent = drv.length? Math.round(drv.reduce((a,b)=>a+b.domain_rating,0)/drv.length):'—';
-    $('s-ss').textContent = avg('spam_score');
-    $('stats').classList.add('on');
-  }
-
-  function showNote(msg){ const n=$('note'); n.textContent=msg; n.classList.add('on'); }
-
-  function exportCsv(){
-    if(!lastResults.length) return;
-    const head=['Domain','DA','PA','DR','SpamScore','Status'];
-    const rows=lastResults.map(r=>[r.url,r.domain_authority??'',r.page_authority??'',r.domain_rating??'',r.spam_score??'',r.status]);
-    const csv=[head.join(','),...rows.map(r=>r.map(c=>`"${c}"`).join(','))].join('\n');
-    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=`aimanchecker-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-  }
-
-  function clearAll(){
-    ta.value='';
-    $('cnt').textContent='0';
-    $('tbody').innerHTML='';
-    $('tblw').classList.remove('on');
-    $('stats').classList.remove('on');
-    $('live').classList.remove('on');
-    $('note').classList.remove('on');
-    $('exp').style.display='none';
-    for(const k in rowMap) delete rowMap[k];
-    lastResults=[];
-  }
-
-  // auto-run from ?url=
-  const qp=new URLSearchParams(location.search).get('url');
-  if(qp){ ta.value=qp; $('cnt').textContent=qp.split('\n').filter(x=>x.trim()).length; run(); }
+});
 </script>
 </body>
 </html>
