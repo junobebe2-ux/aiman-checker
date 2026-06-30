@@ -10,7 +10,7 @@ rm -rf "$DEPLOY"
 mkdir -p "$DEPLOY/functions"
 
 # Static pages
-cp "$SRC"/index.html "$SRC"/checker.html "$SRC"/admin.html "$SRC"/dashboard.html "$SRC"/login.html "$SRC"/dr-booster.html "$DEPLOY/" 2>/dev/null || true
+cp "$SRC"/index.html "$SRC"/checker.html "$SRC"/admin.html "$SRC"/dashboard.html "$SRC"/login.html "$SRC"/dr-booster.html "$SRC"/analyze.html "$DEPLOY/" 2>/dev/null || true
 
 # Pages Functions
 cp -r "$SRC"/functions/* "$DEPLOY/functions/"

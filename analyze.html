@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domain Analyzer — Aiman Checker</title>
+<meta name="description" content="Analisis domain Anda dan dapatkan rekomendasi konkret untuk meningkatkan DA, PA, dan DR.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+  :root{
+    --bg:#0b0b0d; --panel:#141417; --panel-2:#1b1b20; --line:#26262d;
+    --ink:#ecece8; --muted:#8a8a92; --faint:#5a5a62;
+    --gold:#c9a35b; --gold-2:#e6c478; --gold-deep:#9c7b3a;
+    --green:#7fc8a0; --red:#e08a8a; --blue:#6baed6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Sora',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+    min-height:100vh;line-height:1.5;
+    background-image:radial-gradient(900px 500px at 78% -8%,rgba(201,163,91,.10),transparent 60%);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  
+  /* nav */
+  nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em;font-size:18px}
+  .brand a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:11px}
+  .brand .mark{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:16px;
+    box-shadow:0 4px 14px rgba(201,163,91,.30)}
+  .brand b{color:var(--gold-2)}
+  .nav-links{display:flex;gap:26px;font-size:14px}
+  .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
+  .nav-links a:hover{color:var(--ink)}
+  
+  .menu-toggle{display:none;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
+  .menu-toggle svg{width:24px;height:24px}
+  @media(max-width:720px){
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;
+      background:var(--panel);border:1px solid var(--line);border-top:none;
+      flex-direction:column;gap:0;padding:8px 0;z-index:100}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:12px 24px;border-bottom:1px solid var(--line)}
+    .nav-links a:last-child{border-bottom:none}
+    .menu-toggle{display:block}
+    nav{position:relative}
+  }
+  
+  /* hero */
+  .hero{padding:56px 0 30px;max-width:680px}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--gold-2);
+    border:1px solid rgba(201,163,91,.30);background:rgba(201,163,91,.07);padding:6px 13px;border-radius:999px;margin-bottom:22px}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.08;letter-spacing:-.03em;margin-bottom:16px}
+  .g{background:linear-gradient(135deg,var(--gold-2),var(--gold-deep));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .lead{font-size:17px;color:var(--muted);margin-bottom:28px}
+  
+  /* panel */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:30px;margin-top:30px}
+  label{display:block;font-size:14px;font-weight:600;color:var(--muted);margin-bottom:8px}
+  input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:11px;
+    padding:14px 16px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:15px;
+    transition:border-color .2s,box-shadow .2s}
+  input:focus{outline:none;border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(201,163,91,.12)}
+  input::placeholder{color:var(--faint)}
+  
+  .btn{font-family:inherit;font-weight:700;font-size:15px;border:none;border-radius:11px;
+    padding:15px 26px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    background:linear-gradient(140deg,var(--gold-2),var(--gold-deep));color:#1a1408;
+    box-shadow:0 6px 20px rgba(201,163,91,.25);margin-top:18px;transition:transform .15s,box-shadow .2s;border:none}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(201,163,91,.35)}
+  .btn:disabled{opacity:.5;cursor:default;transform:none}
+  .btn svg{width:18px;height:18px}
+  .spin{width:16px;height:16px;border:2px solid rgba(201,163,91,.25);border-top-color:var(--gold-2);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  
+  .note{background:rgba(224,138,138,.08);border:1px solid rgba(224,138,138,.3);color:var(--red);
+    border-radius:10px;padding:11px 13px;margin-top:14px;font-size:13px;display:none}
+  .note.on{display:block}
+  
+  /* results */
+  .results{display:none;margin-top:40px}
+  .results.on{display:block}
+  
+  .metric-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:30px}
+  .metric-card{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center}
+  .metric-card .val{font-size:32px;font-weight:800;color:var(--gold-2);margin-bottom:4px}
+  .metric-card .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  
+  .section-title{font-size:20px;font-weight:700;margin:36px 0 18px;color:var(--gold-2)}
+  
+  .action-item{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:14px}
+  .action-item .top{display:flex;justify-content:space-between;align-items:start;margin-bottom:10px}
+  .action-item .title{font-size:16px;font-weight:700;color:var(--ink)}
+  .priority{font-size:11px;font-weight:700;text-transform:uppercase;padding:4px 10px;border-radius:6px;letter-spacing:.05em}
+  .priority.high{background:rgba(224,138,138,.15);color:var(--red)}
+  .priority.medium{background:rgba(230,196,120,.15);color:var(--gold-2)}
+  .priority.low{background:rgba(127,200,160,.15);color:var(--green)}
+  .action-item .cat{font-size:13px;color:var(--faint);margin-bottom:6px}
+  .action-item .desc{font-size:14px;color:var(--muted);margin-bottom:10px}
+  .action-item .impact{font-size:13px;color:var(--green);margin-bottom:4px}
+  .action-item .effort{font-size:13px;color:var(--blue)}
+  .action-item ul{margin:10px 0 0 20px;font-size:13px;color:var(--muted)}
+  .action-item li{margin-bottom:4px}
+  
+  footer{border-top:1px solid var(--line);margin-top:64px;padding:30px 0;color:var(--faint);font-size:13px;text-align:center}
+  
+  @media(max-width:768px){
+    .wrap{padding:0 18px}
+    h1{font-size:28px}
+    .lead{font-size:15px}
+    .panel{padding:24px 18px}
+    .metric-cards{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand"><a href="/"><span class="mark">A</span>aiman<b>checker</b></a></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="/">Beranda</a>
+      <a href="/checker.html">Checker</a>
+      <a href="/dr-booster.html">DR Booster</a>
+      <a href="/analyze.html" style="color:var(--gold-2)">Analyzer</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <span class="pill"><span class="dot"></span> Analisis mendalam + action plan konkret</span>
+    <h1>Naikkan <span class="g">DA, PA, DR</span> domain Anda dengan strategi yang jelas.</h1>
+    <p class="lead">Masukkan 1 domain, dapatkan metrik saat ini + checklist prioritas untuk boost authority Anda.</p>
+  </section>
+
+  <section class="panel">
+    <label for="domain">Domain Anda</label>
+    <input id="domain" placeholder="example.com" autocomplete="off" autocapitalize="none">
+    <div id="cf-turnstile" class="cf-turnstile" data-sitekey="0x4AAAAAADtWZV7HUO4N_Fhg" data-theme="dark" data-callback="onTurnstile" style="margin:14px 0 4px"></div>
+    <button class="btn" id="analyze" onclick="run()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Analisis Sekarang
+    </button>
+    <div id="note" class="note"></div>
+  </section>
+
+  <section class="results" id="results">
+    <h2 class="section-title">📊 Metrik Saat Ini</h2>
+    <div class="metric-cards">
+      <div class="metric-card"><div class="val" id="m-da">—</div><div class="lbl">DA</div></div>
+      <div class="metric-card"><div class="val" id="m-pa">—</div><div class="lbl">PA</div></div>
+      <div class="metric-card"><div class="val" id="m-dr">—</div><div class="lbl">DR</div></div>
+      <div class="metric-card"><div class="val" id="m-ss">—</div><div class="lbl">Spam Score</div></div>
+    </div>
+
+    <h2 class="section-title">✅ Action Plan</h2>
+    <div id="action-list"></div>
+  </section>
+
+  <footer>
+    <p>© <span id="yr"></span> aimanchecker · Strategi SEO berbasis data.</p>
+  </footer>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  let cfToken = null;
+
+  // Mobile menu
+  const menuToggle = $('menuToggle');
+  const navLinks = $('navLinks');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', ()=> navLinks.classList.toggle('open'));
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', ()=> navLinks.classList.remove('open')));
+  }
+
+  window.onTurnstile = (token) => { cfToken = token; };
+
+  async function run() {
+    const domain = $('domain').value.trim();
+    if (!domain) { showNote('Masukkan domain Anda.'); return; }
+    if (!cfToken) { showNote('Tunggu verifikasi bot selesai.'); return; }
+
+    const btn = $('analyze');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> Menganalisis...';
+    $('note').classList.remove('on');
+    $('results').classList.remove('on');
+
+    try {
+      const res = await fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain, cf_token: cfToken })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Gagal analisis');
+
+      // Render metrics
+      $('m-da').textContent = data.current.da ?? '—';
+      $('m-pa').textContent = data.current.pa ?? '—';
+      $('m-dr').textContent = data.current.dr ?? '—';
+      $('m-ss').textContent = data.current.ss ?? '—';
+
+      // Render action items
+      const list = $('action-list');
+      list.innerHTML = '';
+      for (const item of data.action_items) {
+        const div = document.createElement('div');
+        div.className = 'action-item';
+        div.innerHTML = `
+          <div class="top">
+            <div class="title">${item.action}</div>
+            <span class="priority ${item.priority}">${item.priority}</span>
+          </div>
+          <div class="cat">${item.category}</div>
+          <div class="desc">${item.impact}</div>
+          <div class="effort">Effort: ${item.effort}</div>
+          ${item.details && item.details.length ? '<ul>' + item.details.map(d => '<li>' + d + '</li>').join('') + '</ul>' : ''}
+        `;
+        list.appendChild(div);
+      }
+
+      $('results').classList.add('on');
+    } catch (err) {
+      showNote('Error: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> Analisis Sekarang';
+    }
+  }
+
+  function showNote(msg) {
+    const n = $('note');
+    n.textContent = msg;
+    n.classList.add('on');
+  }
+</script>
+</body>
+</html>
