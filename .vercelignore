@@ -1,0 +1,9 @@
+node_modules
+*.cjs
+results-*.json
+update_env.py
+debug-*.png
+*.html
+.env*
+extract-*.js
+scraper
