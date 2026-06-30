@@ -222,8 +222,8 @@ moz.com"></textarea>
   let maxDomains = 10; // public default
 
   // Check session on page load
-  fetch('/me', { credentials: 'include' }).then(r=>r.json()).then(d=>{
-    if (d.logged_in) {
+  fetch('/api/login', { credentials: 'include' }).then(r=>r.json()).then(d=>{
+    if (d.authed) {
       userSession = d.user;
       maxDomains = 100;
       $('auth-link').textContent = `${d.user} (Logout)`;
@@ -236,7 +236,7 @@ moz.com"></textarea>
   }).catch(()=>{});
 
   function logout(){
-    fetch('/me', { method:'POST', credentials:'include' }).then(()=>{
+    fetch('/api/login', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({logout:true}) }).then(()=>{
       location.reload();
     });
   }

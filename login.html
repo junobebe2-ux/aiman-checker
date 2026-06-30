@@ -96,8 +96,8 @@
   const btn = $('btn');
 
   // Already logged in? bounce to checker
-  fetch('/me', { credentials: 'include' }).then(r=>r.json()).then(d=>{
-    if (d.logged_in) {
+  fetch('/api/login', { credentials: 'include' }).then(r=>r.json()).then(d=>{
+    if (d.authed) {
       ok.textContent = `Already signed in as ${d.user}. Redirecting…`;
       ok.classList.add('on');
       setTimeout(()=>location.href='/checker', 800);
@@ -111,7 +111,7 @@
     btn.disabled = true;
     btn.textContent = 'Signing in…';
     try{
-      const res = await fetch('/login', {
+      const res = await fetch('/api/login', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         credentials:'include',

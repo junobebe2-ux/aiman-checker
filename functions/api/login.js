@@ -1,7 +1,7 @@
 // POST /login -> { ok: true } + Set-Cookie
 // POST /login (logout=true) -> clears cookie
 // GET /login -> { authed: bool, user?: string }
-import { signSession, setSessionCookie, clearSessionCookie, getSessionUser, SESSION_TTL } from './_auth.js';
+import { signSession, setSessionCookie, clearSessionCookie, getSessionUser, SESSION_TTL } from '../_auth.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',

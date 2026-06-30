@@ -13,7 +13,7 @@ mkdir -p "$DEPLOY/functions"
 cp "$SRC"/index.html "$SRC"/checker.html "$SRC"/admin.html "$SRC"/dashboard.html "$SRC"/login.html "$SRC"/pricing.html "$SRC"/dr-booster.html "$DEPLOY/" 2>/dev/null || true
 
 # Pages Functions
-cp "$SRC"/functions/*.js "$DEPLOY/functions/"
+cp -r "$SRC"/functions/* "$DEPLOY/functions/"
 
 # Deploy (token from file to avoid inline redaction issues)
 cd "$DEPLOY"
