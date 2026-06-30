@@ -10,7 +10,7 @@ const JWT_SECRET = '"aiman-checker-secret-key-2024"';
 const USERS_PATH = '/tmp/users.json';
 // Backend URL from Vercel env var (auto-updated by cron)
 const EC2_SCRAPER = process.env.EC2_SCRAPER || 'https://exemption-portrait-badge-encounter.trycloudflare.com';
-const DACHECKER_API = `${EC2_SCRAPER}/api/da-pa-check`;
+const SCRAPER_API = `${EC2_SCRAPER}/check`;
 
 function calculateSpamScore(da) {
   const estimatedMozSpam = Math.max(1, Math.round(15 - da * 0.15));
@@ -62,10 +62,10 @@ async function callScraper(urls) {
   const ctrl = new AbortController();
   const timeout = setTimeout(() => ctrl.abort(), 25000);
   try {
-    const response = await fetch(`${DACHECKER_API}`, {
+    const response = await fetch(`${SCRAPER_API}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ domains: urls }),
+      body: JSON.stringify({ urls: urls }),
       signal: ctrl.signal
     });
     clearTimeout(timeout);
