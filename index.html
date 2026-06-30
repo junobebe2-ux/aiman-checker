@@ -253,7 +253,7 @@ moz.com"></textarea>
     const cells = tr.children;
     cells[1].textContent = r.domain_authority ?? '—';
     cells[2].textContent = r.page_authority ?? '—';
-    cells[3].textContent = r.domain_rating ?? '—';
+    if(r.domain_rating !== undefined) cells[3].textContent = r.domain_rating ?? '—';
     cells[4].textContent = r.spam_score ?? '—';
     cells[5].innerHTML = ok
       ? '<span class="tag ok"><span class="d"></span>done</span>'
@@ -292,28 +292,53 @@ moz.com"></textarea>
     setPhase('Verifying access · solving security check');
     logLine('Run started · <b>'+urls.length+'</b> domains queued','info');
 
-    try{
-      const res = await fetch('/check', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ urls })
-      });
-      if(!res.ok || !res.body) throw new Error('Server error '+res.status);
+    const TOTAL = urls.length;
+    const MAX_ROUNDS = 6;
+    const metrics = {};   // norm-domain -> {da,pa,ss}
+    const drMap = {};     // norm-domain -> dr
+    let resolvedCount = 0;
 
-      const reader = res.body.getReader();
-      const dec = new TextDecoder();
-      let buf = '';
-      while(true){
-        const {value,done} = await reader.read();
-        if(done) break;
-        buf += dec.decode(value,{stream:true});
-        let nl;
-        while((nl = buf.indexOf('\n')) >= 0){
-          const line = buf.slice(0,nl).trim();
-          buf = buf.slice(nl+1);
-          if(line) handleEvent(JSON.parse(line));
+    const nrm = (s)=>String(s).toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/+$/,'').trim();
+    const tickProgress = ()=>updateBar(resolvedCount, TOTAL);
+
+    try{
+      // ROUND-BASED: each /check call is a fresh Worker invocation (fresh subrequest budget)
+      let pending = urls.slice();
+      let round = 0;
+      while(pending.length && round < MAX_ROUNDS){
+        round++;
+        if(round>1){
+          setPhase(`Retry round ${round} · re-checking ${pending.length} domain(s)`);
+          logLine(`Round <b>${round}</b> retry on ${pending.length} unresolved domain(s)…`,'warn');
+          pending.forEach(d=>{ const tr=rowMap[d]; if(tr) tr.children[5].innerHTML='<span class="tag pend"><span class="d"></span>retrying</span>'; });
+          await sleep(1200*round);
         }
+        const got = await streamCheck(pending, metrics, ()=>{ resolvedCount = Object.values(metrics).filter(m=>m.da!=null).length; tickProgress(); });
+        pending = pending.filter(d => !metrics[nrm(d)] || metrics[nrm(d)].da == null);
+        if(!got) break; // hard error already shown
       }
+
+      // DR pass (separate endpoint, chunked <=40 so each invocation stays under subrequest cap)
+      setPhase('Fetching Ahrefs DR…');
+      logLine('Fetching Domain Rating (Ahrefs)…','info');
+      const all = urls.slice();
+      for(let i=0;i<all.length;i+=40){
+        const chunk = all.slice(i,i+40);
+        try{
+          const dres = await fetch('/dr',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({urls:chunk})});
+          const dj = await dres.json();
+          if(dj.success){ Object.assign(drMap, dj.dr); }
+        }catch(_){}
+        // paint DR into rows as it arrives
+        chunk.forEach(d=>{ const tr=rowMap[d]; if(tr && drMap[nrm(d)]!=null) tr.children[3].textContent = drMap[nrm(d)]; });
+      }
+
+      // assemble final results in input order
+      const results = urls.map(u=>{
+        const k=nrm(u); const m=metrics[k]||{da:null,pa:null,ss:null};
+        return {url:u,domain_authority:m.da,page_authority:m.pa,spam_score:m.ss,domain_rating:drMap[k]??null,status:m.da!=null?'success':'failed'};
+      });
+      finish(results);
     }catch(err){
       showNote('Failed: '+err.message);
       setPhase('Stopped');
@@ -323,39 +348,42 @@ moz.com"></textarea>
     }
   }
 
-  function setPhase(t){ $('phase').textContent = t; }
+  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
 
-  function handleEvent(e){
-    switch(e.t){
-      case 'phase':
-        setPhase(e.msg);
-        logLine(e.msg,'info');
-        break;
-      case 'batch':
-        setPhase(`Fetching batch ${e.i} of ${e.total} · ${e.size} domains`);
-        logLine(`Batch <b>${e.i}/${e.total}</b> — pulling ${e.size} domains`,'info');
-        break;
-      case 'result':
-        fillRow(e.r);
-        if(e.r.status==='success') logLine(`<b>${e.r.url}</b> → DA ${e.r.domain_authority} · PA ${e.r.page_authority} · DR ${e.r.domain_rating ?? '—'} · SS ${e.r.spam_score}`,'ok');
-        break;
-      case 'progress':
-        updateBar(e.done,e.total);
-        break;
-      case 'retry':
-        setPhase(`Retry round ${e.round} · re-checking ${e.count} domain(s)`);
-        logLine(`Round <b>${e.round}</b> retry on ${e.count} unresolved domain(s)…`,'warn');
-        (e.domains||[]).forEach(d=>{ const tr=rowMap[d]; if(tr) tr.children[5].innerHTML='<span class="tag pend"><span class="d"></span>retrying</span>'; });
-        break;
-      case 'done':
-        finish(e);
-        break;
-      case 'error':
-        showNote(e.msg);
-        setPhase('Stopped');
-        break;
+  // Stream one /check invocation. Mutates `metrics`. Returns false on hard error.
+  async function streamCheck(domains, metrics, onProgress){
+    const nrm = (s)=>String(s).toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/+$/,'').trim();
+    const res = await fetch('/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({urls:domains})});
+    if(!res.ok || !res.body) throw new Error('Server error '+res.status);
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf='';
+    while(true){
+      const {value,done} = await reader.read();
+      if(done) break;
+      buf += dec.decode(value,{stream:true});
+      let nl;
+      while((nl=buf.indexOf('\n'))>=0){
+        const line=buf.slice(0,nl).trim(); buf=buf.slice(nl+1);
+        if(!line) continue;
+        const e=JSON.parse(line);
+        if(e.t==='error'){ showNote(e.msg); return false; }
+        if(e.t==='phase'){ setPhase(e.msg); logLine(e.msg,'info'); }
+        else if(e.t==='batch'){ setPhase(`Fetching batch ${e.i} of ${e.total} · ${e.size} domains`); logLine(`Batch <b>${e.i}/${e.total}</b> — pulling ${e.size} domains`,'info'); }
+        else if(e.t==='result'){
+          const r=e.r; const k=nrm(r.url);
+          if(r.domain_authority!=null) metrics[k]={da:r.domain_authority,pa:r.page_authority,ss:r.spam_score};
+          fillRow(r);
+          if(r.status==='success') logLine(`<b>${r.url}</b> → DA ${r.domain_authority} · PA ${r.page_authority} · SS ${r.spam_score}`,'ok');
+        }
+        else if(e.t==='progress'){ if(onProgress) onProgress(); }
+        else if(e.t==='done'){ if(onProgress) onProgress(); }
+      }
     }
+    return true;
   }
+
+  function setPhase(t){ $('phase').textContent = t; }
 
   function updateBar(done,total){
     const pct = Math.round(done/total*100);
@@ -364,19 +392,19 @@ moz.com"></textarea>
     $('tsub').textContent = `${done} / ${total} checked`;
   }
 
-  function finish(e){
-    lastResults = e.results;
-    // final fill in input order
-    e.results.forEach(r=>{ fillRow(r); if(r.status!=='success') markFail(r.url); });
-    updateBar(e.total,e.total);
-    setPhase(`Complete · ${e.success}/${e.total} resolved`);
-    $('phase').previousElementSibling; // noop
-    document.querySelector('.spin').style.display='none';
-    logLine(`Done — <b>${e.success}</b> resolved, ${e.failed} failed`, e.failed? 'warn':'ok');
-    $('tsub').textContent = `${e.success} / ${e.total} resolved`;
-    renderStats(e.results);
+  function finish(results){
+    lastResults = results;
+    const success = results.filter(r=>r.status==='success').length;
+    const failed = results.length - success;
+    results.forEach(r=>{ fillRow(r); if(r.status!=='success') markFail(r.url); });
+    updateBar(success, results.length);
+    setPhase(`Complete · ${success}/${results.length} resolved`);
+    const sp=document.querySelector('.spin'); if(sp) sp.style.display='none';
+    logLine(`Done — <b>${success}</b> resolved, ${failed} failed`, failed? 'warn':'ok');
+    $('tsub').textContent = `${success} / ${results.length} resolved`;
+    renderStats(results);
     $('exp').style.display = 'inline-flex';
-    if(e.failed) showNote(`${e.failed} domain(s) could not be resolved after retries. They may be invalid or have no Moz data.`);
+    if(failed) showNote(`${failed} domain(s) could not be resolved after retries. They may be invalid or have no Moz data.`);
   }
 
   function renderStats(rows){

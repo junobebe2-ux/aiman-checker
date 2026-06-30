@@ -1,18 +1,19 @@
 // Cloudflare Pages Function: POST /check  (NDJSON streaming)
-// Real Moz DA/PA/SS via Guestpostlinks (Turnstile solved by YesCaptcha) + DR via Ahrefs.
-// Streams progress events line-by-line so the UI can show live progress and never looks stuck.
-// Failed domains are retried in fresh sessions until resolved (capped rounds).
+// GPL-only: real Moz DA/PA/SS via Guestpostlinks (Turnstile solved by YesCaptcha).
+// DR is fetched separately by the client via /dr (keeps subrequests per invocation low).
+// No in-worker retry — the client re-invokes /check for failed domains (fresh subrequest budget each call).
+// Subrequest budget (100 domains): cookies(1) + captcha(1 + <=20 polls) + 5 batches = ~27, safely under the 50 free-plan cap.
 
 const SITE_KEY = '0x4AAAAAAAin6Bci-iDm5IXu';
 const PAGE_URL = 'https://tools.guestpostlinks.net/bulk-da-pa-checker-tool/';
 const AJAX_URL = 'https://tools.guestpostlinks.net/wp-admin/admin-ajax.php';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-const CHUNK = 20;       // GPL max domains per batch
-const MAX_ROUNDS = 6;   // retry rounds for stubborn domains
+const CHUNK = 20;        // GPL max domains per batch
+const MAX_POLLS = 20;    // captcha poll cap (20 * 3s = 60s) -> bounds subrequests
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
@@ -35,7 +36,7 @@ async function solveTurnstile(key) {
   const cData = await cRes.json();
   if (cData.errorId !== 0) throw new Error(`YesCaptcha create: ${cData.errorDescription}`);
   const taskId = cData.taskId;
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < MAX_POLLS; i++) {
     await new Promise(r => setTimeout(r, 3000));
     const rRes = await fetch('https://api.yescaptcha.com/getTaskResult', {
       method: 'POST',
@@ -55,7 +56,6 @@ async function getCookies() {
   return sc.split(',').map(c => c.split(';')[0].trim()).filter(Boolean).join('; ');
 }
 
-// One GPL batch. batchIndex 0 needs turnstile token; later batches reuse refId.
 async function queryBatch(urls, allRaw, opts) {
   const { token, cookies, batchIndex, batchTotal, refId } = opts;
   const p = new URLSearchParams();
@@ -103,57 +103,6 @@ async function queryBatch(urls, allRaw, opts) {
   return { metrics: out, refId: newRefId };
 }
 
-async function getDR(domain) {
-  try {
-    const res = await fetch(`https://api.ahrefs.com/v3/public/domain-rating-free?target=${encodeURIComponent(domain)}`);
-    const json = await res.json();
-    return json.domain_rating?.domain_rating ?? null;
-  } catch (e) { return null; }
-}
-
-// Run a full GPL session over `urls` (solve turnstile once, batches reuse ref_id).
-// Returns { [normDomain]: {da,pa,ss} }. Emits batch events via send().
-async function runSession(urls, key, send, baseDone, grandTotal) {
-  const cookies = await getCookies();
-  const token = await solveTurnstile(key);
-  const batches = [];
-  for (let i = 0; i < urls.length; i += CHUNK) batches.push(urls.slice(i, i + CHUNK));
-
-  const all = {};
-  let refId = '';
-  let done = baseDone;
-  for (let i = 0; i < batches.length; i++) {
-    send({ t: 'batch', i: i + 1, total: batches.length, size: batches[i].length });
-    const { metrics, refId: rid } = await queryBatch(batches[i], urls, {
-      token, cookies, batchIndex: i, batchTotal: batches.length, refId
-    });
-    if (rid) refId = rid;
-    Object.assign(all, metrics);
-
-    // Fetch DR in parallel for this batch, then stream each row with a tiny stagger
-    const drs = await Promise.all(batches[i].map(d => getDR(d)));
-    for (let j = 0; j < batches[i].length; j++) {
-      const d = batches[i][j];
-      const m = metrics[d] || all[d] || { da: null, pa: null, ss: null };
-      done++;
-      send({
-        t: 'result',
-        r: {
-          url: d,
-          domain_authority: m.da,
-          page_authority: m.pa,
-          spam_score: m.ss,
-          domain_rating: drs[j],
-          status: m.da !== null ? 'success' : 'pending'
-        }
-      });
-      send({ t: 'progress', done, total: grandTotal });
-      await new Promise(r => setTimeout(r, 25)); // cascade rows in UI
-    }
-  }
-  return all;
-}
-
 export async function onRequestOptions() {
   return new Response(null, { status: 200, headers: CORS });
 }
@@ -175,41 +124,52 @@ export async function onRequestPost(context) {
 
       const urls = rawUrls.map(norm);
       const total = urls.length;
+      const batches = [];
+      for (let i = 0; i < urls.length; i += CHUNK) batches.push(urls.slice(i, i + CHUNK));
+
       send({ t: 'phase', phase: 'verify', msg: 'Verifying access \u00b7 solving security check' });
+      const cookies = await getCookies();
+      const token = await solveTurnstile(env.YESCAPTCHA_KEY);
 
-      // First pass
-      let metrics = await runSession(urls, env.YESCAPTCHA_KEY, send, 0, total);
+      const metrics = {};
+      let refId = '';
+      let done = 0;
+      for (let i = 0; i < batches.length; i++) {
+        send({ t: 'batch', i: i + 1, total: batches.length, size: batches[i].length });
+        const { metrics: m, refId: rid } = await queryBatch(batches[i], urls, {
+          token, cookies, batchIndex: i, batchTotal: batches.length, refId
+        });
+        if (rid) refId = rid;
+        Object.assign(metrics, m);
 
-      // Retry rounds for any domain that came back null
-      let failed = urls.filter(d => !metrics[d] || metrics[d].da === null);
-      let round = 0;
-      while (failed.length && round < MAX_ROUNDS) {
-        round++;
-        send({ t: 'retry', round, count: failed.length, domains: failed.slice(0, 50) });
-        await new Promise(r => setTimeout(r, 1500 * round)); // backoff
-        const more = await runSession(failed, env.YESCAPTCHA_KEY, send, 0, total);
-        for (const [k, v] of Object.entries(more)) {
-          if (v && v.da !== null) metrics[k] = v;
+        for (const d of batches[i]) {
+          const mm = metrics[d] || { da: null, pa: null, ss: null };
+          done++;
+          send({
+            t: 'result',
+            r: {
+              url: d,
+              domain_authority: mm.da,
+              page_authority: mm.pa,
+              spam_score: mm.ss,
+              status: mm.da !== null ? 'success' : 'pending'
+            }
+          });
+          send({ t: 'progress', done, total });
+          await new Promise(r => setTimeout(r, 20));
         }
-        failed = urls.filter(d => !metrics[d] || metrics[d].da === null);
       }
 
-      // Final assembled results (preserve original input order + raw input string)
-      const results = await Promise.all(rawUrls.map(async (u) => {
-        const nu = norm(u);
-        const m = metrics[nu] || { da: null, pa: null, ss: null };
-        const dr = await getDR(nu);
+      const results = rawUrls.map(u => {
+        const m = metrics[norm(u)] || { da: null, pa: null, ss: null };
         return {
           url: u,
           domain_authority: m.da,
           page_authority: m.pa,
           spam_score: m.ss,
-          domain_rating: dr,
-          source: 'guestpostlinks (Moz) + ahrefs',
           status: m.da !== null ? 'success' : 'failed'
         };
-      }));
-
+      });
       const success = results.filter(r => r.status === 'success').length;
       send({ t: 'done', total, success, failed: total - success, results });
     } catch (e) {
