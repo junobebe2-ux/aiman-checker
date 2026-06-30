@@ -8,7 +8,9 @@ import { checkLimit, getLimits } from './limits.js';
 
 const JWT_SECRET = '"aiman-checker-secret-key-2024"';
 const USERS_PATH = '/tmp/users.json';
-const DACHECKER_API = 'https://concentrations-contain-rays-hans.trycloudflare.com/api/da-pa-check';
+// Backend URL from Vercel env var (auto-updated by cron)
+const EC2_SCRAPER = process.env.EC2_SCRAPER || 'https://concentrations-contain-rays-hans.trycloudflare.com';
+const DACHECKER_API = `${EC2_SCRAPER}/api/da-pa-check`;
 
 function calculateSpamScore(da) {
   const estimatedMozSpam = Math.max(1, Math.round(15 - da * 0.15));
