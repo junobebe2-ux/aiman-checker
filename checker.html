@@ -35,7 +35,20 @@
   .nav-links{display:flex;gap:26px;font-size:14px;color:var(--muted)}
   .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
   .nav-links a:hover{color:var(--ink)}
-  @media(max-width:620px){.nav-links{display:none}}
+  
+  /* Mobile nav - show menu button */
+  .menu-toggle{display:none;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
+  .menu-toggle svg{width:24px;height:24px}
+  @media(max-width:720px){
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;
+      background:var(--panel);border:1px solid var(--line);border-top:none;
+      flex-direction:column;gap:0;padding:8px 0}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:12px 24px;border-bottom:1px solid var(--line)}
+    .nav-links a:last-child{border-bottom:none}
+    .menu-toggle{display:block}
+    nav{position:relative}
+  }
 
   /* hero */
   .hero{padding:56px 0 30px;max-width:680px}
@@ -171,8 +184,11 @@
 <div class="wrap">
   <nav>
     <div class="brand"><a href="/" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:11px"><span class="mark">A</span>aiman<b>checker</b></a></div>
-    <div class="nav-links">
-      <a href="/">Home</a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="/">Beranda</a>
       <a href="#tool">Checker</a>
       <a href="/dr-booster.html">DR Booster</a>
       <a id="auth-link" href="/login.html" style="color:var(--gold-2)">Login</a>
@@ -180,15 +196,15 @@
   </nav>
 
   <section class="hero">
-    <span class="pill"><span class="dot"></span> Live Moz &amp; Ahrefs data · no estimates</span>
-    <h1>Bulk check <span class="g">DA, PA, DR</span> &amp; spam score for your domains.</h1>
-    <p class="lead">Paste your domains and get real Moz Domain Authority, Page Authority, Spam Score and Ahrefs Domain Rating — pulled live, retried until every domain resolves. <span style="color:var(--gold-2)">Public: 10 domains, 3 runs/day. Login: 100 domains, unlimited.</span></p>
+    <span class="pill"><span class="dot"></span> Data live Moz & Ahrefs · bukan estimasi</span>
+    <h1>Cek massal <span class="g">DA, PA, DR</span> &amp; spam score untuk domain Anda.</h1>
+    <p class="lead">Paste domain Anda dan dapatkan Moz Domain Authority, Page Authority, Spam Score dan Ahrefs Domain Rating yang asli — ditarik live, di-retry sampai semua domain resolve. <span style="color:var(--gold-2)">Publik: 10 domain, 3 run/hari. Login: 100 domain, unlimited.</span></p>
   </section>
 
   <section class="panel" id="tool">
     <div class="panel-head">
-      <label for="domains">Your domains</label>
-      <span class="counter"><b id="cnt">0</b> / 100 lines</span>
+      <label for="domains">Paste domain Anda (satu per baris)</label>
+      <span class="hint"><span id="cnt">0</span> / 10 baris</span>
     </div>
     <textarea id="domains" placeholder="malcomschein.my.id
 example.com
@@ -198,21 +214,21 @@ moz.com"></textarea>
     <div class="row">
       <button class="btn btn-go" id="go" onclick="run()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        Check domains
+        Cek Domain
       </button>
       <button class="btn btn-ghost" id="exp" onclick="exportCsv()" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
         Export CSV
       </button>
-      <button class="btn btn-ghost" onclick="clearAll()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m-9 0v14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6"/></svg>
-        Clear
-      </button>
     </div>
+    <div id="note" class="note"></div>
+  </section>
 
-    <div class="live" id="live">
-      <div class="pbar-top">
-        <span class="ph"><span class="spin"></span><span id="phase">Starting…</span></span>
+  <div class="live" id="live">
+    <div class="pbar-top">
+      <div class="ph"><span class="spin"></span><span id="phase">Mempersiapkan...</span></div>
+      <div class="pc"><span id="prog">0</span>/<span id="total">0</span></div>
+    </div>
         <span class="pct" id="pct">0%</span>
       </div>
       <div class="track"><div class="fill" id="fill"></div></div>
@@ -255,17 +271,26 @@ moz.com"></textarea>
   let userSession = null;
   let maxDomains = 10; // public default
 
+  // Mobile menu toggle
+  const menuToggle = $('menuToggle');
+  const navLinks = $('navLinks');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', ()=> navLinks.classList.toggle('open'));
+    // Close menu when clicking a link
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', ()=> navLinks.classList.remove('open')));
+  }
+
   // Check session on page load
   fetch('/api/login', { credentials: 'include' }).then(r=>r.json()).then(d=>{
     if (d.authed) {
       userSession = d.user;
       maxDomains = 100;
-      $('auth-link').textContent = `${d.user} (Logout)`;
+      $('auth-link').textContent = `${d.user} (Keluar)`;
       $('auth-link').href = '#';
       $('auth-link').onclick = (e)=>{ e.preventDefault(); logout(); };
-      $('cnt').nextSibling.textContent = ` / ${maxDomains} lines`;
+      $('cnt').nextSibling.textContent = ` / ${maxDomains} baris`;
     } else {
-      $('cnt').nextSibling.textContent = ` / ${maxDomains} lines (10 public, 100 logged in)`;
+      $('cnt').nextSibling.textContent = ` / ${maxDomains} baris (10 publik, 100 login)`;
     }
   }).catch(()=>{});
 
@@ -326,9 +351,9 @@ moz.com"></textarea>
 
   async function run(){
     const urls = ta.value.split('\n').map(s=>s.trim()).filter(Boolean);
-    if(!urls.length){ showNote('Add at least one domain first.'); return; }
+    if(!urls.length){ showNote('Tambahkan minimal satu domain.'); return; }
     if(urls.length > maxDomains){
-      showNote(`Max ${maxDomains} domains per run.${maxDomains===10 ? ' Login to unlock 100.' : ''}`);
+      showNote(`Maksimal ${maxDomains} domain per run.${maxDomains===10 ? ' Login untuk unlock 100 domain.' : ''}`);
       return;
     }
 
@@ -403,11 +428,11 @@ moz.com"></textarea>
       });
       finish(results);
     }catch(err){
-      showNote('Failed: '+err.message);
+      showNote('Gagal: '+err.message);
       setPhase('Stopped');
     }finally{
       go.disabled = false;
-      go.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Check domains';
+      go.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Cek Domain';
     }
   }
 
@@ -490,7 +515,7 @@ moz.com"></textarea>
     $('tsub').textContent = `${success} / ${results.length} resolved`;
     renderStats(results);
     $('exp').style.display = 'inline-flex';
-    if(failed) showNote(`${failed} domain(s) could not be resolved after retries. They may be invalid or have no Moz data.`);
+    if(failed) showNote(`${failed} domain tidak bisa diresolve setelah retry. Mungkin invalid atau tidak ada data Moz.`);
   }
 
   function renderStats(rows){

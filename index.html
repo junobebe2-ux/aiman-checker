@@ -33,10 +33,23 @@
     background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:16px;
     box-shadow:0 4px 14px rgba(201,163,91,.30)}
   .brand b{color:var(--gold-2)}
-  .nav-links{display:flex;gap:26px;font-size:14px;color:var(--muted)}
+  .nav-links{display:flex;gap:28px;font-size:14px;color:var(--muted)}
   .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
   .nav-links a:hover{color:var(--ink)}
-  @media(max-width:720px){.nav-links{display:none}}
+  
+  /* Mobile nav */
+  .menu-toggle{display:none;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
+  .menu-toggle svg{width:24px;height:24px}
+  @media(max-width:720px){
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;
+      background:var(--panel);border:1px solid var(--line);border-top:none;
+      flex-direction:column;gap:0;padding:8px 0;z-index:100}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:12px 24px;border-bottom:1px solid var(--line)}
+    .nav-links a:last-child{border-bottom:none}
+    .menu-toggle{display:block}
+    nav{position:relative}
+  }
 
   /* hero */
   .hero{padding:80px 0 50px;text-align:center;max-width:860px;margin:0 auto}
@@ -164,25 +177,28 @@
 <div class="wrap">
   <nav>
     <div class="brand"><span class="mark">A</span>aiman<b>checker</b></div>
-    <div class="nav-links">
-      <a href="#tools">Tools</a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="#tools">Alat</a>
       <a href="#tutorial">Tutorial</a>
       <a href="#faq">FAQ</a>
     </div>
   </nav>
 
   <section class="hero">
-    <span class="pill"><span class="dot"></span> Live Moz & Ahrefs data · no estimates</span>
-    <h1>SEO metrics you can <span class="g">actually trust.</span></h1>
-    <p class="lead">Check DA, PA, DR, and Spam Score for 100 domains at once. Find high-DR guest post sites and live journalist queries. Real numbers, retried until every domain resolves.</p>
+    <span class="pill"><span class="dot"></span> Data live Moz &amp; Ahrefs · bukan estimasi</span>
+    <h1>Metrik SEO yang <span class="g">bisa dipercaya.</span></h1>
+    <p class="lead">Cek DA, PA, DR, dan Spam Score untuk 100 domain sekaligus. Temukan situs guest post DR tinggi dan query jurnalis live. Data asli, diretry sampai semua domain resolve.</p>
     <div class="cta">
       <a href="#tools" class="btn btn-primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        Start checking
+        Mulai Cek
       </a>
-      <a href="#tutorial" class="btn btn-secondary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M2 12h20"/></svg>
-        Learn how
+      <a href="/dr-booster.html" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Cari Backlink
       </a>
     </div>
   </section>
@@ -334,13 +350,21 @@
   </section>
 
   <footer>
-    <p>© <span id="yr"></span> aimanchecker · Real metrics, real backlinks, real results.</p>
-    <p style="margin-top:8px">Powered by Moz · Ahrefs · Google SERP · Featured · Qwoted</p>
+    <p>© <span id="yr"></span> aimanchecker · Metrik asli, backlink asli, hasil nyata.</p>
+    <p style="margin-top:8px">Didukung oleh Moz · Ahrefs · Google SERP · Featured · Qwoted</p>
   </footer>
 </div>
 
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
+  
+  // Mobile menu toggle
+  const menuToggle = document.getElementById('menuToggle');
+  const navLinks = document.getElementById('navLinks');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', ()=> navLinks.classList.toggle('open'));
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', ()=> navLinks.classList.remove('open')));
+  }
 </script>
 </body>
 </html>
