@@ -3,6 +3,8 @@
 // Flow: fetch page -> 2Captcha Turnstile -> emd/captcha-verify -> dapa/check
 // Subrequest budget (100 domains): page(1) + captcha(1 + <=20 polls) + verify(1) + 2 batches(2) = ~25, under 50.
 
+import { getSessionUser } from './_auth.js';
+
 const SITE_KEY = '0x4AAAAAAAX_O8VfAMao1UUl';
 const PAGE_URL = 'https://www.prepostseo.com/domain-authority-checker';
 const BASE_URL = 'https://www.prepostseo.com/';
@@ -166,6 +168,32 @@ export async function onRequestOptions() {
   return new Response(null, { status: 200, headers: CORS });
 }
 
+// In-memory per-IP daily counter (best-effort; resets when Worker isolate cycles).
+// Logged-in users skip this entirely.
+const DAILY_LIMIT_PUBLIC = 3;
+const PUBLIC_MAX_DOMAINS = 10;
+const LOGGED_MAX_DOMAINS = 100;
+const ipUsage = new Map(); // ip -> { day: 'YYYY-MM-DD', count: n }
+
+function todayUTC() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function bumpIp(ip) {
+  if (!ip) return { count: 0, allowed: true };
+  const day = todayUTC();
+  const cur = ipUsage.get(ip);
+  if (!cur || cur.day !== day) {
+    ipUsage.set(ip, { day, count: 1 });
+    return { count: 1, allowed: true };
+  }
+  if (cur.count >= DAILY_LIMIT_PUBLIC) {
+    return { count: cur.count, allowed: false };
+  }
+  cur.count++;
+  return { count: cur.count, allowed: true };
+}
+
 async function verifyTurnstile(token, secret, ip) {
   if (!secret) throw new Error('TURNSTILE_SECRET not set');
   if (!token) return { success: false, error: 'missing-token' };
@@ -187,6 +215,8 @@ export async function onRequestPost(context) {
   const rawUrls = (body.urls || []).map(u => String(u).trim()).filter(Boolean);
   const cfToken = body.cf_token || '';
   const clientIp = request.headers.get('CF-Connecting-IP') || '';
+  const sessionUser = await getSessionUser(request, env);
+  const logged = !!sessionUser;
 
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
@@ -203,7 +233,27 @@ export async function onRequestPost(context) {
       }
 
       if (!rawUrls.length) { send({ t: 'error', msg: 'No domains provided' }); return; }
-      if (rawUrls.length > 100) { send({ t: 'error', msg: 'Max 100 domains per request' }); return; }
+
+      // Limits depend on auth status
+      const maxDomains = logged ? LOGGED_MAX_DOMAINS : PUBLIC_MAX_DOMAINS;
+      if (rawUrls.length > maxDomains) {
+        send({ t: 'error', msg: logged
+          ? `Max ${LOGGED_MAX_DOMAINS} domains per request`
+          : `Public limit: max ${PUBLIC_MAX_DOMAINS} domains per run. Login to unlock ${LOGGED_MAX_DOMAINS}.` });
+        return;
+      }
+
+      // Daily per-IP cap (public only)
+      if (!logged) {
+        const usage = bumpIp(clientIp);
+        if (!usage.allowed) {
+          send({ t: 'error', msg: `Daily limit reached (${DAILY_LIMIT_PUBLIC} runs/day per IP). Try again tomorrow or login for unlimited.` });
+          return;
+        }
+        send({ t: 'phase', msg: `Public run ${usage.count}/${DAILY_LIMIT_PUBLIC} today` });
+      } else {
+        send({ t: 'phase', msg: 'Authenticated · unlimited mode' });
+      }
 
       const urls = rawUrls.map(norm);
       const total = urls.length;
