@@ -3,6 +3,7 @@
 // Flow: fetch page -> 2Captcha Turnstile -> emd/captcha-verify -> dapa/check
 
 import { getSessionUser } from './_auth.js';
+import { checkCredit, consumeCredit } from './_credit.js';
 
 const SITE_KEY = '0x4AAAAAAAX_O8VfAMao1UUl';
 const PAGE_URL = 'https://www.prepostseo.com/domain-authority-checker';
@@ -244,7 +245,7 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Rate limit (public only)
+    // Rate limit + 2patcha credit check
     if (!logged) {
       const usage = bumpIp(clientIp);
       if (!usage.allowed) {
@@ -258,12 +259,25 @@ export async function onRequestPost(context) {
       }
     }
 
+    // 2patcha credit protection: cap 30 solves/day globally
+    const twocaptchaBudget = checkCredit('twocaptcha');
+    if (!twocaptchaBudget.allowed) {
+      return new Response(JSON.stringify({ 
+        ok: false, 
+        error: 'Solver quota exceeded. Please try again in 1 hour.'
+      }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json', ...CORS }
+      });
+    }
+
     const urls = rawUrls.map(norm);
     const total = urls.length;
     const batches = [];
     for (let i = 0; i < urls.length; i += CHUNK) batches.push(urls.slice(i, i + CHUNK));
 
-    // Auth + solve
+    // Auth + solve (consume credit here)
+    consumeCredit('twocaptcha', 1);
     const cookies = await initSession();
     const token = await solveTurnstile(env.TWOCAPTCHA_KEY);
     const reqKey = await verifyCaptcha(cookies, token);

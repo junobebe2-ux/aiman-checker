@@ -2,6 +2,7 @@
 // SERP-based discovery of journalist requests indexed across Featured / Qwoted / Terkel / SourceBottle.
 
 import { googleSerp } from './_serp.js';
+import { checkCredit, consumeCredit } from './_credit.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -66,6 +67,13 @@ export async function onRequestPost(context) {
       if (!niche) { send({ t: 'error', msg: 'Niche required' }); return; }
       if (!env.BRIGHTDATA_TOKEN) { send({ t: 'error', msg: 'SERP not configured' }); return; }
 
+      // BrightData credit protection
+      const bdBudget = checkCredit('brightdata');
+      if (!bdBudget.allowed) {
+        send({ t: 'error', msg: 'BrightData quota exceeded. Try again in 1 hour.' });
+        return;
+      }
+
       const keywords = niche.split(/[,\s]+/).filter(k => k.length >= 3);
       const queries = HARO_QUERIES(niche);
       const seen = new Map(); // url -> result
@@ -76,6 +84,7 @@ export async function onRequestPost(context) {
         send({ t: 'query', q });
         try {
           const results = await googleSerp(env.BRIGHTDATA_TOKEN, q, 15);
+          consumeCredit('brightdata', 1);
           let added = 0;
           for (const r of results) {
             if (seen.has(r.url)) continue;

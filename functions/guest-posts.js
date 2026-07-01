@@ -2,6 +2,7 @@
 // 6 search patterns × ~20 results = up to 120 candidate domains, deduped + scored.
 
 import { googleSerp, isJunk, stripTags } from './_serp.js';
+import { checkCredit, consumeCredit } from './_credit.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -44,6 +45,13 @@ export async function onRequestPost(context) {
       if (niche.length > 80) { send({ t: 'error', msg: 'Niche too long' }); return; }
       if (!env.BRIGHTDATA_TOKEN) { send({ t: 'error', msg: 'SERP not configured' }); return; }
 
+      // BrightData credit protection
+      const bdBudget = checkCredit('brightdata');
+      if (!bdBudget.allowed) {
+        send({ t: 'error', msg: 'BrightData quota exceeded. Try again in 1 hour.' });
+        return;
+      }
+
       const queries = QUERY_TEMPLATES(niche);
       const seen = new Map(); // domain -> result
 
@@ -53,6 +61,7 @@ export async function onRequestPost(context) {
         send({ t: 'query', q });
         try {
           const results = await googleSerp(env.BRIGHTDATA_TOKEN, q, 20);
+          consumeCredit('brightdata', 1);
           let added = 0;
           for (const r of results) {
             if (seen.has(r.domain)) continue;
