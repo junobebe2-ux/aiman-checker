@@ -12,6 +12,9 @@ mkdir -p "$DEPLOY/functions"
 # Static pages + i18n
 cp "$SRC"/*.html "$SRC"/i18n.js "$DEPLOY/" 2>/dev/null || true
 
+# Secrets file for local env (Pages picks up .env)
+cp -p "$SRC"/.env.production "$DEPLOY/.env.production" 2>/dev/null || true
+
 # Pages Functions
 cp -r "$SRC"/functions/* "$DEPLOY/functions/"
 
