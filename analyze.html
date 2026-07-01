@@ -481,6 +481,8 @@ function renderResults(data) {
       ${renderMetric('Spam Score', ss + '%', Math.max(0, 100 - (cur.ss ?? 0)), [70, 85], metricHint('ss', ss))}
     </div>
 
+    ${data.domain_info ? renderDomainInfo(data.domain_info) : ''}
+
     ${quickWins.length ? renderPhase(1, 'Quick Wins', 'Lakuin minggu ini — dampak besar, effort kecil', quickWins, 'p1') : ''}
     ${growth.length ? renderPhase(2, 'Growth Plan', 'Target bulan ini — naikin DR bertahap', growth, 'p2') : ''}
     ${longTerm.length ? renderPhase(3, 'Long-term', 'Strategi 3+ bulan — sustain growth', longTerm, 'p3') : ''}
@@ -543,6 +545,23 @@ function renderMetric(name, displayVal, rawVal, thresholds, hint) {
       </div>
       <div class="metric-bar"><div class="metric-fill ${cls}" data-w="${pct}" style="width:0"></div></div>
       <div class="metric-hint">${hint}</div>
+    </div>
+  `;
+}
+
+function renderDomainInfo(info) {
+  const rows = [];
+  if (info.indexedPages != null) rows.push(['Indexed Pages', info.indexedPages.toLocaleString('id-ID') + ' halaman']);
+  if (info.domainAge != null) rows.push(['Umur Domain', info.domainAge + ' tahun' + (info.createdDate ? ` (sejak ${info.createdDate})` : '')]);
+  if (info.registrar) rows.push(['Registrar', info.registrar]);
+  if (info.expiry) rows.push(['Expiry', info.expiry]);
+  if (info.ssl != null) rows.push(['SSL/HTTPS', info.ssl ? '✅ Aktif' : '❌ Tidak aktif']);
+
+  if (!rows.length) return '';
+  return `
+    <div class="data-block" style="margin-bottom:24px">
+      <h4>Domain Info</h4>
+      ${rows.map(([k, v]) => `<div class="data-item"><span style="color:var(--muted)">${k}</span><span style="font-weight:600">${v}</span></div>`).join('')}
     </div>
   `;
 }

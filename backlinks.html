@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backlink Checker — Aiman Checker</title>
+<meta name="description" content="Cek backlink pointing to domain. Lihat siapa yang link ke lo + DR domain mereka.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+  :root{
+    --bg:#0b0b0d; --panel:#141417; --panel-2:#1b1b20; --line:#26262d;
+    --ink:#ecece8; --muted:#8a8a92; --faint:#5a5a62;
+    --gold:#c9a35b; --gold-2:#e6c478; --gold-deep:#9c7b3a;
+    --green:#7fc8a0; --red:#e08a8a; --blue:#6baed6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Sora',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.5;background-image:radial-gradient(900px 500px at 78% -8%,rgba(201,163,91,.10),transparent 60%)}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+
+  nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px}
+  .brand a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px}
+  .brand .mark{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:15px}
+  .brand b{color:var(--gold-2)}
+  .nav-links{display:flex;gap:22px;font-size:14px;align-items:center}
+  .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
+  .nav-links a:hover{color:var(--ink)}
+  .lang-switch{display:flex;gap:4px;margin-left:12px;padding-left:12px;border-left:1px solid var(--line)}
+  .lang-switch button{background:none;border:none;color:var(--faint);cursor:pointer;font-size:12px;font-weight:600;padding:2px 5px;border-radius:4px;transition:all .15s}
+  .lang-switch button.active{color:var(--gold-2);background:rgba(201,163,91,.1)}
+  .lang-switch button:hover{color:var(--ink)}
+  .menu-toggle{display:none;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
+  .menu-toggle svg{width:22px;height:22px}
+  @media(max-width:720px){
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-top:none;flex-direction:column;gap:0;padding:6px 0;z-index:100}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:11px 22px;border-bottom:1px solid var(--line)}
+    .nav-links a:last-child{border-bottom:none}
+    .nav-links .lang-switch{margin:8px 22px;padding:10px 0;border-top:1px solid var(--line);border-left:none}
+    .menu-toggle{display:block}
+    nav{position:relative}
+  }
+
+  .hero{padding:44px 0 20px;max-width:600px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--gold-2);border:1px solid rgba(201,163,91,.25);background:rgba(201,163,91,.06);padding:5px 12px;border-radius:999px;margin-bottom:16px}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  h1{font-size:clamp(26px,5vw,38px);line-height:1.1;letter-spacing:-.03em;font-weight:800;margin-bottom:12px}
+  .g{background:linear-gradient(135deg,var(--gold-2),var(--gold-deep));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .lead{font-size:15.5px;color:var(--muted);margin-bottom:22px}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .input-row{display:flex;gap:12px;align-items:stretch}
+  .input-wrap{flex:1}
+  .input-wrap label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 15px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:14px;transition:border-color .2s,box-shadow .2s}
+  input:focus{outline:none;border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(201,163,91,.12)}
+  input::placeholder{color:var(--faint)}
+  .btn{font-family:inherit;font-weight:700;font-size:14px;border:none;border-radius:10px;padding:13px 24px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(140deg,var(--gold-2),var(--gold-deep));color:#1a1408;box-shadow:0 5px 18px rgba(201,163,91,.22);transition:transform .15s,box-shadow .2s;white-space:nowrap;align-self:flex-end}
+  .btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 9px 24px rgba(201,163,91,.32)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+  .btn-ghost:hover:not(:disabled){border-color:var(--gold-deep);color:var(--gold-2)}
+  .btn svg{width:16px;height:16px}
+  .spin{width:16px;height:16px;border:2px solid rgba(201,163,91,.25);border-top-color:var(--gold-2);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .turnstile-wrapper{margin-top:14px}
+
+  /* Loading */
+  .loading{display:none;margin-top:20px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px;text-align:center}
+  .loading.on{display:block;animation:fadeIn .3s}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .loading .spin-big{width:36px;height:36px;border:3px solid rgba(201,163,91,.15);border-top-color:var(--gold-2);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+  .loading p{font-size:14px;color:var(--muted)}
+
+  /* Results */
+  .results{display:none;margin-top:28px}
+  .results.on{display:block;animation:fadeIn .4s}
+
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px}
+  .stat-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center}
+  .stat-card .val{font-size:30px;font-weight:800;color:var(--gold-2)}
+  .stat-card .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+
+  .section-title{font-size:17px;font-weight:700;margin:24px 0 14px;color:var(--gold-2)}
+  .bl-table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .bl-table th{background:var(--panel-2);padding:11px 14px;text-align:left;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line)}
+  .bl-table td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
+  .bl-table tr:last-child td{border-bottom:none}
+  .bl-table tr:hover{background:var(--panel-2)}
+  .bl-url{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue);word-break:break-all}
+  .bl-title{color:var(--ink);font-weight:500;margin-bottom:3px;font-size:13px}
+  .dr-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px}
+  .dr-badge.high{background:rgba(127,200,160,.15);color:var(--green)}
+  .dr-badge.mid{background:rgba(201,163,91,.15);color:var(--gold-2)}
+  .dr-badge.low{background:rgba(90,90,98,.2);color:var(--faint)}
+  .type-tag{font-size:11px;color:var(--faint)}
+
+  .empty{text-align:center;padding:40px;color:var(--faint);font-size:14px}
+
+  footer{border-top:1px solid var(--line);margin-top:48px;padding:28px 0;color:var(--faint);font-size:12.5px;text-align:center}
+
+  @media(max-width:768px){
+    .wrap{padding:0 18px}
+    .hero{padding:32px 0 16px}
+    h1{font-size:24px}
+    .panel{padding:18px 14px}
+    .input-row{flex-direction:column}
+    .btn{align-self:stretch}
+    .bl-table{font-size:12px}
+    .bl-table th,.bl-table td{padding:9px 10px}
+    .stats-row{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand"><a href="/"><span class="mark">A</span>aiman<b>checker</b></a></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="/checker">Checker</a>
+      <a href="/backlinks">Backlinks</a>
+      <a href="/speed">Speed</a>
+      <a href="/dr-booster">DR Booster</a>
+      <a href="/analyze">Analyzer</a>
+      <a href="/blog">Blog</a>
+      <a href="/login" id="loginLink">Login</a>
+      <div class="lang-switch">
+        <button onclick="setLang('id')" id="langId" class="active">ID</button>
+        <button onclick="setLang('en')" id="langEn">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="pill"><span class="dot"></span> Liat siapa yang link ke domain lo</div>
+    <h1>Backlink <span class="g">Checker</span></h1>
+    <p class="lead">Masukkan domain, lo dapet list backlinks pointing ke domain tersebut lengkap dengan DR domain sumbernya. Sortir by DR, liat yang paling berharga.</p>
+  </div>
+
+  <div class="panel" id="inputPanel">
+    <div class="input-row">
+      <div class="input-wrap">
+        <label for="domain">Domain</label>
+        <input type="text" id="domain" placeholder="example.com" autocomplete="off">
+      </div>
+      <button class="btn" id="checkBtn" disabled>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path d="M21 21l-4.35-4.35M11 17a6 6 0 100-12 6 6 0 000 12z"/></svg>
+        Cek Backlinks
+      </button>
+    </div>
+    <div class="turnstile-wrapper">
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAADtWZV7HUO4N_Fhg" data-callback="onTurnstileSuccess"></div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spin-big"></div>
+    <p>Lagi scrape backlink profile domain lo...</p>
+  </div>
+
+  <div class="results" id="results"></div>
+
+  <footer>
+    <p>© <span id="yr"></span> aimanchecker · Backlinks via Ahrefs + Google SERP</p>
+  </footer>
+</div>
+
+<script src="/i18n.js"></script>
+<script>
+let turnstileToken = null;
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+if (menuToggle) {
+  menuToggle.addEventListener('click', ()=> navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', ()=> navLinks.classList.remove('open')));
+}
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+function onTurnstileSuccess(token) {
+  turnstileToken = token;
+  document.getElementById('checkBtn').disabled = !document.getElementById('domain').value.trim() || !token;
+}
+
+document.getElementById('domain').addEventListener('input', () => {
+  document.getElementById('checkBtn').disabled = !document.getElementById('domain').value.trim() || !turnstileToken;
+});
+
+document.getElementById('domain').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !document.getElementById('checkBtn').disabled) document.getElementById('checkBtn').click();
+});
+
+document.getElementById('checkBtn').addEventListener('click', async () => {
+  const domain = document.getElementById('domain').value.trim().replace(/^https?:\/\//, '').replace(/\/$/, '').replace(/^www\./, '');
+  if (!domain) return;
+  if (!turnstileToken) { alert('Tunggu verifikasi bot'); return; }
+
+  const btn = document.getElementById('checkBtn');
+  btn.disabled = true;
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('results').classList.remove('on');
+  document.getElementById('inputPanel').style.opacity = '.5';
+  document.getElementById('inputPanel').style.pointerEvents = 'none';
+
+  try {
+    const res = await fetch('/backlinks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain, cf_token: turnstileToken })
+    });
+    const data = await res.json();
+
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('inputPanel').style.opacity = '1';
+    document.getElementById('inputPanel').style.pointerEvents = 'auto';
+
+    if (!data.ok) {
+      alert('Error: ' + (data.error || 'Unknown'));
+      btn.disabled = false;
+      return;
+    }
+
+    renderResults(data);
+  } catch (err) {
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('inputPanel').style.opacity = '1';
+    document.getElementById('inputPanel').style.pointerEvents = 'auto';
+    alert('Gagal: ' + err.message);
+  }
+
+  turnstileToken = null;
+  if (window.turnstile) window.turnstile.reset();
+  document.getElementById('checkBtn').disabled = true;
+});
+
+function drClass(dr) {
+  if (dr >= 50) return 'high';
+  if (dr >= 20) return 'mid';
+  return 'low';
+}
+
+function renderResults(data) {
+  const bl = data.backlinks || [];
+  const html = `
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="val">${data.refDomains || '—'}</div>
+        <div class="lbl">Referring Domains</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">${data.totalFound || bl.length}</div>
+        <div class="lbl">Backlinks Found</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">${bl.filter(b => b.dr >= 50).length}</div>
+        <div class="lbl">DR 50+ Links</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">${bl.filter(b => b.dr >= 20 && b.dr < 50).length}</div>
+        <div class="lbl">DR 20-49</div>
+      </div>
+    </div>
+
+    <div class="section-title">Top Backlinks (sorted by DR)</div>
+    ${bl.length === 0 ? '<div class="empty">Tidak ada backlink ditemukan. Domain mungkin baru atau belum punya backlink.</div>' : `
+    <table class="bl-table">
+      <thead>
+        <tr><th>Source URL</th><th>DR</th><th>Type</th></tr>
+      </thead>
+      <tbody>
+        ${bl.map(b => `
+          <tr>
+            <td>
+              <div class="bl-title">${b.title || b.source || '—'}</div>
+              <div class="bl-url">${b.source}</div>
+            </td>
+            <td><span class="dr-badge ${drClass(b.dr)}">${b.dr || 0}</span></td>
+            <td><span class="type-tag">${b.type || 'text'}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    `}
+  `;
+
+  const el = document.getElementById('results');
+  el.innerHTML = html;
+  el.classList.add('on');
+  el.scrollIntoView({ behavior: 'smooth' });
+}
+
+fetch('/api/login').then(r => r.json()).then(d => {
+  if (d.authed) {
+    document.getElementById('loginLink').textContent = `👤 ${d.user}`;
+    document.getElementById('loginLink').href = '/api/login?logout=1';
+  }
+}).catch(()=>{});
+</script>
+</body>
+</html>

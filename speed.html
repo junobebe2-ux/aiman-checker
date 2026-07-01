@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page Speed Check — Aiman Checker</title>
+<meta name="description" content="Cek Core Web Vitals: LCP, FID, CLS + PageSpeed score. Gratis, data real dari Google.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+  :root{
+    --bg:#0b0b0d; --panel:#141417; --panel-2:#1b1b20; --line:#26262d;
+    --ink:#ecece8; --muted:#8a8a92; --faint:#5a5a62;
+    --gold:#c9a35b; --gold-2:#e6c478; --gold-deep:#9c7b3a;
+    --green:#7fc8a0; --red:#e08a8a; --orange:#e0b88a; --blue:#6baed6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Sora',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.5;background-image:radial-gradient(900px 500px at 78% -8%,rgba(201,163,91,.10),transparent 60%)}
+  .wrap{max-width:900px;margin:0 auto;padding:0 24px}
+
+  nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px}
+  .brand a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px}
+  .brand .mark{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:15px}
+  .brand b{color:var(--gold-2)}
+  .nav-links{display:flex;gap:22px;font-size:14px;align-items:center}
+  .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
+  .nav-links a:hover{color:var(--ink)}
+  .lang-switch{display:flex;gap:4px;margin-left:12px;padding-left:12px;border-left:1px solid var(--line)}
+  .lang-switch button{background:none;border:none;color:var(--faint);cursor:pointer;font-size:12px;font-weight:600;padding:2px 5px;border-radius:4px;transition:all .15s}
+  .lang-switch button.active{color:var(--gold-2);background:rgba(201,163,91,.1)}
+  .lang-switch button:hover{color:var(--ink)}
+  .menu-toggle{display:none;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
+  .menu-toggle svg{width:22px;height:22px}
+  @media(max-width:720px){
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-top:none;flex-direction:column;gap:0;padding:6px 0;z-index:100}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:11px 22px;border-bottom:1px solid var(--line)}
+    .nav-links a:last-child{border-bottom:none}
+    .nav-links .lang-switch{margin:8px 22px;padding:10px 0;border-top:1px solid var(--line);border-left:none}
+    .menu-toggle{display:block}
+    nav{position:relative}
+  }
+
+  .hero{padding:44px 0 20px;max-width:600px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--gold-2);border:1px solid rgba(201,163,91,.25);background:rgba(201,163,91,.06);padding:5px 12px;border-radius:999px;margin-bottom:16px}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  h1{font-size:clamp(26px,5vw,38px);line-height:1.1;letter-spacing:-.03em;font-weight:800;margin-bottom:12px}
+  .g{background:linear-gradient(135deg,var(--gold-2),var(--gold-deep));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .lead{font-size:15.5px;color:var(--muted);margin-bottom:22px}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .input-row{display:flex;gap:12px;align-items:stretch}
+  .input-wrap{flex:1}
+  .input-wrap label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 15px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:14px;transition:border-color .2s,box-shadow .2s}
+  input:focus{outline:none;border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(201,163,91,.12)}
+  input::placeholder{color:var(--faint)}
+  .strategy-row{display:flex;gap:8px;margin-top:12px}
+  .strategy-btn{flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s}
+  .strategy-btn.active{border-color:var(--gold-deep);color:var(--gold-2);background:rgba(201,163,91,.08)}
+  .btn{font-family:inherit;font-weight:700;font-size:14px;border:none;border-radius:10px;padding:13px 24px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(140deg,var(--gold-2),var(--gold-deep));color:#1a1408;box-shadow:0 5px 18px rgba(201,163,91,.22);transition:transform .15s,box-shadow .2s;white-space:nowrap;align-self:flex-end}
+  .btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 9px 24px rgba(201,163,91,.32)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn svg{width:16px;height:16px}
+  .spin{width:16px;height:16px;border:2px solid rgba(201,163,91,.25);border-top-color:var(--gold-2);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .turnstile-wrapper{margin-top:14px}
+
+  .loading{display:none;margin-top:20px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px;text-align:center}
+  .loading.on{display:block;animation:fadeIn .3s}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .loading .spin-big{width:36px;height:36px;border:3px solid rgba(201,163,91,.15);border-top-color:var(--gold-2);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+  .loading p{font-size:14px;color:var(--muted)}
+
+  .results{display:none;margin-top:28px}
+  .results.on{display:block;animation:fadeIn .4s}
+
+  /* Score gauge */
+  .score-section{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px;text-align:center;margin-bottom:20px}
+  .score-ring{position:relative;width:120px;height:120px;margin:0 auto 14px}
+  .score-ring svg{width:120px;height:120px;transform:rotate(-90deg)}
+  .score-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+  .score-ring .bg-c{stroke:var(--panel-2)}
+  .score-ring .fill-c{stroke:url(#sg);transition:stroke-dashoffset 1s ease}
+  .score-val{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:34px;font-weight:800}
+  .score-label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+  .score-grade{font-size:15px;font-weight:700;padding:5px 16px;border-radius:999px;display:inline-block}
+  .score-grade.good{background:rgba(127,200,160,.15);color:var(--green)}
+  .score-grade.mid{background:rgba(201,163,91,.15);color:var(--gold-2)}
+  .score-grade.poor{background:rgba(224,138,138,.15);color:var(--red)}
+  .score-url{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--faint);margin-top:8px;word-break:break-all}
+
+  /* Core Web Vitals */
+  .cwv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}
+  .cwv-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center}
+  .cwv-card .name{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  .cwv-card .num{font-size:26px;font-weight:800;margin-bottom:4px}
+  .cwv-card .unit{font-size:12px;color:var(--faint)}
+  .cwv-card .status{font-size:11px;font-weight:600;margin-top:8px;padding:2px 8px;border-radius:5px;display:inline-block}
+  .cwv-card .status.good{background:rgba(127,200,160,.12);color:var(--green)}
+  .cwv-card .status.warn{background:rgba(224,184,138,.12);color:var(--orange)}
+  .cwv-card .status.bad{background:rgba(224,138,138,.12);color:var(--red)}
+  .cwv-card .num.good{color:var(--green)}
+  .cwv-card .num.warn{color:var(--orange)}
+  .cwv-card .num.bad{color:var(--red)}
+
+  .section-title{font-size:16px;font-weight:700;margin:24px 0 14px;color:var(--gold-2)}
+  .metrics-table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .metrics-table th{background:var(--panel-2);padding:10px 14px;text-align:left;font-size:12px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line)}
+  .metrics-table td{padding:11px 14px;border-bottom:1px solid var(--line);font-size:13px}
+  .metrics-table tr:last-child td{border-bottom:none}
+
+  .opp-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:10px}
+  .opp-item .opp-head{display:flex;justify-content:space-between;align-items:start;gap:12px;margin-bottom:6px}
+  .opp-item .opp-title{font-size:14px;font-weight:600;flex:1}
+  .opp-item .opp-save{font-size:12px;font-weight:700;color:var(--green);background:rgba(127,200,160,.1);padding:3px 8px;border-radius:5px;white-space:nowrap}
+  .opp-item .opp-desc{font-size:12.5px;color:var(--muted);line-height:1.5}
+
+  .empty{text-align:center;padding:40px;color:var(--faint);font-size:14px}
+
+  footer{border-top:1px solid var(--line);margin-top:48px;padding:28px 0;color:var(--faint);font-size:12.5px;text-align:center}
+
+  @media(max-width:768px){
+    .wrap{padding:0 18px}
+    .hero{padding:32px 0 16px}
+    h1{font-size:24px}
+    .panel{padding:18px 14px}
+    .input-row{flex-direction:column}
+    .btn{align-self:stretch}
+    .cwv-grid{grid-template-columns:repeat(2,1fr)}
+    .metrics-table{font-size:12px}
+    .metrics-table th,.metrics-table td{padding:9px 10px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand"><a href="/"><span class="mark">A</span>aiman<b>checker</b></a></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="/checker">Checker</a>
+      <a href="/backlinks">Backlinks</a>
+      <a href="/speed">Speed</a>
+      <a href="/dr-booster">DR Booster</a>
+      <a href="/analyze">Analyzer</a>
+      <a href="/blog">Blog</a>
+      <a href="/login" id="loginLink">Login</a>
+      <div class="lang-switch">
+        <button onclick="setLang('id')" id="langId" class="active">ID</button>
+        <button onclick="setLang('en')" id="langEn">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="pill"><span class="dot"></span> Core Web Vitals dari Google PageSpeed Insights</div>
+    <h1>Page <span class="g">Speed</span> Check</h1>
+    <p class="lead">Masukkan URL, lo dapet skor performa + Core Web Vitals (LCP, FID, CLS) + saran optimasi. Data real dari Google.</p>
+  </div>
+
+  <div class="panel" id="inputPanel">
+    <div class="input-row">
+      <div class="input-wrap">
+        <label for="url">URL (halaman lengkap atau domain)</label>
+        <input type="text" id="url" placeholder="example.com atau example.com/blog/post" autocomplete="off">
+      </div>
+      <button class="btn" id="checkBtn" disabled>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Cek Speed
+      </button>
+    </div>
+    <div class="strategy-row">
+      <button class="strategy-btn active" data-strategy="mobile" onclick="selectStrategy('mobile')">📱 Mobile</button>
+      <button class="strategy-btn" data-strategy="desktop" onclick="selectStrategy('desktop')">💻 Desktop</button>
+    </div>
+    <div class="turnstile-wrapper">
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAADtWZV7HUO4N_Fhg" data-callback="onTurnstileSuccess"></div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spin-big"></div>
+    <p id="loadingText">Lagi ngetes kecepatan halaman via Google...</p>
+  </div>
+
+  <div class="results" id="results"></div>
+
+  <footer>
+    <p>© <span id="yr"></span> aimanchecker · Data dari Google PageSpeed Insights API</p>
+  </footer>
+</div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#e6c478"/><stop offset="100%" stop-color="#9c7b3a"/>
+  </linearGradient>
+</defs></svg>
+
+<script src="/i18n.js"></script>
+<script>
+let turnstileToken = null;
+let strategy = 'mobile';
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+if (menuToggle) {
+  menuToggle.addEventListener('click', ()=> navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', ()=> navLinks.classList.remove('open')));
+}
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+function selectStrategy(s) {
+  strategy = s;
+  document.querySelectorAll('.strategy-btn').forEach(b => b.classList.toggle('active', b.dataset.strategy === s));
+}
+
+function onTurnstileSuccess(token) {
+  turnstileToken = token;
+  document.getElementById('checkBtn').disabled = !document.getElementById('url').value.trim() || !token;
+}
+
+document.getElementById('url').addEventListener('input', () => {
+  document.getElementById('checkBtn').disabled = !document.getElementById('url').value.trim() || !turnstileToken;
+});
+
+document.getElementById('url').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !document.getElementById('checkBtn').disabled) document.getElementById('checkBtn').click();
+});
+
+document.getElementById('checkBtn').addEventListener('click', async () => {
+  const url = document.getElementById('url').value.trim();
+  if (!url) return;
+  if (!turnstileToken) { alert('Tunggu verifikasi bot'); return; }
+
+  const btn = document.getElementById('checkBtn');
+  btn.disabled = true;
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('results').classList.remove('on');
+  document.getElementById('inputPanel').style.opacity = '.5';
+  document.getElementById('inputPanel').style.pointerEvents = 'none';
+  document.getElementById('loadingText').textContent = `Lagi ngetest ${url} (${strategy})...`;
+
+  try {
+    const res = await fetch('/speed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, strategy, cf_token: turnstileToken })
+    });
+    const data = await res.json();
+
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('inputPanel').style.opacity = '1';
+    document.getElementById('inputPanel').style.pointerEvents = 'auto';
+
+    if (!data.ok) {
+      alert('Error: ' + (data.error || 'Unknown'));
+      btn.disabled = false;
+      return;
+    }
+
+    renderResults(data);
+  } catch (err) {
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('inputPanel').style.opacity = '1';
+    document.getElementById('inputPanel').style.pointerEvents = 'auto';
+    alert('Gagal: ' + err.message);
+  }
+
+  turnstileToken = null;
+  if (window.turnstile) window.turnstile.reset();
+  document.getElementById('checkBtn').disabled = true;
+});
+
+function scoreGrade(s) {
+  if (s >= 80) return { label: 'Good', cls: 'good' };
+  if (s >= 50) return { label: 'Needs Work', cls: 'mid' };
+  return { label: 'Poor', cls: 'poor' };
+}
+
+function lcpStatus(v) {
+  const s = parseFloat(v);
+  if (s <= 2.5) return 'good';
+  if (s <= 4) return 'warn';
+  return 'bad';
+}
+function clsStatus(v) {
+  const s = parseFloat(v);
+  if (s <= 0.1) return 'good';
+  if (s <= 0.25) return 'warn';
+  return 'bad';
+}
+function fidStatus(v) {
+  const s = parseFloat(v);
+  if (s <= 0.1) return 'good';
+  if (s <= 0.3) return 'warn';
+  return 'bad';
+}
+function metricStatus(v, good, warn) {
+  const s = parseFloat(v);
+  if (s <= good) return 'good';
+  if (s <= warn) return 'warn';
+  return 'bad';
+}
+function statusText(s) {
+  return s === 'good' ? 'Good' : s === 'warn' ? 'Perlu Perbaikan' : 'Buruk';
+}
+
+function renderResults(data) {
+  const m = data.metrics || {};
+  const g = scoreGrade(data.score);
+  const circ = 2 * Math.PI * 52;
+  const offset = circ - (data.score / 100) * circ;
+
+  const lcpS = lcpStatus(m.lcp);
+  const clsS = clsStatus(m.cls);
+  const fidS = fidStatus(m.fid);
+  const fcpS = metricStatus(m.fcp, 1.8, 3);
+  const ttfbS = metricStatus(m.ttfb, 200, 500);
+  const tbtS = metricStatus(m.tbt, 0.2, 0.6);
+
+  const opps = data.opportunities || [];
+
+  const html = `
+    <div class="score-section">
+      <div class="score-label">Performance Score (${data.strategy})</div>
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120">
+          <circle class="bg-c" cx="60" cy="60" r="52"/>
+          <circle class="fill-c" cx="60" cy="60" r="52" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/>
+        </svg>
+        <div class="score-val">${data.score}</div>
+      </div>
+      <div class="score-grade ${g.cls}">${g.label}</div>
+      <div class="score-url">${data.url}</div>
+      ${data.source === 'fallback_analysis' ? '<div style="font-size:11px;color:var(--orange);margin-top:8px;padding:3px 10px;background:rgba(224,184,138,.1);border-radius:5px;display:inline-block">⚠ Estimasi (PSI API quota habis)</div>' : ''}
+    </div>
+
+    <div class="section-title">Core Web Vitals</div>
+    <div class="cwv-grid">
+      <div class="cwv-card">
+        <div class="name">LCP</div>
+        <div class="num ${lcpS}">${m.lcp}<span class="unit">s</span></div>
+        <div class="status ${lcpS}">${statusText(lcpS)}</div>
+      </div>
+      <div class="cwv-card">
+        <div class="name">CLS</div>
+        <div class="num ${clsS}">${m.cls}</div>
+        <div class="status ${clsS}">${statusText(clsS)}</div>
+      </div>
+      <div class="cwv-card">
+        <div class="name">FID</div>
+        <div class="num ${fidS}">${m.fid}<span class="unit">s</span></div>
+        <div class="status ${fidS}">${statusText(fidS)}</div>
+      </div>
+    </div>
+
+    <div class="section-title">Metrics Detail</div>
+    <table class="metrics-table">
+      <thead><tr><th>Metric</th><th>Nilai</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>First Contentful Paint</td><td><b>${m.fcp}s</b></td><td><span class="status ${fcpS}">${statusText(fcpS)}</span></td></tr>
+        <tr><td>Time to First Byte</td><td><b>${m.ttfb}ms</b></td><td><span class="status ${ttfbS}">${statusText(ttfbS)}</span></td></tr>
+        <tr><td>Total Blocking Time</td><td><b>${m.tbt}s</b></td><td><span class="status ${tbtS}">${statusText(tbtS)}</span></td></tr>
+        <tr><td>Speed Index</td><td><b>${m.si}s</b></td><td>—</td></tr>
+        <tr><td>Time to Interactive</td><td><b>${m.tti}s</b></td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    ${opps.length ? `
+    <div class="section-title">Saran Optimasi (${opps.length})</div>
+    ${opps.map(o => `
+      <div class="opp-item">
+        <div class="opp-head">
+          <div class="opp-title">${o.title}</div>
+          <div class="opp-save">Hemat ${(o.savingsMs/1000).toFixed(1)}s</div>
+        </div>
+        <div class="opp-desc">${o.desc}</div>
+      </div>
+    `).join('')}
+    ` : ''}
+
+    ${data.fieldData ? `
+    <div class="section-title">Real User Data (Chrome UX Report)</div>
+    <div class="cwv-grid">
+      ${data.fieldData.lcp ? `<div class="cwv-card"><div class="name">LCP (Real)</div><div class="num ${(data.fieldData.lcp/1000)<=2.5?'good':(data.fieldData.lcp/1000)<=4?'warn':'bad'}">${(data.fieldData.lcp/1000).toFixed(2)}s</div><div class="status ${data.fieldData.lcpCat?.toLowerCase()?.includes('fast')?'good':data.fieldData.lcpCat?.toLowerCase()?.includes('slow')?'bad':'warn'}">${data.fieldData.lcpCat || '—'}</div></div>` : ''}
+      ${data.fieldData.fid ? `<div class="cwv-card"><div class="name">FID (Real)</div><div class="num ${(data.fieldData.fid/1000)<=0.1?'good':(data.fieldData.fid/1000)<=0.3?'warn':'bad'}">${(data.fieldData.fid/1000).toFixed(3)}s</div><div class="status ${data.fieldData.fidCat?.toLowerCase()?.includes('fast')?'good':data.fieldData.fidCat?.toLowerCase()?.includes('slow')?'bad':'warn'}">${data.fieldData.fidCat || '—'}</div></div>` : ''}
+      ${data.fieldData.cls != null ? `<div class="cwv-card"><div class="name">CLS (Real)</div><div class="num ${data.fieldData.cls<=0.1?'good':data.fieldData.cls<=0.25?'warn':'bad'}">${data.fieldData.cls.toFixed(3)}</div><div class="status ${data.fieldData.clsCat?.toLowerCase()?.includes('fast')?'good':data.fieldData.clsCat?.toLowerCase()?.includes('slow')?'bad':'warn'}">${data.fieldData.clsCat || '—'}</div></div>` : ''}
+    </div>
+    ` : ''}
+  `;
+
+  const el = document.getElementById('results');
+  el.innerHTML = html;
+  el.classList.add('on');
+  setTimeout(() => {
+    const fill = el.querySelector('.fill-c');
+    if (fill) fill.style.strokeDashoffset = offset;
+  }, 100);
+  el.scrollIntoView({ behavior: 'smooth' });
+}
+
+fetch('/api/login').then(r => r.json()).then(d => {
+  if (d.authed) {
+    document.getElementById('loginLink').textContent = `👤 ${d.user}`;
+    document.getElementById('loginLink').href = '/api/login?logout=1';
+  }
+}).catch(()=>{});
+</script>
+</body>
+</html>

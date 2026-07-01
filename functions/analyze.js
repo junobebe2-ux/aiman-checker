@@ -86,6 +86,29 @@ export async function onRequestPost(context) {
     // 8) Generate action items
     const actionItems = generateActionItems(currentMetrics, backlinks, guestPosts, brokenLinks, contentGaps, domain);
 
+    // 9) Domain info: indexed pages + domain age + SSL
+    let domainInfo = null;
+    try {
+      const diRes = await fetch(`${origin}/domaininfo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain })
+      });
+      if (diRes.ok) {
+        const diData = await diRes.json();
+        if (diData.ok) {
+          domainInfo = {
+            indexedPages: diData.indexedPages,
+            domainAge: diData.domainAge,
+            createdDate: diData.createdDate,
+            registrar: diData.registrar,
+            expiry: diData.expiry,
+            ssl: diData.ssl
+          };
+        }
+      }
+    } catch (_) {}
+
     return new Response(JSON.stringify({
       ok: true,
       domain,
@@ -95,7 +118,8 @@ export async function onRequestPost(context) {
       action_items: actionItems,
       backlinks: backlinks.slice(0, 10),
       broken_links: brokenLinks.slice(0, 5),
-      guest_posts: guestPosts.slice(0, 5)
+      guest_posts: guestPosts.slice(0, 5),
+      domain_info: domainInfo
     }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' }
