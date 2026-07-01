@@ -109,6 +109,9 @@
   
   footer{border-top:1px solid var(--line);margin-top:64px;padding:30px 0;color:var(--faint);font-size:13px;text-align:center}
   
+  /* Turnstile widget styling */
+  .turnstile-wrapper{margin-top:16px;text-align:center}
+  
   @media(max-width:768px){
     .wrap{padding:0 18px}
     h1{font-size:28px}
@@ -122,126 +125,156 @@
 <div class="wrap">
   <nav>
     <div class="brand"><a href="/"><span class="mark">A</span>aiman<b>checker</b></a></div>
-    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
-    <div class="nav-links" id="navLinks">
-      <a href="/">Beranda</a>
-      <a href="/checker.html">Checker</a>
-      <a href="/dr-booster.html">DR Booster</a>
-      <a href="/analyze.html" style="color:var(--gold-2)">Analyzer</a>
+    <div class="nav-links">
+      <a href="/checker">Domain Checker</a>
+      <a href="/dr-booster">DR Booster</a>
+      <a href="/analyze">Analyzer</a>
+      <a href="/login" id="loginLink">Login</a>
     </div>
   </nav>
 
-  <section class="hero">
-    <span class="pill"><span class="dot"></span> Analisis mendalam + action plan konkret</span>
-    <h1>Naikkan <span class="g">DA, PA, DR</span> domain Anda dengan strategi yang jelas.</h1>
-    <p class="lead">Masukkan 1 domain, dapatkan metrik saat ini + checklist prioritas untuk boost authority Anda.</p>
-  </section>
+  <div class="hero">
+    <div class="pill"><span class="dot"></span>Analisis Mendalam untuk Meningkatkan Otoritas Domain</div>
+    <h1>Dapatkan <span class="g">Action Plan</span> untuk DA, PA, dan DR</h1>
+    <p class="lead">Masukkan domain Anda untuk melihat metrik saat ini dan langkah konkret yang harus diambil untuk meningkatkan otoritas SEO.</p>
+  </div>
 
-  <section class="panel">
-    <label for="domain">Domain Anda</label>
-    <input id="domain" placeholder="example.com" autocomplete="off" autocapitalize="none">
-    <div id="cf-turnstile" class="cf-turnstile" data-sitekey="0x4AAAAAADtWZV7HUO4N_Fhg" data-theme="dark" data-callback="onTurnstile" style="margin:14px 0 4px"></div>
-    <button class="btn" id="analyze" onclick="run()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-      Analisis Sekarang
+  <div class="panel">
+    <label for="domain">Domain (tanpa http/https)</label>
+    <input type="text" id="domain" placeholder="example.com">
+    
+    <div class="turnstile-wrapper">
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAADtWZV7HUO4N_Fhg" data-callback="onTurnstileSuccess"></div>
+    </div>
+    
+    <button class="btn" id="analyzeBtn" disabled>
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg> Analisis Sekarang
     </button>
-    <div id="note" class="note"></div>
-  </section>
+  </div>
 
-  <section class="results" id="results">
-    <h2 class="section-title">📊 Metrik Saat Ini</h2>
+  <div class="results" id="resultsWrap">
     <div class="metric-cards">
-      <div class="metric-card"><div class="val" id="m-da">—</div><div class="lbl">DA</div></div>
-      <div class="metric-card"><div class="val" id="m-pa">—</div><div class="lbl">PA</div></div>
-      <div class="metric-card"><div class="val" id="m-dr">—</div><div class="lbl">DR</div></div>
-      <div class="metric-card"><div class="val" id="m-ss">—</div><div class="lbl">Spam Score</div></div>
+      <div class="metric-card">
+        <div class="val" id="valDA">—</div>
+        <div class="lbl">DA</div>
+      </div>
+      <div class="metric-card">
+        <div class="val" id="valPA">—</div>
+        <div class="lbl">PA</div>
+      </div>
+      <div class="metric-card">
+        <div class="val" id="valDR">—</div>
+        <div class="lbl">DR</div>
+      </div>
+      <div class="metric-card">
+        <div class="val" id="valSS">—</div>
+        <div class="lbl">Spam Score</div>
+      </div>
     </div>
 
-    <h2 class="section-title">✅ Action Plan</h2>
-    <div id="action-list"></div>
-  </section>
-
-  <footer>
-    <p>© <span id="yr"></span> aimanchecker · Strategi SEO berbasis data.</p>
-  </footer>
+    <div class="section-title">Rekomendasi Tindakan</div>
+    <div id="actionList"></div>
+  </div>
 </div>
 
 <script>
-  const $ = id => document.getElementById(id);
-  document.getElementById('yr').textContent = new Date().getFullYear();
-  let cfToken = null;
+let turnstileToken = null;
 
-  // Mobile menu
-  const menuToggle = $('menuToggle');
-  const navLinks = $('navLinks');
-  if (menuToggle) {
-    menuToggle.addEventListener('click', ()=> navLinks.classList.toggle('open'));
-    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', ()=> navLinks.classList.remove('open')));
+function onTurnstileSuccess(token) {
+  turnstileToken = token;
+  document.getElementById('analyzeBtn').disabled = !document.getElementById('domain').value.trim() || !token;
+}
+
+document.getElementById('domain').addEventListener('input', () => {
+  const domain = document.getElementById('domain').value.trim();
+  document.getElementById('analyzeBtn').disabled = !domain || !turnstileToken;
+});
+
+document.getElementById('analyzeBtn').addEventListener('click', async () => {
+  const domain = document.getElementById('domain').value.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+  if (!domain) {
+    alert('Masukkan domain');
+    return;
+  }
+  if (!turnstileToken) {
+    alert('Tunggu verifikasi bot selesai');
+    return;
   }
 
-  window.onTurnstile = (token) => { cfToken = token; };
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Sedang menganalisis...';
 
-  async function run() {
-    const domain = $('domain').value.trim();
-    if (!domain) { showNote('Masukkan domain Anda.'); return; }
-    if (!cfToken) { showNote('Tunggu verifikasi bot selesai.'); return; }
+  try {
+    const res = await fetch('/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain, cf_token: turnstileToken })
+    });
 
-    const btn = $('analyze');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> Menganalisis...';
-    $('note').classList.remove('on');
-    $('results').classList.remove('on');
+    const data = await res.json();
+    if (!data.ok) {
+      alert('Error: ' + (data.error || 'Unknown error'));
+      btn.disabled = false;
+      btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg> Analisis Sekarang';
+      return;
+    }
 
-    try {
-      const res = await fetch('/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain, cf_token: cfToken })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || 'Gagal analisis');
+    // Update metric cards
+    const cur = data.current || {};
+    document.getElementById('valDA').textContent = cur.da ?? '—';
+    document.getElementById('valPA').textContent = cur.pa ?? '—';
+    document.getElementById('valDR').textContent = cur.dr ?? '—';
+    document.getElementById('valSS').textContent = cur.ss ?? '—';
 
-      // Render metrics
-      $('m-da').textContent = data.current.da ?? '—';
-      $('m-pa').textContent = data.current.pa ?? '—';
-      $('m-dr').textContent = data.current.dr ?? '—';
-      $('m-ss').textContent = data.current.ss ?? '—';
-
-      // Render action items
-      const list = $('action-list');
-      list.innerHTML = '';
-      for (const item of data.action_items) {
-        const div = document.createElement('div');
-        div.className = 'action-item';
-        div.innerHTML = `
+    // Render action items
+    const actionList = document.getElementById('actionList');
+    const items = data.action_items || [];
+    if (items.length === 0) {
+      actionList.innerHTML = '<p class="note">Tidak ada rekomendasi saat ini.</p>';
+    } else {
+      actionList.innerHTML = items.map(item => `
+        <div class="action-item">
           <div class="top">
             <div class="title">${item.action}</div>
-            <span class="priority ${item.priority}">${item.priority}</span>
+            <div class="priority ${item.priority}">${item.priority.toUpperCase()}</div>
           </div>
           <div class="cat">${item.category}</div>
-          <div class="desc">${item.impact}</div>
-          <div class="effort">Effort: ${item.effort}</div>
-          ${item.details && item.details.length ? '<ul>' + item.details.map(d => '<li>' + d + '</li>').join('') + '</ul>' : ''}
-        `;
-        list.appendChild(div);
-      }
-
-      $('results').classList.add('on');
-    } catch (err) {
-      showNote('Error: ' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> Analisis Sekarang';
+          <div class="desc">${item.desc || ''}</div>
+          <div class="impact">Dampak: ${item.impact}</div>
+          <div class="effort">Usaha: ${item.effort}</div>
+          ${item.details && Array.isArray(item.details) && item.details.length ? `<ul>${item.details.map(d => `<li>${d}</li>`).join('')}</ul>` : ''}
+        </div>
+      `).join('');
     }
-  }
 
-  function showNote(msg) {
-    const n = $('note');
-    n.textContent = msg;
-    n.classList.add('on');
+    // Show results
+    document.getElementById('resultsWrap').classList.add('on');
+
+    // Reset button
+    btn.disabled = false;
+    btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg> Analisis Sekarang';
+
+    // Reset turnstile token for next use
+    turnstileToken = null;
+    if (window.turnstile) window.turnstile.reset();
+    document.getElementById('analyzeBtn').disabled = true;
+
+  } catch (err) {
+    console.error(err);
+    alert('Terjadi kesalahan jaringan: ' + err.message);
+    btn.disabled = false;
+    btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg> Analisis Sekarang';
   }
+});
+
+// Check auth status
+fetch('/api/login').then(r => r.json()).then(d => {
+  if (d.authed) {
+    document.getElementById('loginLink').textContent = `👤 ${d.user}`;
+    document.getElementById('loginLink').href = '/api/login?logout=1';
+  }
+});
 </script>
 </body>
 </html>
