@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Domain Analyzer — Aiman Checker</title>
-<meta name="description" content="Analisis domain Anda dan dapatkan rekomendasi konkret untuk meningkatkan DA, PA, dan DR.">
+<meta name="description" content="Analisis domain dan dapatkan action plan konkret untuk naikin DA, PA, DR.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
     --bg:#0b0b0d; --panel:#141417; --panel-2:#1b1b20; --line:#26262d;
     --ink:#ecece8; --muted:#8a8a92; --faint:#5a5a62;
     --gold:#c9a35b; --gold-2:#e6c478; --gold-deep:#9c7b3a;
-    --green:#7fc8a0; --red:#e08a8a; --blue:#6baed6;
+    --green:#7fc8a0; --red:#e08a8a; --blue:#6baed6; --orange:#e0b88a;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -22,15 +22,13 @@
     min-height:100vh;line-height:1.5;
     background-image:radial-gradient(900px 500px at 78% -8%,rgba(201,163,91,.10),transparent 60%);
   }
-  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-  
-  /* nav */
-  nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em;font-size:18px}
-  .brand a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:11px}
-  .brand .mark{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
-    background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:16px;
-    box-shadow:0 4px 14px rgba(201,163,91,.30)}
+  .wrap{max-width:960px;margin:0 auto;padding:0 24px}
+
+  nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px}
+  .brand a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px}
+  .brand .mark{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:15px}
   .brand b{color:var(--gold-2)}
   .nav-links{display:flex;gap:22px;font-size:14px;align-items:center}
   .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
@@ -39,89 +37,161 @@
   .lang-switch button{background:none;border:none;color:var(--faint);cursor:pointer;font-size:12px;font-weight:600;padding:2px 5px;border-radius:4px;transition:all .15s}
   .lang-switch button.active{color:var(--gold-2);background:rgba(201,163,91,.1)}
   .lang-switch button:hover{color:var(--ink)}
-  
   .menu-toggle{display:none;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
-  .menu-toggle svg{width:24px;height:24px}
+  .menu-toggle svg{width:22px;height:22px}
   @media(max-width:720px){
-    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;
-      background:var(--panel);border:1px solid var(--line);border-top:none;
-      flex-direction:column;gap:0;padding:8px 0;z-index:100}
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:var(--panel);border:1px solid var(--line);border-top:none;flex-direction:column;gap:0;padding:6px 0;z-index:100}
     .nav-links.open{display:flex}
-    .nav-links a{padding:12px 24px;border-bottom:1px solid var(--line)}
+    .nav-links a{padding:11px 22px;border-bottom:1px solid var(--line)}
     .nav-links a:last-child{border-bottom:none}
-    .nav-links .lang-switch{margin:8px 24px;padding:10px 0;border-top:1px solid var(--line);border-left:none}
+    .nav-links .lang-switch{margin:8px 22px;padding:10px 0;border-top:1px solid var(--line);border-left:none}
     .menu-toggle{display:block}
     nav{position:relative}
   }
 
-  .hero{padding:56px 0 30px;max-width:680px}
-  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--gold-2);
-    border:1px solid rgba(201,163,91,.30);background:rgba(201,163,91,.07);padding:6px 13px;border-radius:999px;margin-bottom:22px}
-  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  h1{font-size:clamp(30px,5vw,46px);line-height:1.08;letter-spacing:-.03em;margin-bottom:16px}
+  .hero{padding:50px 0 24px;max-width:640px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--gold-2);
+    border:1px solid rgba(201,163,91,.25);background:rgba(201,163,91,.06);padding:5px 12px;border-radius:999px;margin-bottom:18px}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.1;letter-spacing:-.03em;font-weight:800;margin-bottom:14px}
   .g{background:linear-gradient(135deg,var(--gold-2),var(--gold-deep));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .lead{font-size:17px;color:var(--muted);margin-bottom:28px}
-  
-  /* panel */
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:30px;margin-top:30px}
-  label{display:block;font-size:14px;font-weight:600;color:var(--muted);margin-bottom:8px}
-  input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:11px;
-    padding:14px 16px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:15px;
+  .lead{font-size:16px;color:var(--muted);margin-bottom:24px}
+
+  /* Input panel */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
+  .input-row{display:flex;gap:12px;align-items:stretch}
+  .input-wrap{flex:1}
+  .input-wrap label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:13px 15px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:14px;
     transition:border-color .2s,box-shadow .2s}
   input:focus{outline:none;border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(201,163,91,.12)}
   input::placeholder{color:var(--faint)}
-  
-  .btn{font-family:inherit;font-weight:700;font-size:15px;border:none;border-radius:11px;
-    padding:15px 26px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  .btn{font-family:inherit;font-weight:700;font-size:14px;border:none;border-radius:10px;
+    padding:13px 24px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;
     background:linear-gradient(140deg,var(--gold-2),var(--gold-deep));color:#1a1408;
-    box-shadow:0 6px 20px rgba(201,163,91,.25);margin-top:18px;transition:transform .15s,box-shadow .2s;border:none}
-  .btn:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(201,163,91,.35)}
-  .btn:disabled{opacity:.5;cursor:default;transform:none}
-  .btn svg{width:18px;height:18px}
-  .spin{width:16px;height:16px;border:2px solid rgba(201,163,91,.25);border-top-color:var(--gold-2);border-radius:50%;animation:spin .8s linear infinite}
+    box-shadow:0 5px 18px rgba(201,163,91,.22);transition:transform .15s,box-shadow .2s;white-space:nowrap;align-self:flex-end}
+  .btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 9px 24px rgba(201,163,91,.32)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+  .btn-ghost:hover:not(:disabled){border-color:var(--gold-deep);color:var(--gold-2)}
+  .btn svg{width:16px;height:16px}
+  .turnstile-wrapper{margin-top:14px}
+
+  /* Loading overlay */
+  .loading{display:none;margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px 28px}
+  .loading.on{display:block;animation:fadeIn .3s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .loading-title{font-size:18px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+  .loading-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+  .loading-bar-track{height:5px;background:var(--panel-2);border-radius:999px;overflow:hidden;margin-bottom:28px}
+  .loading-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold-2),var(--gold-deep));border-radius:999px;width:0;transition:width .5s ease}
+  .loading-steps{display:flex;flex-direction:column;gap:14px}
+  .load-step{display:flex;align-items:center;gap:14px;opacity:.35;transition:opacity .3s}
+  .load-step.active{opacity:1}
+  .load-step.done{opacity:1}
+  .load-step .icon{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;
+    border:2px solid var(--line);background:var(--panel-2);font-size:13px}
+  .load-step.active .icon{border-color:var(--gold-2)}
+  .load-step.done .icon{border-color:var(--green);background:rgba(127,200,160,.15)}
+  .load-step .icon .spin{width:14px;height:14px;border:2px solid rgba(201,163,91,.2);border-top-color:var(--gold-2);border-radius:50%;animation:spin .7s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  
-  .note{background:rgba(224,138,138,.08);border:1px solid rgba(224,138,138,.3);color:var(--red);
-    border-radius:10px;padding:11px 13px;margin-top:14px;font-size:13px;display:none}
-  .note.on{display:block}
-  
-  /* results */
-  .results{display:none;margin-top:40px}
-  .results.on{display:block}
-  
-  .metric-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:30px}
-  .metric-card{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center}
-  .metric-card .val{font-size:32px;font-weight:800;color:var(--gold-2);margin-bottom:4px}
-  .metric-card .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-  
-  .section-title{font-size:20px;font-weight:700;margin:36px 0 18px;color:var(--gold-2)}
-  
-  .action-item{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:14px}
-  .action-item .top{display:flex;justify-content:space-between;align-items:start;margin-bottom:10px}
-  .action-item .title{font-size:16px;font-weight:700;color:var(--ink)}
-  .priority{font-size:11px;font-weight:700;text-transform:uppercase;padding:4px 10px;border-radius:6px;letter-spacing:.05em}
-  .priority.high{background:rgba(224,138,138,.15);color:var(--red)}
-  .priority.medium{background:rgba(230,196,120,.15);color:var(--gold-2)}
-  .priority.low{background:rgba(127,200,160,.15);color:var(--green)}
-  .action-item .cat{font-size:13px;color:var(--faint);margin-bottom:6px}
-  .action-item .desc{font-size:14px;color:var(--muted);margin-bottom:10px}
-  .action-item .impact{font-size:13px;color:var(--green);margin-bottom:4px}
-  .action-item .effort{font-size:13px;color:var(--blue)}
-  .action-item ul{margin:10px 0 0 20px;font-size:13px;color:var(--muted)}
-  .action-item li{margin-bottom:4px}
-  
-  footer{border-top:1px solid var(--line);margin-top:64px;padding:30px 0;color:var(--faint);font-size:13px;text-align:center}
-  
-  /* Turnstile widget styling */
-  .turnstile-wrapper{margin-top:16px;text-align:center}
-  
+  .load-step .check{color:var(--green);font-size:15px;font-weight:700}
+  .load-step .txt{font-size:14px;font-weight:500}
+  .load-step.active .txt{color:var(--gold-2)}
+  .load-step .sub{font-size:12px;color:var(--faint);margin-top:1px}
+
+  /* Results */
+  .results{display:none;margin-top:32px}
+  .results.on{display:block;animation:fadeIn .4s ease}
+
+  /* Health score */
+  .score-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px;margin-bottom:20px;text-align:center}
+  .score-label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+  .score-ring{position:relative;width:120px;height:120px;margin:0 auto 14px}
+  .score-ring svg{width:120px;height:120px;transform:rotate(-90deg)}
+  .score-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+  .score-ring .bg-circle{stroke:var(--panel-2)}
+  .score-ring .fill-circle{stroke:url(#scoreGrad);transition:stroke-dashoffset 1s ease}
+  .score-val{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:34px;font-weight:800;color:var(--ink)}
+  .score-grade{font-size:15px;font-weight:700;padding:5px 16px;border-radius:999px;display:inline-block}
+  .score-grade.excellent{background:rgba(127,200,160,.15);color:var(--green)}
+  .score-grade.good{background:rgba(201,163,91,.15);color:var(--gold-2)}
+  .score-grade.fair{background:rgba(224,184,138,.15);color:var(--orange)}
+  .score-grade.poor{background:rgba(224,138,138,.15);color:var(--red)}
+  .score-domain{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--faint);margin-top:10px}
+
+  /* Metric bars */
+  .metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px}
+  .metric{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .metric-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .metric-name{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .metric-val{font-size:24px;font-weight:800}
+  .metric-bar{height:6px;background:var(--panel-2);border-radius:999px;overflow:hidden}
+  .metric-fill{height:100%;border-radius:999px;transition:width .8s ease}
+  .metric-fill.good{background:var(--green)}
+  .metric-fill.mid{background:var(--gold-2)}
+  .metric-fill.low{background:var(--red)}
+  .metric-hint{font-size:11px;color:var(--faint);margin-top:6px}
+
+  /* Phase sections */
+  .phase{margin-bottom:24px}
+  .phase-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .phase-num{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:14px;flex-shrink:0}
+  .phase-num.p1{background:rgba(224,138,138,.15);color:var(--red)}
+  .phase-num.p2{background:rgba(201,163,91,.15);color:var(--gold-2)}
+  .phase-num.p3{background:rgba(127,200,160,.15);color:var(--green)}
+  .phase-title{font-size:17px;font-weight:700}
+  .phase-when{font-size:12px;color:var(--faint);margin-top:1px}
+  .phase-count{margin-left:auto;font-size:12px;color:var(--faint);background:var(--panel-2);padding:3px 10px;border-radius:6px}
+
+  .action{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:12px;transition:border-color .2s}
+  .action:hover{border-color:var(--gold-deep)}
+  .action-top{display:flex;justify-content:space-between;align-items:start;gap:12px;margin-bottom:8px}
+  .action-title{font-size:15px;font-weight:600;flex:1}
+  .action-cat{font-size:11px;color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .action-desc{font-size:13.5px;color:var(--muted);margin-bottom:12px;line-height:1.55}
+  .action-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+  .meta-item{font-size:12px;display:flex;align-items:center;gap:5px}
+  .meta-item .lbl{color:var(--faint)}
+  .meta-item.impact{color:var(--green)}
+  .meta-item.effort{color:var(--blue)}
+  .checklist{list-style:none;padding:0;margin:0}
+  .checklist li{display:flex;align-items:start;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted);cursor:pointer;transition:color .2s}
+  .checklist li:first-child{border-top:none}
+  .checklist li:hover{color:var(--ink)}
+  .checklist li .box{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;flex-shrink:0;margin-top:1px;display:grid;place-items:center;transition:all .2s}
+  .checklist li.done .box{background:var(--green);border-color:var(--green)}
+  .checklist li.done .box::after{content:'✓';color:#0b0b0d;font-size:12px;font-weight:800}
+  .checklist li.done .txt{text-decoration:line-through;color:var(--faint)}
+
+  /* Bottom CTA */
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px;padding-top:28px;border-top:1px solid var(--line)}
+  .cta-row .btn{flex:1;min-width:160px}
+
+  /* Data tables */
+  .data-block{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+  .data-block h4{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .data-block h4 .count{font-size:11px;color:var(--faint);background:var(--panel-2);padding:2px 8px;border-radius:5px}
+  .data-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+  .data-item:first-of-type{border-top:none}
+  .data-item .url{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%}
+  .data-item .dr-tag{font-size:11px;font-weight:700;color:var(--gold-2);background:rgba(201,163,91,.1);padding:2px 8px;border-radius:5px;flex-shrink:0}
+
+  footer{border-top:1px solid var(--line);margin-top:48px;padding:28px 0;color:var(--faint);font-size:12.5px;text-align:center}
+
   @media(max-width:768px){
     .wrap{padding:0 18px}
-    h1{font-size:28px}
-    .lead{font-size:15px}
-    .panel{padding:24px 18px}
-    .metric-cards{grid-template-columns:repeat(2,1fr)}
+    .hero{padding:36px 0 20px}
+    h1{font-size:26px}
+    .lead{font-size:14.5px}
+    .panel{padding:20px 16px}
+    .input-row{flex-direction:column}
+    .btn{align-self:stretch}
+    .metrics{grid-template-columns:1fr}
+    .loading{padding:24px 18px}
+    .cta-row .btn{min-width:100%}
   }
 </style>
 </head>
@@ -129,7 +199,10 @@
 <div class="wrap">
   <nav>
     <div class="brand"><a href="/"><span class="mark">A</span>aiman<b>checker</b></a></div>
-    <div class="nav-links">
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="nav-links" id="navLinks">
       <a href="/checker">Domain Checker</a>
       <a href="/dr-booster">DR Booster</a>
       <a href="/analyze">Analyzer</a>
@@ -143,52 +216,61 @@
   </nav>
 
   <div class="hero">
-    <div class="pill"><span class="dot"></span>Analisis Mendalam untuk Meningkatkan Otoritas Domain</div>
-    <h1>Dapatkan <span class="g">Action Plan</span> untuk DA, PA, dan DR</h1>
-    <p class="lead">Masukkan domain Anda untuk melihat metrik saat ini dan langkah konkret yang harus diambil untuk meningkatkan otoritas SEO.</p>
+    <div class="pill"><span class="dot"></span> Action Plan otomatis untuk naikin otoritas domain</div>
+    <h1>Analisis <span class="g">domain lo</span> dalam 30 detik</h1>
+    <p class="lead">Masukkan domain, lo dapet: metrik real (DA/PA/DR/SS), health score, sama roadmap lengkap — quick wins minggu ini, target bulan ini, strategi jangka panjang.</p>
   </div>
 
-  <div class="panel">
-    <label for="domain">Domain (tanpa http/https)</label>
-    <input type="text" id="domain" placeholder="example.com">
-    
+  <div class="panel" id="inputPanel">
+    <div class="input-row">
+      <div class="input-wrap">
+        <label for="domain">Domain (tanpa http/https)</label>
+        <input type="text" id="domain" placeholder="example.com" autocomplete="off">
+      </div>
+      <button class="btn" id="analyzeBtn" disabled>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path d="M21 21l-4.35-4.35M11 17a6 6 0 100-12 6 6 0 000 12z"/></svg>
+        Analisis
+      </button>
+    </div>
     <div class="turnstile-wrapper">
       <div class="cf-turnstile" data-sitekey="0x4AAAAAADtWZV7HUO4N_Fhg" data-callback="onTurnstileSuccess"></div>
     </div>
-    
-    <button class="btn" id="analyzeBtn" disabled>
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg> Analisis Sekarang
-    </button>
   </div>
 
-  <div class="results" id="resultsWrap">
-    <div class="metric-cards">
-      <div class="metric-card">
-        <div class="val" id="valDA">—</div>
-        <div class="lbl">DA</div>
-      </div>
-      <div class="metric-card">
-        <div class="val" id="valPA">—</div>
-        <div class="lbl">PA</div>
-      </div>
-      <div class="metric-card">
-        <div class="val" id="valDR">—</div>
-        <div class="lbl">DR</div>
-      </div>
-      <div class="metric-card">
-        <div class="val" id="valSS">—</div>
-        <div class="lbl">Spam Score</div>
-      </div>
-    </div>
-
-    <div class="section-title">Rekomendasi Tindakan</div>
-    <div id="actionList"></div>
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="loading-title"><span class="spin" style="width:18px;height:18px;border-width:2.5px"></span> Lagi ngecek domain lo...</div>
+    <div class="loading-sub" id="loadingDomain">—</div>
+    <div class="loading-bar-track"><div class="loading-bar-fill" id="loadingBar"></div></div>
+    <div class="loading-steps" id="loadingSteps"></div>
   </div>
+
+  <!-- Results -->
+  <div class="results" id="results"></div>
+
+  <footer>
+    <p>© <span id="yr"></span> aimanchecker · Data dari Moz · Ahrefs · Google SERP</p>
+  </footer>
 </div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#e6c478"/><stop offset="100%" stop-color="#9c7b3a"/>
+  </linearGradient>
+</defs></svg>
 
 <script src="/i18n.js"></script>
 <script>
 let turnstileToken = null;
+
+// Mobile nav
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+if (menuToggle) {
+  menuToggle.addEventListener('click', ()=> navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', ()=> navLinks.classList.remove('open')));
+}
+document.getElementById('yr').textContent = new Date().getFullYear();
 
 function onTurnstileSuccess(token) {
   turnstileToken = token;
@@ -200,20 +282,105 @@ document.getElementById('domain').addEventListener('input', () => {
   document.getElementById('analyzeBtn').disabled = !domain || !turnstileToken;
 });
 
+document.getElementById('domain').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !document.getElementById('analyzeBtn').disabled) {
+    document.getElementById('analyzeBtn').click();
+  }
+});
+
+// Loading steps
+const STEPS = [
+  { txt: 'Mengambil metrik DA, PA, DR, Spam Score', sub: 'Scrape live dari Moz & Ahrefs', dur: 4000 },
+  { txt: 'Menganalisis backlink profile', sub: 'Cek top backlinks & DR-nya', dur: 5000 },
+  { txt: 'Mencari broken links', sub: 'Cek backlink yang 404/error', dur: 5000 },
+  { txt: 'Mendeteksi niche & kompetitor', sub: 'Scrape homepage + SERP', dur: 6000 },
+  { txt: 'Menyusun action plan', sub: 'Prioritasin quick wins', dur: 4000 }
+];
+
+function startLoadingAnim(domain) {
+  const stepsEl = document.getElementById('loadingSteps');
+  document.getElementById('loadingDomain').textContent = domain;
+  document.getElementById('loadingBar').style.width = '0%';
+
+  stepsEl.innerHTML = STEPS.map((s, i) => `
+    <div class="load-step" data-idx="${i}">
+      <div class="icon"><span class="spin" style="display:none"></span></div>
+      <div><div class="txt">${s.txt}</div><div class="sub">${s.sub}</div></div>
+    </div>
+  `).join('');
+
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('inputPanel').style.opacity = '.5';
+  document.getElementById('inputPanel').style.pointerEvents = 'none';
+
+  let elapsed = 0;
+  const totalDur = STEPS.reduce((a, b) => a + b.dur, 0);
+  let stepIdx = 0;
+
+  // Activate step 0
+  function activateStep(idx) {
+    const step = stepsEl.querySelector(`[data-idx="${idx}"]`);
+    if (!step) return;
+    step.classList.add('active');
+    step.querySelector('.icon').innerHTML = '<span class="spin"></span>';
+  }
+
+  function completeStep(idx) {
+    const step = stepsEl.querySelector(`[data-idx="${idx}"]`);
+    if (!step) return;
+    step.classList.remove('active');
+    step.classList.add('done');
+    step.querySelector('.icon').innerHTML = '<span class="check">✓</span>';
+  }
+
+  activateStep(0);
+
+  const timers = [];
+  let cumul = 0;
+  for (let i = 0; i < STEPS.length; i++) {
+    cumul += STEPS[i].dur;
+    const nextIdx = i + 1;
+    timers.push(setTimeout(() => {
+      completeStep(i);
+      if (nextIdx < STEPS.length) activateStep(nextIdx);
+    }, cumul));
+  }
+
+  // Progress bar smooth
+  const bar = document.getElementById('loadingBar');
+  bar.style.transition = `width ${totalDur}ms linear`;
+  requestAnimationFrame(() => { bar.style.width = '92%'; });
+
+  return timers;
+}
+
+function stopLoading(timers) {
+  timers.forEach(t => clearTimeout(t));
+  const bar = document.getElementById('loadingBar');
+  bar.style.transition = 'width .3s ease';
+  bar.style.width = '100%';
+  // Complete all steps
+  document.querySelectorAll('.load-step').forEach(s => {
+    s.classList.remove('active');
+    s.classList.add('done');
+    s.querySelector('.icon').innerHTML = '<span class="check">✓</span>';
+  });
+  setTimeout(() => {
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('inputPanel').style.opacity = '1';
+    document.getElementById('inputPanel').style.pointerEvents = 'auto';
+  }, 500);
+}
+
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
-  const domain = document.getElementById('domain').value.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
-  if (!domain) {
-    alert('Masukkan domain');
-    return;
-  }
-  if (!turnstileToken) {
-    alert('Tunggu verifikasi bot selesai');
-    return;
-  }
+  const domain = document.getElementById('domain').value.trim().replace(/^https?:\/\//, '').replace(/\/$/, '').replace(/^www\./, '');
+  if (!domain) { alert('Masukkan domain'); return; }
+  if (!turnstileToken) { alert('Tunggu verifikasi bot selesai'); return; }
 
   const btn = document.getElementById('analyzeBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> Sedang menganalisis...';
+
+  const timers = startLoadingAnim(domain);
 
   try {
     const res = await fetch('/analyze', {
@@ -221,70 +388,251 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ domain, cf_token: turnstileToken })
     });
-
     const data = await res.json();
+
+    stopLoading(timers);
+
     if (!data.ok) {
       alert('Error: ' + (data.error || 'Unknown error'));
       btn.disabled = false;
-      btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg> Analisis Sekarang';
       return;
     }
 
-    // Update metric cards
-    const cur = data.current || {};
-    document.getElementById('valDA').textContent = cur.da ?? '—';
-    document.getElementById('valPA').textContent = cur.pa ?? '—';
-    document.getElementById('valDR').textContent = cur.dr ?? '—';
-    document.getElementById('valSS').textContent = cur.ss ?? '—';
-
-    // Render action items
-    const actionList = document.getElementById('actionList');
-    const items = data.action_items || [];
-    if (items.length === 0) {
-      actionList.innerHTML = '<p class="note">Tidak ada rekomendasi saat ini.</p>';
-    } else {
-      actionList.innerHTML = items.map(item => `
-        <div class="action-item">
-          <div class="top">
-            <div class="title">${item.action}</div>
-            <div class="priority ${item.priority}">${item.priority.toUpperCase()}</div>
-          </div>
-          <div class="cat">${item.category}</div>
-          <div class="desc">${item.desc || ''}</div>
-          <div class="impact">Dampak: ${item.impact}</div>
-          <div class="effort">Usaha: ${item.effort}</div>
-          ${item.details && Array.isArray(item.details) && item.details.length ? `<ul>${item.details.map(d => `<li>${d}</li>`).join('')}</ul>` : ''}
-        </div>
-      `).join('');
-    }
-
-    // Show results
-    document.getElementById('resultsWrap').classList.add('on');
-
-    // Reset button
-    btn.disabled = false;
-    btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg> Analisis Sekarang';
-
-    // Reset turnstile token for next use
-    turnstileToken = null;
-    if (window.turnstile) window.turnstile.reset();
-    document.getElementById('analyzeBtn').disabled = true;
-
+    renderResults(data);
   } catch (err) {
-    console.error(err);
-    alert('Terjadi kesalahan jaringan: ' + err.message);
+    stopLoading(timers);
+    alert('Gagal: ' + err.message);
     btn.disabled = false;
-    btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg> Analisis Sekarang';
   }
+
+  turnstileToken = null;
+  if (window.turnstile) window.turnstile.reset();
+  document.getElementById('analyzeBtn').disabled = true;
 });
 
-// Check auth status
+function calcScore(cur) {
+  const da = cur.da ?? 0;
+  const pa = cur.pa ?? 0;
+  const dr = cur.dr ?? 0;
+  const ss = Math.min(cur.ss ?? 0, 100);
+  const base = (da + pa + dr) / 3;
+  const penalty = ss > 10 ? Math.min(ss * 0.3, 20) : 0;
+  return Math.max(0, Math.round(base - penalty));
+}
+
+function grade(score) {
+  if (score >= 70) return { label: 'Excellent', cls: 'excellent' };
+  if (score >= 50) return { label: 'Good', cls: 'good' };
+  if (score >= 30) return { label: 'Fair', cls: 'fair' };
+  return { label: 'Poor', cls: 'poor' };
+}
+
+function metricColor(val, thresholds) {
+  if (val >= thresholds[1]) return 'good';
+  if (val >= thresholds[0]) return 'mid';
+  return 'low';
+}
+
+function metricHint(name, val) {
+  const hints = {
+    da: v => v >= 50 ? 'Authority tinggi' : v >= 30 ? 'Authority sedang' : v > 0 ? 'Authority rendah' : 'Belum ada data DA',
+    pa: v => v >= 50 ? 'Page authority kuat' : v >= 30 ? 'Lumayan' : v > 0 ? 'Perlu dioptimasi' : 'Belum ada data PA',
+    dr: v => v >= 50 ? 'Backlink profile kuat' : v >= 30 ? 'Backlink sedang' : v > 0 ? 'Backlink minim' : 'Belum ada data DR',
+    ss: v => v <= 5 ? 'Bersih, aman' : v <= 15 ? 'Perlu diawasi' : v > 0 ? 'Spam risk tinggi' : 'Belum ada data'
+  };
+  return hints[name] ? hints[name](val ?? 0) : '';
+}
+
+function renderResults(data) {
+  const cur = data.current || {};
+  const score = calcScore(cur);
+  const g = grade(score);
+  const items = data.action_items || [];
+
+  // Group by phase: High+Low effort = Quick Wins, High+Medium/High effort + Medium = Growth, Low = Long-term
+  const quickWins = items.filter(i => i.priority === 'high' && (i.effort === 'Low'));
+  const growth = items.filter(i => (i.priority === 'high' && i.effort !== 'Low') || i.priority === 'medium');
+  const longTerm = items.filter(i => i.priority === 'low');
+
+  const da = cur.da ?? null, pa = cur.pa ?? null, dr = cur.dr ?? null, ss = cur.ss ?? null;
+  const circ = 2 * Math.PI * 52;
+  const offset = circ - (score / 100) * circ;
+
+  const html = `
+    <!-- Health Score -->
+    <div class="score-wrap">
+      <div class="score-label">Domain Health Score</div>
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120">
+          <circle class="bg-circle" cx="60" cy="60" r="52"/>
+          <circle class="fill-circle" cx="60" cy="60" r="52" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/>
+        </svg>
+        <div class="score-val">${score}</div>
+      </div>
+      <div class="score-grade ${g.cls}">${g.label}</div>
+      <div class="score-domain">${data.domain}</div>
+    </div>
+
+    <!-- Metric bars -->
+    <div class="metrics">
+      ${renderMetric('DA', da, cur.da ?? 0, [30, 50], metricHint('da', da))}
+      ${renderMetric('PA', pa, cur.pa ?? 0, [30, 50], metricHint('pa', pa))}
+      ${renderMetric('DR', dr, cur.dr ?? 0, [30, 50], metricHint('dr', dr))}
+      ${renderMetric('Spam Score', ss + '%', Math.max(0, 100 - (cur.ss ?? 0)), [70, 85], metricHint('ss', ss))}
+    </div>
+
+    ${quickWins.length ? renderPhase(1, 'Quick Wins', 'Lakuin minggu ini — dampak besar, effort kecil', quickWins, 'p1') : ''}
+    ${growth.length ? renderPhase(2, 'Growth Plan', 'Target bulan ini — naikin DR bertahap', growth, 'p2') : ''}
+    ${longTerm.length ? renderPhase(3, 'Long-term', 'Strategi 3+ bulan — sustain growth', longTerm, 'p3') : ''}
+
+    <!-- Extra data -->
+    ${(data.broken_links && data.broken_links.length) ? renderDataBlock('Broken Links', data.broken_links, 'url', 'dr') : ''}
+    ${(data.guest_posts && data.guest_posts.length) ? renderDataBlock('Guest Post Opportunities', data.guest_posts, 'domain', 'dr') : ''}
+
+    <!-- CTA -->
+    <div class="cta-row">
+      <a href="/dr-booster" class="btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Cari Guest Posts
+      </a>
+      <a href="/checker" class="btn btn-ghost">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        Cek Domain Lain
+      </a>
+      <button class="btn btn-ghost" onclick="exportPlan()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export Plan
+      </button>
+    </div>
+  `;
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.innerHTML = html;
+  resultsEl.classList.add('on');
+
+  // Animate score ring
+  setTimeout(() => {
+    const fill = resultsEl.querySelector('.fill-circle');
+    if (fill) fill.style.strokeDashoffset = offset;
+  }, 100);
+
+  // Animate metric bars
+  setTimeout(() => {
+    resultsEl.querySelectorAll('.metric-fill').forEach(f => {
+      const w = f.dataset.w;
+      f.style.width = w + '%';
+    });
+  }, 200);
+
+  // Checklist toggle
+  resultsEl.querySelectorAll('.checklist li').forEach(li => {
+    li.addEventListener('click', () => li.classList.toggle('done'));
+  });
+
+  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderMetric(name, displayVal, rawVal, thresholds, hint) {
+  const pct = Math.min(100, rawVal);
+  const cls = metricColor(rawVal, thresholds);
+  return `
+    <div class="metric">
+      <div class="metric-head">
+        <span class="metric-name">${name}</span>
+        <span class="metric-val">${displayVal ?? '—'}</span>
+      </div>
+      <div class="metric-bar"><div class="metric-fill ${cls}" data-w="${pct}" style="width:0"></div></div>
+      <div class="metric-hint">${hint}</div>
+    </div>
+  `;
+}
+
+function renderPhase(num, title, when, items, cls) {
+  return `
+    <div class="phase">
+      <div class="phase-head">
+        <div class="phase-num ${cls}">${num}</div>
+        <div><div class="phase-title">${title}</div><div class="phase-when">${when}</div></div>
+        <div class="phase-count">${items.length} task</div>
+      </div>
+      ${items.map(renderAction).join('')}
+    </div>
+  `;
+}
+
+function renderAction(item) {
+  const details = (item.details && Array.isArray(item.details) && item.details.length)
+    ? `<ul class="checklist">${item.details.map(d => `<li><div class="box"></div><span class="txt">${d}</span></li>`).join('')}</ul>`
+    : '';
+  return `
+    <div class="action">
+      <div class="action-top">
+        <div class="action-title">${item.action}</div>
+        <div class="action-cat">${item.category}</div>
+      </div>
+      ${item.desc ? `<div class="action-desc">${item.desc}</div>` : ''}
+      <div class="action-meta">
+        <div class="meta-item impact"><span class="lbl">Dampak:</span> ${item.impact || '—'}</div>
+        <div class="meta-item effort"><span class="lbl">Effort:</span> ${item.effort || '—'}</div>
+      </div>
+      ${details}
+    </div>
+  `;
+}
+
+function renderDataBlock(title, items, urlKey, drKey) {
+  return `
+    <div class="data-block">
+      <h4>${title} <span class="count">${items.length}</span></h4>
+      ${items.map(i => `
+        <div class="data-item">
+          <span class="url">${i[urlKey] || '—'}</span>
+          ${i[drKey] != null ? `<span class="dr-tag">DR${i[drKey]}</span>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function exportPlan() {
+  const results = document.getElementById('results');
+  if (!results) return;
+  let text = `DOMAIN ANALYSIS REPORT\n${'='.repeat(50)}\n\n`;
+  text += `Domain: ${results.querySelector('.score-domain')?.textContent || '-'}\n`;
+  text += `Score: ${results.querySelector('.score-val')?.textContent || '-'}\n`;
+  text += `Grade: ${results.querySelector('.score-grade')?.textContent || '-'}\n\n`;
+  text += `METRICS:\n`;
+  results.querySelectorAll('.metric').forEach(m => {
+    const name = m.querySelector('.metric-name')?.textContent;
+    const val = m.querySelector('.metric-val')?.textContent;
+    text += `  ${name}: ${val}\n`;
+  });
+  text += `\nACTION PLAN:\n`;
+  results.querySelectorAll('.phase').forEach(p => {
+    const title = p.querySelector('.phase-title')?.textContent;
+    text += `\n--- ${title} ---\n`;
+    p.querySelectorAll('.action').forEach((a, i) => {
+      text += `\n${i+1}. ${a.querySelector('.action-title')?.textContent}\n`;
+      a.querySelectorAll('.checklist li').forEach(li => {
+        const done = li.classList.contains('done') ? '[x]' : '[ ]';
+        text += `   ${done} ${li.querySelector('.txt')?.textContent}\n`;
+      });
+    });
+  });
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `action-plan-${Date.now()}.txt`;
+  a.click();
+}
+
+// Auth check
 fetch('/api/login').then(r => r.json()).then(d => {
   if (d.authed) {
     document.getElementById('loginLink').textContent = `👤 ${d.user}`;
     document.getElementById('loginLink').href = '/api/login?logout=1';
   }
-});
+}).catch(()=>{});
 </script>
 </body>
 </html>
