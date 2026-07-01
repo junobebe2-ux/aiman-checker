@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — AIMAN Checker | Tips SEO, Link Building & Domain Authority</title>
+<meta name="description" content="Panduan lengkap SEO, cara naikin DA/PA/DR, guest posting, dan strategi link building untuk website Indonesia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b0d; --panel:#141417; --panel-2:#1b1b20; --line:#26262d;
+    --ink:#ecece8; --muted:#8a8a92; --faint:#5a5a62;
+    --gold:#c9a35b; --gold-2:#e6c478; --gold-deep:#9c7b3a;
+    --green:#7fc8a0; --red:#e08a8a; --blue:#6baed6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Sora',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+    min-height:100vh;line-height:1.6;
+    background-image:radial-gradient(900px 500px at 78% -8%,rgba(201,163,91,.10),transparent 60%);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  
+  nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em;font-size:18px;text-decoration:none;color:var(--ink)}
+  .brand .mark{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:16px;
+    box-shadow:0 4px 14px rgba(201,163,91,.30)}
+  .brand b{color:var(--gold-2)}
+  .nav-links{display:flex;gap:26px;font-size:14px}
+  .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-links a.active{color:var(--gold-2)}
+  
+  @media(max-width:720px){
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;
+      background:var(--panel);border:1px solid var(--line);border-top:none;
+      flex-direction:column;gap:0;padding:8px 0;z-index:100}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:12px 24px;border-bottom:1px solid var(--line)}
+    .menu-toggle{display:block;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
+    .menu-toggle svg{width:24px;height:24px}
+  }
+  
+  .hero{padding:56px 0 40px;max-width:680px}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--gold-2);
+    border:1px solid rgba(201,163,91,.30);background:rgba(201,163,91,.07);padding:6px 13px;border-radius:999px;margin-bottom:22px}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.08;letter-spacing:-.03em;margin-bottom:16px}
+  .g{background:linear-gradient(135deg,var(--gold-2),var(--gold-deep));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .lead{font-size:17px;color:var(--muted);margin-bottom:28px}
+  
+  .search-box{margin:30px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .search-box input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:11px;
+    padding:14px 16px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:15px}
+  .search-box input:focus{outline:none;border-color:var(--gold-deep)}
+  
+  .categories{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}
+  .cat-btn{padding:8px 16px;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;
+    color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s}
+  .cat-btn:hover,.cat-btn.active{border-color:var(--gold-deep);color:var(--gold-2)}
+  
+  .post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin:40px 0}
+  .post-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:transform .2s,border-color .2s}
+  .post-card:hover{transform:translateY(-4px);border-color:var(--gold-deep)}
+  .post-card a{text-decoration:none;color:inherit}
+  .post-thumb{height:180px;background:linear-gradient(135deg,var(--gold-deep),var(--gold-2));display:grid;place-items:center;font-size:48px}
+  .post-content{padding:22px}
+  .post-meta{display:flex;gap:12px;font-size:12px;color:var(--faint);margin-bottom:10px}
+  .post-meta .cat{color:var(--gold-2);font-weight:600}
+  .post-title{font-size:18px;font-weight:700;line-height:1.3;margin-bottom:10px}
+  .post-excerpt{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+  .post-footer{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--faint)}
+  .read-time{display:flex;align-items:center;gap:6px}
+  
+  .newsletter{background:linear-gradient(135deg,rgba(201,163,91,.15),rgba(156,123,58,.1));
+    border:1px solid rgba(201,163,91,.3);border-radius:16px;padding:30px;margin:60px 0;text-align:center}
+  .newsletter h3{font-size:22px;margin-bottom:10px}
+  .newsletter p{color:var(--muted);margin-bottom:20px}
+  .newsletter-form{display:flex;gap:10px;max-width:450px;margin:0 auto}
+  .newsletter-form input{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:11px;
+    padding:14px 16px;color:var(--ink);font-family:'JetBrains Mono',monospace}
+  .newsletter-form button{background:linear-gradient(140deg,var(--gold-2),var(--gold-deep));
+    color:#1a1408;border:none;border-radius:11px;padding:14px 24px;font-weight:700;cursor:pointer}
+  
+  footer{border-top:1px solid var(--line);margin-top:60px;padding:30px 0;color:var(--faint);font-size:13px;text-align:center}
+  
+  @media(max-width:768px){
+    .wrap{padding:0 18px}
+    .post-grid{grid-template-columns:1fr}
+    .newsletter-form{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="/" class="brand">
+      <div class="mark">A</div>
+      <span>AIMAN <b>Checker</b></span>
+    </a>
+    <button class="menu-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="nav-links">
+      <a href="/checker">Domain Checker</a>
+      <a href="/dr-booster">DR Booster</a>
+      <a href="/analyze">Analyzer</a>
+      <a href="/blog" class="active">Blog</a>
+      <a href="/login" id="loginLink">Login</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="pill">📚 Belajar SEO & Link Building</div>
+    <h1>Blog <span class="g">AIMAN Checker</span></h1>
+    <p class="lead">Panduan lengkap naikin DA, PA, DR domain Anda. Dari dasar SEO sampai strategi advanced link building.</p>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Cari artikel (misal: guest post, spam score, DA)..." onkeyup="filterPosts()">
+  </div>
+
+  <div class="categories">
+    <button class="cat-btn active" onclick="filterCategory('all')">Semua</button>
+    <button class="cat-btn" onclick="filterCategory('seo')">SEO</button>
+    <button class="cat-btn" onclick="filterCategory('link-building')">Link Building</button>
+    <button class="cat-btn" onclick="filterCategory('guest-post')">Guest Post</button>
+    <button class="cat-btn" onclick="filterCategory('tools')">Tools</button>
+    <button class="cat-btn" onclick="filterCategory('case-study')">Case Study</button>
+  </div>
+
+  <div class="post-grid" id="postGrid">
+    <!-- Posts will be loaded here -->
+  </div>
+
+  <div class="newsletter">
+    <h3>📩 Dapatkan Tips SEO Mingguan</h3>
+    <p>Join 2,000+ marketer Indonesia. Gratis, unsubscribe kapan saja.</p>
+    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Fitur coming soon!');">
+      <input type="email" placeholder="Email Anda" required>
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+
+  <footer>
+    <p>© 2026 AIMAN Checker. Built for Indonesian SEO community.</p>
+  </footer>
+</div>
+
+<script>
+const posts = [
+  {
+    slug: 'cara-naikin-da-dari-20-ke-50',
+    title: 'Cara Naikin DA dari 20 ke 50 dalam 3 Bulan',
+    excerpt: 'Panduan step-by-step meningkatkan Domain Authority dengan strategi white-hat yang terbukti.',
+    category: 'seo',
+    date: '2026-07-01',
+    readTime: '8 min',
+    emoji: '📈'
+  },
+  {
+    slug: '10-situs-guest-post-dr-50',
+    title: '10 Situs Guest Post DR 50+ yang Masih Accept 2026',
+    excerpt: 'Daftar situs authority tinggi yang masih menerima guest post dari Indonesia. Lengkap dengan contact info.',
+    category: 'guest-post',
+    date: '2026-06-28',
+    readTime: '6 min',
+    emoji: '✍️'
+  },
+  {
+    slug: 'spam-score-tinggi-caranya-turunin',
+    title: 'Spam Score Tinggi? Ini 7 Langkah Turuninnya',
+    excerpt: 'Spam Score di atas 10% bisa bikin website Anda dihindari. Ini cara membersihkannya.',
+    category: 'seo',
+    date: '2026-06-25',
+    readTime: '5 min',
+    emoji: '🧹'
+  },
+  {
+    slug: 'audit-100-domain-pola-yang-ketemu',
+    title: 'Gue Audit 100 Domain, Ini Pola yang Ketemu',
+    excerpt: 'Analisis 100 website Indonesia dengan DA 50+. Ada pola menarik yang bisa lo tiru.',
+    category: 'case-study',
+    date: '2026-06-22',
+    readTime: '10 min',
+    emoji: '🔍'
+  },
+  {
+    slug: 'backlink-404-emas-tersembunyi',
+    title: 'Backlink 404 = Emas Tersembunyi (Begini Carany)',
+    excerpt: 'Strategi broken link building yang bisa dapetin 5-10 backlink DR 50+ per minggu.',
+    category: 'link-building',
+    date: '2026-06-20',
+    readTime: '7 min',
+    emoji: '💎'
+  },
+  {
+    slug: 'tools-seo-gratis-2026',
+    title: '15 Tools SEO Gratis yang Gue Pakai Setiap Hari',
+    excerpt: 'Dari keyword research sampai rank tracking, ini tools favorit gue tanpa bayar sepeser pun.',
+    category: 'tools',
+    date: '2026-06-18',
+    readTime: '9 min',
+    emoji: '🛠️'
+  },
+  {
+    slug: 'haro-strategi-2026',
+    title: 'HARO 2026: Dapat Backlink DR 80+ dari Media AS',
+    excerpt: 'Help A Reporter Out masih works di 2026. Ini template pitch yang conversion rate-nya 30%+.',
+    category: 'link-building',
+    date: '2026-06-15',
+    readTime: '8 min',
+    emoji: '🎯'
+  },
+  {
+    slug: 'internal-linking-strategy',
+    title: 'Internal Linking Strategy yang Naikin PA 40%',
+    excerpt: 'Bukan cuma external link, internal linking yang bener bisa boost Page Authority signifikan.',
+    category: 'seo',
+    date: '2026-06-12',
+    readTime: '6 min',
+    emoji: '🔗'
+  }
+];
+
+function renderPosts(filter = 'all', search = '') {
+  const grid = document.getElementById('postGrid');
+  let filtered = posts;
+  
+  if (filter !== 'all') {
+    filtered = filtered.filter(p => p.category === filter);
+  }
+  
+  if (search) {
+    const s = search.toLowerCase();
+    filtered = filtered.filter(p => 
+      p.title.toLowerCase().includes(s) || 
+      p.excerpt.toLowerCase().includes(s)
+    );
+  }
+  
+  grid.innerHTML = filtered.map(p => `
+    <article class="post-card">
+      <a href="/blog/${p.slug}.html">
+        <div class="post-thumb">${p.emoji}</div>
+        <div class="post-content">
+          <div class="post-meta">
+            <span class="cat">${p.category.replace('-', ' ').toUpperCase()}</span>
+            <span>•</span>
+            <span>${formatDate(p.date)}</span>
+          </div>
+          <h3 class="post-title">${p.title}</h3>
+          <p class="post-excerpt">${p.excerpt}</p>
+          <div class="post-footer">
+            <span class="read-time">⏱️ ${p.readTime}</span>
+            <span>Read →</span>
+          </div>
+        </div>
+      </a>
+    </article>
+  `).join('');
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function filterCategory(cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderPosts(cat, document.getElementById('searchInput').value);
+}
+
+function filterPosts() {
+  const activeCat = document.querySelector('.cat-btn.active').textContent.toLowerCase();
+  const search = document.getElementById('searchInput').value;
+  renderPosts(activeCat === 'semua' ? 'all' : activeCat, search);
+}
+
+// Check auth status
+fetch('/api/login').then(r => r.json()).then(d => {
+  if (d.authed) {
+    document.getElementById('loginLink').textContent = `👤 ${d.user}`;
+    document.getElementById('loginLink').href = '/api/login?logout=1';
+  }
+});
+
+// Initial render
+renderPosts();
+</script>
+</body>
+</html>
