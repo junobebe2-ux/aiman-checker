@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aiman Checker — Real DA/PA/DR Metrics + Backlink Discovery</title>
-<meta name="description" content="Check Domain Authority, Page Authority, Ahrefs DR and Spam Score for 100 domains at once. Find guest post sites and journalist queries to grow your backlinks. Real data, no estimates.">
+<title>Aiman Checker — Cek DA PA DR Spam Score Gratis</title>
+<meta name="description" content="Cek Domain Authority, Page Authority, Domain Rating, Spam Score untuk 100 domain sekaligus. Gratis, data real dari Moz dan Ahrefs.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -13,168 +13,110 @@
     --bg:#0b0b0d; --panel:#141417; --panel-2:#1b1b20; --line:#26262d;
     --ink:#ecece8; --muted:#8a8a92; --faint:#5a5a62;
     --gold:#c9a35b; --gold-2:#e6c478; --gold-deep:#9c7b3a;
-    --green:#7fc8a0; --blue:#6fb4e0; --red:#e08a8a; --purple:#b896d8;
+    --green:#7fc8a0; --blue:#6fb4e0; --red:#e08a8a;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{
     font-family:'Sora',system-ui,sans-serif;background:var(--bg);color:var(--ink);
     min-height:100vh;line-height:1.5;
-    background-image:
-      radial-gradient(900px 500px at 78% -8%,rgba(201,163,91,.10),transparent 60%),
-      radial-gradient(600px 400px at 15% 95%,rgba(127,200,160,.06),transparent 55%);
+    background-image:radial-gradient(900px 500px at 78% -8%,rgba(201,163,91,.10),transparent 60%);
   }
-  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 24px}
 
-  /* nav */
-  nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em;font-size:18px}
-  .brand .mark{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
-    background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:16px;
-    box-shadow:0 4px 14px rgba(201,163,91,.30)}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px}
+  .brand .mark{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:15px}
   .brand b{color:var(--gold-2)}
-  .nav-links{display:flex;gap:28px;font-size:14px;color:var(--muted);align-items:center}
+  .nav-links{display:flex;gap:24px;font-size:14px;color:var(--muted);align-items:center}
   .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
   .nav-links a:hover{color:var(--ink)}
-  .lang-switch{display:flex;gap:6px;margin-left:16px;padding-left:16px;border-left:1px solid var(--line)}
-  .lang-switch button{background:none;border:none;color:var(--faint);cursor:pointer;font-size:13px;font-weight:600;transition:color .2s}
-  .lang-switch button.active{color:var(--gold-2)}
+  .lang-switch{display:flex;gap:4px;margin-left:12px;padding-left:12px;border-left:1px solid var(--line)}
+  .lang-switch button{background:none;border:none;color:var(--faint);cursor:pointer;font-size:12px;font-weight:600;padding:2px 5px;border-radius:4px;transition:all .15s}
+  .lang-switch button.active{color:var(--gold-2);background:rgba(201,163,91,.1)}
   .lang-switch button:hover{color:var(--ink)}
-  
-  /* Mobile nav */
   .menu-toggle{display:none;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
-  .menu-toggle svg{width:24px;height:24px}
+  .menu-toggle svg{width:22px;height:22px}
   @media(max-width:720px){
     .nav-links{display:none;position:absolute;top:100%;left:0;right:0;
       background:var(--panel);border:1px solid var(--line);border-top:none;
-      flex-direction:column;gap:0;padding:8px 0;z-index:100}
+      flex-direction:column;gap:0;padding:6px 0;z-index:100}
     .nav-links.open{display:flex}
-    .nav-links a{padding:12px 24px;border-bottom:1px solid var(--line)}
+    .nav-links a{padding:11px 22px;border-bottom:1px solid var(--line)}
     .nav-links a:last-child{border-bottom:none}
-    .nav-links .lang-switch{margin:0 24px;padding:16px 0;border-top:1px solid var(--line);border-left:none;justify-content:center}
+    .nav-links .lang-switch{margin:8px 22px;padding:10px 0;border-top:1px solid var(--line);border-left:none}
     .menu-toggle{display:block}
     nav{position:relative}
   }
 
-  /* hero */
-  .hero{padding:80px 0 50px;text-align:center;max-width:860px;margin:0 auto}
-  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--gold-2);
-    border:1px solid rgba(201,163,91,.30);background:rgba(201,163,91,.07);padding:6px 13px;border-radius:999px;margin-bottom:26px}
-  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(127,200,160,.6);animation:live 2s infinite}
-  @keyframes live{0%{box-shadow:0 0 0 0 rgba(127,200,160,.5)}70%{box-shadow:0 0 0 7px rgba(127,200,160,0)}100%{box-shadow:0 0 0 0 rgba(127,200,160,0)}}
-  h1{font-size:clamp(36px,6vw,58px);line-height:1.05;letter-spacing:-.04em;font-weight:800;margin-bottom:20px}
+  .hero{padding:70px 0 50px;text-align:center;max-width:780px;margin:0 auto}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--gold-2);
+    border:1px solid rgba(201,163,91,.25);background:rgba(201,163,91,.06);padding:5px 12px;border-radius:999px;margin-bottom:24px}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  h1{font-size:clamp(32px,5.5vw,52px);line-height:1.1;letter-spacing:-.03em;font-weight:800;margin-bottom:18px}
   h1 .g{background:linear-gradient(120deg,var(--gold-2),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .lead{color:var(--muted);font-size:18px;line-height:1.6;max-width:700px;margin:0 auto 36px}
-  .cta{display:inline-flex;gap:13px;flex-wrap:wrap;justify-content:center}
-  .btn{font-family:inherit;font-weight:700;font-size:15px;border:none;border-radius:11px;padding:15px 30px;cursor:pointer;
-    display:inline-flex;align-items:center;gap:9px;text-decoration:none;transition:transform .15s,box-shadow .2s}
-  .btn-primary{background:linear-gradient(140deg,var(--gold-2),var(--gold-deep));color:#1a1408;box-shadow:0 6px 20px rgba(201,163,91,.25)}
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(201,163,91,.35)}
-  .btn-secondary{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
-  .btn-secondary:hover{border-color:var(--gold-deep);color:var(--gold-2)}
-  .btn svg{width:18px;height:18px}
+  .lead{color:var(--muted);font-size:17px;line-height:1.6;max-width:640px;margin:0 auto 32px}
+  .cta{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .btn{font-family:inherit;font-weight:700;font-size:14.5px;border:none;border-radius:10px;padding:14px 26px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:transform .15s,box-shadow .2s}
+  .btn-primary{background:linear-gradient(140deg,var(--gold-2),var(--gold-deep));color:#1a1408;box-shadow:0 5px 18px rgba(201,163,91,.22)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 9px 24px rgba(201,163,91,.32)}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--gold-deep);color:var(--gold-2)}
+  .btn svg{width:17px;height:17px}
 
-  /* tools grid */
-  .tools{padding:60px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
-  .tool-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:32px;
-    transition:transform .2s,border-color .2s,box-shadow .3s;text-decoration:none;display:block}
-  .tool-card:hover{transform:translateY(-4px);border-color:var(--gold-deep);box-shadow:0 12px 30px rgba(0,0,0,.3)}
-  .tool-icon{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;
-    background:linear-gradient(140deg,rgba(201,163,91,.15),rgba(201,163,91,.05));margin-bottom:18px}
-  .tool-icon svg{width:28px;height:28px;color:var(--gold-2)}
-  .tool-card h3{font-size:19px;font-weight:700;margin-bottom:10px;color:var(--ink)}
-  .tool-card p{color:var(--muted);font-size:14.5px;line-height:1.55;margin-bottom:16px}
-  .tool-meta{display:flex;gap:10px;flex-wrap:wrap}
-  .badge{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:6px}
-  .badge.free{background:rgba(127,200,160,.13);color:var(--green)}
-  .badge.pro{background:rgba(184,150,216,.13);color:var(--purple)}
-  .badge.new{background:rgba(201,163,91,.13);color:var(--gold-2)}
+  .tools{padding:50px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+  .tool-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px;
+    transition:transform .2s,border-color .2s;text-decoration:none;display:block}
+  .tool-card:hover{transform:translateY(-3px);border-color:var(--gold-deep)}
+  .tool-icon{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;
+    background:linear-gradient(140deg,rgba(201,163,91,.12),rgba(201,163,91,.04));margin-bottom:14px}
+  .tool-icon svg{width:22px;height:22px;color:var(--gold-2)}
+  .tool-card h3{font-size:17px;font-weight:700;margin-bottom:8px}
+  .tool-card p{color:var(--muted);font-size:14px;line-height:1.55;margin-bottom:14px}
+  .tool-meta{display:flex;gap:8px;flex-wrap:wrap}
+  .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px}
+  .badge.free{background:rgba(127,200,160,.12);color:var(--green)}
+  .badge.new{background:rgba(201,163,91,.12);color:var(--gold-2)}
 
-  /* how it works */
-  .how{padding:70px 0;background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .how h2{font-size:32px;font-weight:800;text-align:center;margin-bottom:50px;letter-spacing:-.02em}
-  .how h2 .g{color:var(--gold-2)}
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px}
-  .step{text-align:center}
-  .step-num{width:52px;height:52px;border-radius:50%;background:linear-gradient(140deg,var(--gold-2),var(--gold-deep));
-    color:#1a1408;font-weight:800;font-size:22px;display:grid;place-items:center;margin:0 auto 16px;
-    box-shadow:0 6px 18px rgba(201,163,91,.25)}
-  .step h4{font-size:17px;font-weight:700;margin-bottom:8px}
-  .step p{color:var(--muted);font-size:14px;line-height:1.6}
+  .strip{padding:40px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--panel)}
+  .strip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px;text-align:center}
+  .strip-item .num{font-size:28px;font-weight:800;color:var(--gold-2);margin-bottom:4px}
+  .strip-item .lbl{font-size:13px;color:var(--muted)}
 
-  /* tutorial section */
-  .tutorial{padding:70px 0}
-  .tutorial h2{font-size:32px;font-weight:800;margin-bottom:16px;letter-spacing:-.02em}
-  .tutorial h2 .g{color:var(--gold-2)}
-  .tutorial .intro{color:var(--muted);font-size:16px;margin-bottom:40px;max-width:720px}
-  .tut-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;margin-bottom:50px}
-  .tut-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px}
-  .tut-card h3{font-size:18px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-  .tut-card h3 .icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(140deg,rgba(201,163,91,.15),rgba(201,163,91,.05));
-    display:grid;place-items:center;flex-shrink:0}
-  .tut-card h3 .icon svg{width:18px;height:18px;color:var(--gold-2)}
-  .tut-card ol{margin:0;padding-left:20px;color:var(--muted);font-size:14px;line-height:1.8}
-  .tut-card ol li{margin-bottom:8px}
-  .tut-card ol li strong{color:var(--ink);font-weight:600}
-  .tut-card .tip{background:rgba(111,180,224,.08);border:1px solid rgba(111,180,224,.25);border-radius:10px;
-    padding:12px 14px;margin-top:16px;font-size:13px;color:var(--blue);line-height:1.5}
-  .tut-card .tip strong{color:var(--ink)}
-
-  /* faq */
-  .faq{padding:70px 0;background:var(--panel-2)}
-  .faq h2{font-size:32px;font-weight:800;text-align:center;margin-bottom:50px;letter-spacing:-.02em}
+  .faq{padding:60px 0;max-width:760px;margin:0 auto}
+  .faq h2{font-size:26px;font-weight:800;text-align:center;margin-bottom:36px;letter-spacing:-.02em}
   .faq h2 .g{color:var(--gold-2)}
-  .faq-list{max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
-  .faq-item{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;transition:border-color .2s}
+  .faq-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:14px;cursor:pointer;transition:border-color .2s}
   .faq-item:hover{border-color:var(--gold-deep)}
-  .faq-item h4{font-size:16px;font-weight:700;margin-bottom:10px;color:var(--gold-2)}
-  .faq-item p{color:var(--muted);font-size:14px;line-height:1.6}
+  .faq-item summary{font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  .faq-item summary::-webkit-details-marker{display:none}
+  .faq-item summary::after{content:'+';color:var(--gold-2);font-size:20px;font-weight:400;transition:transform .2s}
+  .faq-item[open] summary::after{transform:rotate(45deg)}
+  .faq-item p{color:var(--muted);font-size:14px;line-height:1.6;margin-top:12px}
 
-  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--faint);font-size:13px;text-align:center}
-  footer a{color:var(--muted);text-decoration:none}
+  footer{border-top:1px solid var(--line);padding:36px 0;color:var(--faint);font-size:12.5px;text-align:center}
+  footer a{color:var(--muted);text-decoration:none;margin:0 8px}
   footer a:hover{color:var(--gold-2)}
 
-  /* Mobile responsive */
   @media(max-width:768px){
     .wrap{padding:0 18px}
-    nav{padding:16px 0}
-    .brand{font-size:16px}
-    .brand .mark{width:26px;height:26px;font-size:14px}
-    .hero{padding:60px 0 40px}
-    .pill{font-size:11px;padding:5px 11px}
-    h1{font-size:36px}
-    .lead{font-size:16px}
-    .cta{gap:10px}
-    .btn{font-size:14px;padding:13px 24px}
-    .tools{grid-template-columns:1fr;gap:16px}
-    .tool-card{padding:26px}
-    .tool-icon{width:48px;height:48px}
-    .tool-icon svg{width:24px;height:24px}
-    .tool-card h3{font-size:17px}
-    .tool-card p{font-size:13.5px}
-    .how{padding:50px 0}
-    .how h2{font-size:26px;margin-bottom:36px}
-    .steps{grid-template-columns:1fr;gap:24px}
-    .step-num{width:44px;height:44px;font-size:18px}
-    .tutorial{padding:50px 0}
-    .tutorial h2{font-size:26px}
-    .tutorial .intro{font-size:15px}
-    .tut-grid{grid-template-columns:1fr;gap:20px}
-    .tut-card{padding:24px}
-    .tut-card h3{font-size:16px}
-    .tut-card ol{font-size:13px}
-    .faq{padding:50px 0}
-    .faq h2{font-size:26px;margin-bottom:36px}
-    .faq-item{padding:20px}
-    .faq-item h4{font-size:15px}
-    .faq-item p{font-size:13px}
-    footer{padding:32px 0;font-size:12px}
+    .hero{padding:50px 0 40px}
+    h1{font-size:34px}
+    .lead{font-size:15.5px}
+    .btn{font-size:13.5px;padding:12px 22px}
+    .tools{grid-template-columns:1fr;gap:14px}
+    .tool-card{padding:22px}
+    .strip-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+    .faq{padding:44px 0}
+    .faq h2{font-size:22px}
   }
   @media(max-width:480px){
-    h1{font-size:30px}
-    .lead{font-size:15px}
-    .btn{font-size:13px;padding:12px 20px}
-    .tool-card{padding:20px}
+    h1{font-size:28px}
+    .cta{flex-direction:column;width:100%}
+    .btn{width:100%;justify-content:center}
   }
 </style>
 </head>
@@ -187,7 +129,6 @@
     </button>
     <div class="nav-links" id="navLinks">
       <a href="#tools" data-i18n="nav-tools">Alat</a>
-      <a href="#tutorial" data-i18n="nav-tutorial">Tutorial</a>
       <a href="#faq" data-i18n="nav-faq">FAQ</a>
       <a href="/blog.html" data-i18n="nav-blog">Blog</a>
       <a href="/analyze.html" data-i18n="nav-analyzer">Analyzer</a>
@@ -199,178 +140,117 @@
   </nav>
 
   <section class="hero">
-    <span class="pill"><span class="dot"></span> <span data-i18n="hero-pill">Data live Moz &amp; Ahrefs · bukan estimasi</span></span>
-    <h1><span data-i18n="hero-title">Metrik SEO yang <span class="g">bisa dipercaya.</span></span></h1>
-    <p class="lead" data-i18n="hero-lead">Cek DA, PA, DR, dan Spam Score untuk 100 domain sekaligus. Temukan situs guest post DR tinggi dan query jurnalis live. Data asli, diretry sampai semua domain resolve.</p>
+    <span class="pill"><span class="dot"></span> <span data-i18n="hero-pill">Data live Moz &amp; Ahrefs — bukan estimasi</span></span>
+    <h1 data-i18n="hero-title">Cek <span class="g">DA, PA, DR</span> domain gratis</h1>
+    <p class="lead" data-i18n="hero-lead">Bulk check 100 domain sekaligus. Data real dari Moz dan Ahrefs, auto-retry kalau ada yang gagal. Cocok buat audit backlink, cari guest post, atau riset kompetitor.</p>
     <div class="cta">
-      <a href="#tools" class="btn btn-primary">
+      <a href="/checker.html" class="btn btn-primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <span data-i18n="hero-btn-primary">Mulai Cek</span>
+        <span data-i18n="hero-btn1">Mulai Cek Domain</span>
       </a>
-      <a href="/dr-booster.html" class="btn btn-ghost">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        <span data-i18n="hero-btn-secondary">Cari Backlink</span>
+      <a href="/analyze.html" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span data-i18n="hero-btn2">Analyze Domain</span>
       </a>
     </div>
   </section>
 
   <section class="tools" id="tools">
-    <a href="/checker.html#tool" class="tool-card">
+    <a href="/checker.html" class="tool-card">
       <div class="tool-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       </div>
-      <h3>Domain Checker</h3>
-      <p>Bulk check DA, PA, DR, and Spam Score for up to 100 domains. Pulls live Moz and Ahrefs data, retries failed domains automatically. Export to CSV.</p>
+      <h3 data-i18n="tool1-title">Domain Checker</h3>
+      <p data-i18n="tool1-desc">Cek DA, PA, DR, Spam Score untuk 100 domain sekaligus. Data fresh dari Moz &amp; Ahrefs, export CSV.</p>
       <div class="tool-meta">
         <span class="badge free">Free</span>
-        <span class="badge new">100 domains/run</span>
+        <span class="badge new">100 domain/run</span>
       </div>
     </a>
 
     <a href="/dr-booster.html" class="tool-card">
       <div class="tool-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       </div>
-      <h3>DR Booster</h3>
-      <p>Find guest post sites in your niche and live journalist queries from Featured, Qwoted, and Terkel. Build real backlinks that move your Domain Rating.</p>
+      <h3 data-i18n="tool2-title">DR Booster</h3>
+      <p data-i18n="tool2-desc">Cari situs guest post di niche lo + query jurnalis live dari HARO/Featured. Dapet backlink DR tinggi.</p>
       <div class="tool-meta">
         <span class="badge free">Free</span>
-        <span class="badge new">New</span>
+        <span class="badge new">Guest Post + HARO</span>
+      </div>
+    </a>
+
+    <a href="/analyze.html" class="tool-card">
+      <div class="tool-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3 data-i18n="tool3-title">Domain Analyzer</h3>
+      <p data-i18n="tool3-desc">Masukkan 1 domain, dapet action plan konkret buat naikin DA/PA/DR. Lengkap dengan backlink analysis.</p>
+      <div class="tool-meta">
+        <span class="badge free">Free</span>
+        <span class="badge new">Action Plan</span>
       </div>
     </a>
   </section>
+</div>
 
-  <section class="how">
-    <div class="wrap">
-      <h2>How <span class="g">Aiman Checker</span> works</h2>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <h4>Paste domains</h4>
-          <p>Drop up to 100 domains, one per line. No formatting required—we normalize everything.</p>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <h4>Live scraping</h4>
-          <p>We pull fresh data from Moz and Ahrefs in real time. No cached estimates, no formulas.</p>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <h4>Auto retry</h4>
-          <p>Failed domains get retried automatically until they resolve. You see 100% completion.</p>
-        </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <h4>Export CSV</h4>
-          <p>Download all results as CSV. Ready for your outreach tracker or link-building sheet.</p>
-        </div>
+<section class="strip">
+  <div class="wrap">
+    <div class="strip-grid">
+      <div class="strip-item">
+        <div class="num">100</div>
+        <div class="lbl" data-i18n="stat1">domain per run</div>
+      </div>
+      <div class="strip-item">
+        <div class="num">15s</div>
+        <div class="lbl" data-i18n="stat2">rata-rata waktu check</div>
+      </div>
+      <div class="strip-item">
+        <div class="num">100%</div>
+        <div class="lbl" data-i18n="stat3">auto-retry domain gagal</div>
+      </div>
+      <div class="strip-item">
+        <div class="num">0</div>
+        <div class="lbl" data-i18n="stat4">data disimpan</div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="tutorial" id="tutorial">
-    <div class="wrap">
-      <h2>DR Booster <span class="g">Tutorial</span></h2>
-      <p class="intro">DR Booster helps you find <strong>real backlink opportunities</strong>. There are two ways to grow your Ahrefs Domain Rating: <strong>guest posts</strong> (write for high-DR sites) and <strong>journalist queries</strong> (get quoted in major media). Both get you do-follow backlinks from authoritative domains.</p>
-
-      <div class="tut-grid">
-        <div class="tut-card">
-          <h3>
-            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8m8 4H8m2-8H8"/></svg></span>
-            Guest Post Finder
-          </h3>
-          <ol>
-            <li><strong>Enter your niche</strong> — e.g. "crypto", "marketing", "health". Be specific.</li>
-            <li><strong>Hit "Find guest post sites"</strong> — we search 6 Google patterns like <code>"write for us" + niche</code>.</li>
-            <li><strong>Review results</strong> — each card shows domain, title, snippet, and a signal badge (e.g. "write for us").</li>
-            <li><strong>Check DR</strong> — use the Domain Checker tool to pull DR/DA for the list.</li>
-            <li><strong>Pitch</strong> — visit the URL, find submission guidelines, send your pitch. Most sites reply within 7 days.</li>
-          </ol>
-          <div class="tip">
-            <strong>Pro tip:</strong> Target domains with DR 30+ for meaningful link juice. Avoid sites with DA &lt; 20 or Spam Score &gt; 30 (check via Domain Checker first).
-          </div>
-        </div>
-
-        <div class="tut-card">
-          <h3>
-            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-            Journalist Queries (HARO)
-          </h3>
-          <ol>
-            <li><strong>Enter your expertise</strong> — keywords like "seo backlinks", "startup funding", "crypto blockchain".</li>
-            <li><strong>Hit "Find journalist queries"</strong> — we search Featured.com, Qwoted, Terkel, and indexed HARO-style requests.</li>
-            <li><strong>Sort by relevance</strong> — results ranked by keyword match. High score = better fit.</li>
-            <li><strong>Click through</strong> — each query links to the source. Read full brief, submission deadline, and outlet.</li>
-            <li><strong>Submit your response</strong> — answer the question thoroughly (200-400 words). Include your name, title, and website. If selected, you get a backlink from Forbes, Entrepreneur, TechCrunch, etc.</li>
-          </ol>
-          <div class="tip">
-            <strong>Pro tip:</strong> Respond within 24 hours of the query posting. Journalists close submissions fast. Featured.com queries are the hottest—they notify you in real time.
-          </div>
-        </div>
-      </div>
-
-      <div class="tut-card" style="max-width:none">
-        <h3>
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
-          Why this works (and how DR actually moves)
-        </h3>
-        <ol>
-          <li><strong>Ahrefs DR is backlink-driven.</strong> The more high-DR sites link to you, the higher your DR climbs. One link from a DR 70 site = ~10 links from DR 20 sites.</li>
-          <li><strong>Guest posts = do-follow backlinks.</strong> Most "write for us" sites give you 1-2 do-follow links in your author bio or within the post. That's direct link juice.</li>
-          <li><strong>HARO = media backlinks.</strong> Getting quoted on Forbes (DR 93) or Entrepreneur (DR 92) is a single backlink worth more than 50 low-tier guest posts. Major media links = trust signal to Google + Ahrefs.</li>
-          <li><strong>Volume + quality both matter.</strong> Aim for 5-10 guest posts per month on DR 30-60 sites, plus 2-3 HARO placements per quarter on DR 70+ outlets. Your DR will move 5-15 points in 6 months.</li>
-          <li><strong>Avoid spam.</strong> Never buy links from Fiverr link farms or PBNs (Private Blog Networks). Ahrefs and Google both detect footprints. Stick to real editorial placements from this tool.</li>
-        </ol>
-        <div class="tip">
-          <strong>Reality check:</strong> DR is a lagging metric. You'll see movement 4-8 weeks after your backlink goes live (Ahrefs crawls the web monthly). Keep building, track in a sheet, check DR every 30 days.
-        </div>
-      </div>
-    </div>
-  </section>
-
+<div class="wrap">
   <section class="faq" id="faq">
-    <div class="wrap">
-      <h2>Frequently asked <span class="g">questions</span></h2>
-      <div class="faq-list">
-        <div class="faq-item">
-          <h4>Is this data real or estimated?</h4>
-          <p>100% real. We scrape Moz and Ahrefs live—no formulas, no cached data. If Moz says DA 62, you see DA 62.</p>
-        </div>
-        <div class="faq-item">
-          <h4>How many domains can I check at once?</h4>
-          <p>100 domains per run in the Domain Checker. We retry failed domains automatically, so you'll get results for all 100 (or close to it).</p>
-        </div>
-        <div class="faq-item">
-          <h4>Do guest posts actually move DR?</h4>
-          <p>Yes, if the linking site has real authority (DR 30+). One DR 60 guest post = ~5-10 DR 20 links in terms of impact. Focus on quality over volume.</p>
-        </div>
-        <div class="faq-item">
-          <h4>What's the difference between HARO and guest posts?</h4>
-          <p>Guest posts: you write a full article for their blog. HARO: you answer a journalist's question (200-400 words) and get quoted in their article. HARO links are usually higher DR (media outlets) but harder to land.</p>
-        </div>
-        <div class="faq-item">
-          <h4>How often should I use DR Booster?</h4>
-          <p>Run Guest Post Finder weekly for your niche (fresh sites get indexed constantly). Run HARO daily if you're serious—journalist queries expire in 24-72 hours.</p>
-        </div>
-        <div class="faq-item">
-          <h4>Can I use this for competitor research?</h4>
-          <p>Absolutely. Paste your competitor's backlink domains (export from Ahrefs Site Explorer) into Domain Checker to see their DA/PA/DR profile. Then use DR Booster to find the same guest post sites they used.</p>
-        </div>
-      </div>
-    </div>
+    <h2 data-i18n="faq-title">Pertanyaan <span class="g">sering ditanya</span></h2>
+    <details class="faq-item">
+      <summary data-i18n="faq1-q">Datanya real atau estimasi?</summary>
+      <p data-i18n="faq1-a">100% real. Kita scrape Moz dan Ahrefs langsung — bukan formula, bukan cache. Kalau Moz bilang DA 62, lo liat DA 62.</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq2-q">Berapa domain bisa dicek sekaligus?</summary>
+      <p data-i18n="faq2-a">Public: 10 domain per run, 3x per hari. Login: 100 domain per run, unlimited. Domain yang gagal auto-retry sampai resolve.</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq3-q">Domain yang gue cek disimpan ga?</summary>
+      <p data-i18n="faq3-a">Nggak. Semua check bersifat private, nggak ada log, nggak ada database. Request datang, jawaban keluar, selesai.</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq4-q">Guest post beneran bisa naikin DR?</summary>
+      <p data-i18n="faq4-a">Bisa, kalau situsnya beneran authority (DR 30+). 1 guest post dari situs DR 60 setara 5-10 link dari situs DR 20. Kualitas > kuantitas.</p>
+    </details>
+    <details class="faq-item">
+      <summary data-i18n="faq5-q">Berapa lama DR naik setelah dapat backlink?</summary>
+      <p data-i18n="faq5-a">Ahrefs crawl web sekitar 2-4 minggu sekali. Lo baru liat pergerakan DR 4-8 minggu setelah backlink live. Sabar, keep building.</p>
+    </details>
   </section>
 
   <footer>
-    <p>© <span id="yr"></span> aimanchecker · Metrik asli, backlink asli, hasil nyata.</p>
-    <p style="margin-top:8px">Didukung oleh Moz · Ahrefs · Google SERP · Featured · Qwoted</p>
+    <p>© <span id="yr"></span> aimanchecker</p>
+    <p style="margin-top:6px">Moz · Ahrefs · Google SERP · Featured · Qwoted</p>
   </footer>
 </div>
 
 <script src="/i18n.js"></script>
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
-  
-  // Mobile menu toggle
   const menuToggle = document.getElementById('menuToggle');
   const navLinks = document.getElementById('navLinks');
   if (menuToggle) {

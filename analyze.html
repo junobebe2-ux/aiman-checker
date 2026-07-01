@@ -32,9 +32,13 @@
     background:linear-gradient(150deg,var(--gold-2),var(--gold-deep));color:#1a1408;font-weight:800;font-size:16px;
     box-shadow:0 4px 14px rgba(201,163,91,.30)}
   .brand b{color:var(--gold-2)}
-  .nav-links{display:flex;gap:26px;font-size:14px}
+  .nav-links{display:flex;gap:22px;font-size:14px;align-items:center}
   .nav-links a{color:var(--muted);text-decoration:none;transition:color .2s}
   .nav-links a:hover{color:var(--ink)}
+  .lang-switch{display:flex;gap:4px;margin-left:12px;padding-left:12px;border-left:1px solid var(--line)}
+  .lang-switch button{background:none;border:none;color:var(--faint);cursor:pointer;font-size:12px;font-weight:600;padding:2px 5px;border-radius:4px;transition:all .15s}
+  .lang-switch button.active{color:var(--gold-2);background:rgba(201,163,91,.1)}
+  .lang-switch button:hover{color:var(--ink)}
   
   .menu-toggle{display:none;background:none;border:none;color:var(--ink);cursor:pointer;padding:8px}
   .menu-toggle svg{width:24px;height:24px}
@@ -45,11 +49,11 @@
     .nav-links.open{display:flex}
     .nav-links a{padding:12px 24px;border-bottom:1px solid var(--line)}
     .nav-links a:last-child{border-bottom:none}
+    .nav-links .lang-switch{margin:8px 24px;padding:10px 0;border-top:1px solid var(--line);border-left:none}
     .menu-toggle{display:block}
     nav{position:relative}
   }
-  
-  /* hero */
+
   .hero{padding:56px 0 30px;max-width:680px}
   .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--gold-2);
     border:1px solid rgba(201,163,91,.30);background:rgba(201,163,91,.07);padding:6px 13px;border-radius:999px;margin-bottom:22px}
@@ -129,7 +133,12 @@
       <a href="/checker">Domain Checker</a>
       <a href="/dr-booster">DR Booster</a>
       <a href="/analyze">Analyzer</a>
+      <a href="/blog">Blog</a>
       <a href="/login" id="loginLink">Login</a>
+      <div class="lang-switch">
+        <button onclick="setLang('id')" id="langId" class="active">ID</button>
+        <button onclick="setLang('en')" id="langEn">EN</button>
+      </div>
     </div>
   </nav>
 
@@ -177,6 +186,7 @@
   </div>
 </div>
 
+<script src="/i18n.js"></script>
 <script>
 let turnstileToken = null;
 
